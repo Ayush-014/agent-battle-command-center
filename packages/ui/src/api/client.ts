@@ -1,0 +1,399 @@
+const API_BASE = '/api';
+
+async function request<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = `${API_BASE}${endpoint}`;
+
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  return response.json();
+}
+
+// Tasks API
+export const tasksApi = {
+  list: (filters?: { status?: string; requiredAgent?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.status) params.set('status', filters.status);
+    if (filters?.requiredAgent) params.set('requiredAgent', filters.requiredAgent);
+    const query = params.toString();
+    return request<Task[]>(`/tasks${query ? `?${query}` : ''}`);
+  },
+
+  get: (id: string) => request<Task>(`/tasks/${id}`),
+
+  create: (data: CreateTaskRequest) =>
+    request<Task>('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: UpdateTaskRequest) =>
+    request<Task>(`/tasks/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    request<void>(`/tasks/${id}`, { method: 'DELETE' }),
+
+  retry: (id: string) =>
+    request<Task>(`/tasks/${id}/retry`, { method: 'POST' }),
+
+  submitHumanInput: (id: string, data: HumanInputRequest) =>
+    request<Task>(`/tasks/${id}/human`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  abort: (id: string) =>
+    request<Task>(`/tasks/${id}/abort`, { method: 'POST' }),
+};
+
+// Agents API
+export const agentsApi = {
+  list: (filters?: { type?: string; status?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.type) params.set('type', filters.type);
+    if (filters?.status) params.set('status', filters.status);
+    const query = params.toString();
+    return request<Agent[]>(`/agents${query ? `?${query}` : ''}`);
+  },
+
+  get: (id: string) => request<Agent & { currentTask?: Task }>(`/agents/${id}`),
+
+  update: (id: string, config: Partial<AgentConfig>) =>
+    request<Agent>(`/agents/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(config),
+    }),
+
+  pause: (id: string) =>
+    request<Agent>(`/agents/${id}/pause`, { method: 'POST' }),
+
+  resume: (id: string) =>
+    request<Agent>(`/agents/${id}/resume`, { method: 'POST' }),
+
+  abort: (id: string) =>
+    request<Agent>(`/agents/${id}/abort`, { method: 'POST' }),
+
+  setOffline: (id: string) =>
+    request<Agent>(`/agents/${id}/offline`, { method: 'POST' }),
+
+  setOnline: (id: string) =>
+    request<Agent>(`/agents/${id}/online`, { method: 'POST' }),
+
+  getStats: (id: string) =>
+    request<{ stats: AgentStats; executions: TaskExecution[] }>(`/agents/${id}/stats`),
+};
+
+// Queue API
+export const queueApi = {
+  getState: () =>
+    request<QueueState>('/queue'),
+
+  assign: (taskId: string, agentId: string) =>
+    request<Task>('/queue/assign', {
+      method: 'POST',
+      body: JSON.stringify({ taskId, agentId }),
+    }),
+
+  autoAssign: (agentId: string) =>
+    request<{ assigned: boolean; task?: Task }>('/queue/auto-assign', {
+      method: 'POST',
+      body: JSON.stringify({ agentId }),
+    }),
+
+  getLocks: () => request<FileLock[]>('/queue/locks'),
+
+  releaseLock: (filePath: string) =>
+    request<void>(`/queue/locks/${encodeURIComponent(filePath)}`, {
+      method: 'DELETE',
+    }),
+};
+
+// Execute API
+export const executeApi = {
+  start: (taskId: string, options?: ExecuteOptions) =>
+    request<{ started: boolean; taskId: string }>('/execute', {
+      method: 'POST',
+      body: JSON.stringify({ taskId, ...options }),
+    }),
+
+  // Quick execute - auto-assigns and executes a pending task
+  quickExecute: async (taskId: string, agentId: string) => {
+    // First assign the task
+    await request<Task>('/queue/assign', {
+      method: 'POST',
+      body: JSON.stringify({ taskId, agentId }),
+    });
+    // Then execute it
+    return request<{ started: boolean; taskId: string }>('/execute', {
+      method: 'POST',
+      body: JSON.stringify({ taskId, useClaude: false }),
+    });
+  },
+
+  step: (taskId: string, stepNumber: number) =>
+    request<ExecutionStep>('/execute/step', {
+      method: 'POST',
+      body: JSON.stringify({ taskId, stepNumber }),
+    }),
+
+  approve: (taskId: string, stepNumber: number) =>
+    request<{ approved: boolean }>('/execute/approve', {
+      method: 'POST',
+      body: JSON.stringify({ taskId, stepNumber }),
+    }),
+
+  reject: (taskId: string, stepNumber: number, reason: string) =>
+    request<{ rejected: boolean }>('/execute/reject', {
+      method: 'POST',
+      body: JSON.stringify({ taskId, stepNumber, reason }),
+    }),
+
+  abort: (taskId: string) =>
+    request<{ aborted: boolean }>('/execute/abort', {
+      method: 'POST',
+      body: JSON.stringify({ taskId }),
+    }),
+
+  health: () => request<{ status: string; ollama: boolean; claude: boolean }>('/execute/health'),
+};
+
+// Metrics API
+export const metricsApi = {
+  overview: () => request<OverviewMetrics>('/metrics/overview'),
+
+  agent: (id: string) =>
+    request<AgentMetrics>(`/metrics/agents/${id}`),
+
+  timeline: (hours?: number) =>
+    request<TimelineDataPoint[]>(`/metrics/timeline${hours ? `?hours=${hours}` : ''}`),
+
+  distribution: () => request<DistributionMetrics>('/metrics/distribution'),
+};
+
+// Code Reviews API
+export const codeReviewsApi = {
+  getForTask: (taskId: string) =>
+    request<CodeReview>(`/code-reviews/task/${taskId}`),
+
+  getAll: (params?: { limit?: number; offset?: number; status?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.offset) query.set('offset', String(params.offset));
+    if (params?.status) query.set('status', params.status);
+    return request<{ reviews: CodeReview[]; total: number }>(`/code-reviews?${query}`);
+  },
+
+  getStats: () => request<CodeReviewStats>('/code-reviews/stats'),
+};
+
+// Execution Logs API
+export const executionLogsApi = {
+  getTaskLogs: (taskId: string) =>
+    request<ExecutionLog[]>(`/execution-logs/task/${taskId}`),
+
+  getAgentLogs: (agentId: string, limit = 100) =>
+    request<ExecutionLog[]>(`/execution-logs/agent/${agentId}?limit=${limit}`),
+
+  getLoopLogs: (taskId: string) =>
+    request<ExecutionLog[]>(`/execution-logs/task/${taskId}/loops`),
+};
+
+// Chat API
+export const chatApi = {
+  listConversations: (agentId?: string) => {
+    const query = agentId ? `?agentId=${agentId}` : '';
+    return request<Conversation[]>(`/chat/conversations${query}`);
+  },
+
+  getConversation: (id: string) =>
+    request<Conversation>(`/chat/conversations/${id}`),
+
+  createConversation: (data: CreateConversationRequest) =>
+    request<Conversation>('/chat/conversations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  deleteConversation: (id: string) =>
+    request<void>(`/chat/conversations/${id}`, { method: 'DELETE' }),
+
+  sendMessage: (conversationId: string, content: string) =>
+    request<{ status: string; conversationId: string }>(
+      `/chat/conversations/${conversationId}/messages`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      }
+    ),
+};
+
+// Types
+import type {
+  Task,
+  Agent,
+  AgentConfig,
+  AgentStats,
+  FileLock,
+  ExecutionStep,
+  TaskExecution,
+  Conversation,
+  CreateConversationRequest,
+} from '@abcc/shared';
+
+interface CreateTaskRequest {
+  title: string;
+  description?: string;
+  taskType: string;
+  requiredAgent?: string;
+  priority?: number;
+  maxIterations?: number;
+  lockedFiles?: string[];
+}
+
+interface UpdateTaskRequest {
+  title?: string;
+  description?: string;
+  priority?: number;
+  maxIterations?: number;
+}
+
+interface HumanInputRequest {
+  input: string;
+  action: 'approve' | 'reject' | 'modify';
+  modifiedContent?: string;
+}
+
+interface ExecuteOptions {
+  useClaude?: boolean;
+  model?: string;
+  allowFallback?: boolean;
+  stepByStep?: boolean;
+}
+
+interface QueueState {
+  pending: Task[];
+  active: Task[];
+  idleAgents: Agent[];
+  stats: {
+    pendingCount: number;
+    activeCount: number;
+    idleAgentCount: number;
+  };
+}
+
+interface OverviewMetrics {
+  totalTasks: number;
+  pendingTasks: number;
+  activeTasks: number;
+  completedTasks: number;
+  failedTasks: number;
+  totalAgents: number;
+  busyAgents: number;
+  idleAgents: number;
+  totalApiCredits: number;
+  totalTimeMs: number;
+  successRate: number;
+}
+
+interface AgentMetrics {
+  agent: Agent;
+  stats: AgentStats;
+  executions: TaskExecution[];
+  metrics: {
+    totalExecutions: number;
+    completedExecutions: number;
+    failedExecutions: number;
+    totalApiCredits: number;
+    totalTimeMs: number;
+    avgDurationMs: number;
+  };
+}
+
+interface TimelineDataPoint {
+  timestamp: string;
+  tasksCompleted: number;
+  tasksFailed: number;
+  apiCreditsUsed: number;
+}
+
+interface DistributionMetrics {
+  byType: { type: string; count: number }[];
+  byStatus: { status: string; count: number }[];
+  byAgent: { agent: string; count: number }[];
+}
+
+export interface ExecutionLog {
+  id: string;
+  taskId: string;
+  agentId: string;
+  step: number;
+  timestamp: string;
+  thought?: string;
+  action: string;
+  actionInput: unknown;
+  observation: string;
+  durationMs?: number;
+  isLoop: boolean;
+  errorTrace?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  modelUsed?: string;
+}
+
+export interface CodeReviewFinding {
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  category: string;
+  description: string;
+  location?: string;
+  suggestion?: string;
+}
+
+export interface CodeReview {
+  id: string;
+  taskId: string;
+  reviewerId?: string;
+  reviewerModel?: string;
+  initialComplexity: number;
+  opusComplexity?: number;
+  findings: CodeReviewFinding[];
+  summary?: string;
+  codeQualityScore?: number;
+  status: 'pending' | 'approved' | 'needs_fixes' | 'rejected';
+  fixAttempts: number;
+  fixedByAgentId?: string;
+  fixedByModel?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  totalCost?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CodeReviewStats {
+  total: number;
+  approved: number;
+  needsFixes: number;
+  approvalRate: string;
+  avgQualityScore: string;
+  totalCost: string;
+}

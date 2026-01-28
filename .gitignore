@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Docker
+.docker/
+
+# Prisma
+packages/api/prisma/*.db
+packages/api/prisma/*.db-journal
+
+# Python
+*.egg-info/
+.eggs/
+*.egg
+.pytest_cache/
+.claude/
+
+# Workspace (agent-generated files)
+workspace/

@@ -1,0 +1,751 @@
+[
+  {
+    "id": "bc24a0da-0d4f-4674-93e7-92131faf5ec8",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 1,
+    "timestamp": "2026-01-28T02:46:13.551Z",
+    "thought": null,
+    "action": "file_list",
+    "actionInput": {
+      "path": "tasks/"
+    },
+    "observation": "[FILE] README.md\n[FILE] __init__.py\n[DIR]  __pycache__\n[FILE] api_client.py\n[FILE] calculator.py\n[FILE] data_processor.py\n[FILE] database.py\n[FILE] hello.py\n[DIR]  scraper\n[FILE] string_utils.py\n[FILE] task-270fa8d6-build-asynchronous-task-queue-with-worker-pool.txt\n[FILE] task-5057f4d0-create-simple-hello-world-function.txt\n[FILE] task-7c601b1e-create-calculator-module-with-basic-operations.txt\n[FILE] task-cd130ce8-build-sqlite-orm-wrapper-with-crud-operations.txt\n[FILE] task-d265c78c-build-asynchronous-task-queue-with-worker-pool.txt\n[FILE] task-ea5dbc05-create-simple-hello-world-function.txt\n[FILE] task-f36fd10e-create-php-class-user.txt\n[FILE] task_queue.py\n[FILE] user.php\n[FILE] worker_pool.py",
+    "durationMs": 71,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "14d6a315-cf62-48fd-b2d3-e349dd65018b",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 2,
+    "timestamp": "2026-01-28T02:46:15.354Z",
+    "thought": null,
+    "action": "file_read",
+    "actionInput": {
+      "path": "tasks/api_client.py"
+    },
+    "observation": "class APIClient:\n    def __init__(self):\n        pass\n    def get(self):\n        pass\n    def post(self):\n        pass",
+    "durationMs": 71,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "865b270c-107c-485b-9357-27475e0a1224",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 3,
+    "timestamp": "2026-01-28T02:46:20.161Z",
+    "thought": null,
+    "action": "code_search",
+    "actionInput": {
+      "pattern": "import",
+      "file_pattern": "*.py"
+    },
+    "observation": "tasks/database.py:1: import sqlite3\ntasks/data_processor.py:1: import pandas as pd\ntasks/task_queue.py:1: import asyncio\ntasks/worker_pool.py:1: import asyncio\ntasks_archive/auth.py:1: import random\ntasks_archive/auth.py:2: from string import digits\ntasks_archive/config_parser.py:1: import json\ntasks_archive/config_parser.py:2: import os\ntasks_archive/config_parser.py:3: from typing import Dict, Any, List, Optional\ntasks_archive/data_processor.py:1: import csv\ntasks_archive/data_processor.py:2: from typing import List\ntasks_archive/list_utils.py:1: import math\ntasks_archive/task_queue.py:1: import asyncio\ntasks_archive/validator.py:2: import re\ntasks_archive/worker_pool.py:1: import asyncio\ntasks_archive/scraper/fetcher.py:1: import requests\ntasks_archive/scraper/__init__.py:3: import fetcher, parser, storage\ntests/test_api_client.py:2: import unittest\ntests/test_api_client.py:3: from unittest.mock import patch\ntests/test_api_client.py:4: from tasks.api_client import APIClient\ntests/te",
+    "durationMs": 165,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "7d05d3ef-0a41-457c-bf9c-4b7f24b9d050",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 4,
+    "timestamp": "2026-01-28T02:46:25.111Z",
+    "thought": null,
+    "action": "file_write",
+    "actionInput": {
+      "path": "tasks/di_container.py",
+      "content": "class Container:\n    def __init__(self):\n        self.dependencies = {}\n\n    def register(self, interface, implementation):\n        self.dependencies[interface] = implementation\n\n    def resolve(self, interface):\n        return self.dependencies[interface]"
+    },
+    "observation": "Successfully wrote to tasks/di_container.py",
+    "durationMs": 66,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "4b0784de-a4dd-43c6-9fcd-47b7145a954e",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 5,
+    "timestamp": "2026-01-28T02:46:30.468Z",
+    "thought": null,
+    "action": "file_list",
+    "actionInput": {},
+    "observation": "",
+    "durationMs": null,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "77df2bd3-5304-409e-a642-d4f082262d1f",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 6,
+    "timestamp": "2026-01-28T02:46:30.479Z",
+    "thought": null,
+    "action": "file_read",
+    "actionInput": {},
+    "observation": "",
+    "durationMs": null,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "1a969d02-9495-4096-bc95-297a083cfced",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 7,
+    "timestamp": "2026-01-28T02:46:30.487Z",
+    "thought": null,
+    "action": "file_list",
+    "actionInput": {},
+    "observation": "",
+    "durationMs": null,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "2218acc5-e489-400e-8c66-36a01f550de6",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 8,
+    "timestamp": "2026-01-28T02:46:30.499Z",
+    "thought": null,
+    "action": "code_search",
+    "actionInput": {},
+    "observation": "",
+    "durationMs": null,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "92351737-add8-49d6-a617-3c7bb7cc450a",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 9,
+    "timestamp": "2026-01-28T02:46:30.510Z",
+    "thought": null,
+    "action": "file_write",
+    "actionInput": {},
+    "observation": "",
+    "durationMs": null,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "7129960d-e902-439d-97b9-fc13ba57adea",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 10,
+    "timestamp": "2026-01-28T02:46:36.246Z",
+    "thought": null,
+    "action": "file_list",
+    "actionInput": {
+      "path": "/app/workspace/tasks/"
+    },
+    "observation": "[FILE] README.md\n[FILE] __init__.py\n[DIR]  __pycache__\n[FILE] api_client.py\n[FILE] calculator.py\n[FILE] data_processor.py\n[FILE] database.py\n[FILE] di_container.py\n[FILE] hello.py\n[DIR]  scraper\n[FILE] string_utils.py\n[FILE] task-10474dcb-refactor-multi-file-project-to-use-dependency-inje.txt\n[FILE] task-270fa8d6-build-asynchronous-task-queue-with-worker-pool.txt\n[FILE] task-5057f4d0-create-simple-hello-world-function.txt\n[FILE] task-7c601b1e-create-calculator-module-with-basic-operations.txt\n[FILE] task-cd130ce8-build-sqlite-orm-wrapper-with-crud-operations.txt\n[FILE] task-d265c78c-build-asynchronous-task-queue-with-worker-pool.txt\n[FILE] task-ea5dbc05-create-simple-hello-world-function.txt\n[FILE] task-f36fd10e-create-php-class-user.txt\n[FILE] task_queue.py\n[FILE] user.php\n[FILE] worker_pool.py",
+    "durationMs": 90,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "286bca26-e770-4711-906d-ce7452677506",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 11,
+    "timestamp": "2026-01-28T02:46:38.270Z",
+    "thought": null,
+    "action": "file_read",
+    "actionInput": {
+      "path": "/app/workspace/tasks/calculator.py"
+    },
+    "observation": "def add(a, b):\n    return a + b\n\ndef subtract(a, b):\n    return a - b\n\ndef multiply(a, b):\n    return a * b\n\ndef divide(a, b):\n    if b == 0:\n        raise ValueError('Cannot divide by zero')\n    else:\n        return a / b",
+    "durationMs": 58,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "3f2031ff-863d-4557-b5a1-9ff57738f4c9",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 12,
+    "timestamp": "2026-01-28T02:46:39.808Z",
+    "thought": null,
+    "action": "shell_run",
+    "actionInput": {
+      "command": "pylint --recursive=y tasks/calculator.py"
+    },
+    "observation": "Error: Command 'pylint' is not in the allowed list. Allowed: ls, cat, head, tail, grep, find, wc, python, pip, npm, node, pnpm, git, echo, pwd, mkdir, touch, pytest, jest, vitest, cargo, go",
+    "durationMs": 56,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "7257bd61-7cc7-4122-b1d7-7904cfbf02f9",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 13,
+    "timestamp": "2026-01-28T02:46:51.694Z",
+    "thought": null,
+    "action": "code_search",
+    "actionInput": {
+      "pattern": "sql*",
+      "file_pattern": "*.py"
+    },
+    "observation": "tasks/database.py:1: import sqlite3\ntasks/database.py:4: self.conn = sqlite3.connect(db_name)",
+    "durationMs": 135,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  },
+  {
+    "id": "e6d8f639-6c8c-44d5-9b43-19e2b5ea25d2",
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "agentId": "coder-01",
+    "step": 14,
+    "timestamp": "2026-01-28T02:47:49.775Z",
+    "thought": null,
+    "action": "file_read",
+    "actionInput": {
+      "path": "/app/workspace/tasks/database.py"
+    },
+    "observation": "import sqlite3\nclass Database:\n    def __init__(self, db_name):\n        self.conn = sqlite3.connect(db_name)\n        self.cursor = self.conn.cursor()\n    def create_table(self, schema):\n        # TO DO: implement create table method",
+    "durationMs": 45,
+    "isLoop": false,
+    "errorTrace": null,
+    "inputTokens": null,
+    "outputTokens": null,
+    "modelUsed": null,
+    "agent": {
+      "id": "coder-01",
+      "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+      "name": "Coder-01",
+      "status": "idle",
+      "currentTaskId": null,
+      "config": {
+        "preferredModel": "claude-sonnet-4-20250514"
+      },
+      "stats": {
+        "successRate": 0.51,
+        "tasksFailed": 17,
+        "totalTimeMs": 0,
+        "tasksCompleted": 18,
+        "totalApiCredits": 0
+      },
+      "createdAt": "2026-01-27T01:44:17.367Z",
+      "updatedAt": "2026-01-28T02:48:25.556Z",
+      "agentType": {
+        "id": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+        "name": "coder",
+        "displayName": "Coder Agent",
+        "description": "Senior Software Developer who writes clean, efficient, well-tested code",
+        "capabilities": [
+          "file_read",
+          "file_write",
+          "file_edit",
+          "shell_run",
+          "code_search"
+        ],
+        "icon": "code",
+        "color": "#3B82F6",
+        "createdAt": "2026-01-27T01:44:17.350Z"
+      }
+    }
+  }
+]

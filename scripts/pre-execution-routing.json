@@ -1,0 +1,112 @@
+[
+  {
+    "taskId": "5057f4d0-9a3b-44a2-8c1b-66f0c9de9933",
+    "title": "Create simple hello world function",
+    "agentId": "coder-01",
+    "agentName": "Coder-01",
+    "reason": "Simple task (1.0/10) → Ollama (free, fast)",
+    "confidence": 0.85,
+    "fallbackAgentId": "qa-01",
+    "modelTier": "ollama",
+    "estimatedCost": 0
+  },
+  {
+    "taskId": "d84bf542-4f46-47f1-a053-86f5a78176e0",
+    "title": "Create calculator module with basic operations",
+    "agentId": "coder-01",
+    "agentName": "Coder-01",
+    "reason": "Simple task (1.0/10) → Ollama (free, fast)",
+    "confidence": 0.85,
+    "fallbackAgentId": "qa-01",
+    "modelTier": "ollama",
+    "estimatedCost": 0
+  },
+  {
+    "taskId": "bf686d7e-4764-48eb-8403-90366d82a48a",
+    "title": "Create string utilities module with tests",
+    "agentId": "qa-01",
+    "agentName": "QA-Alpha",
+    "reason": "Medium+ task (4.8/10) → Haiku (quality, ~$0.001)",
+    "confidence": 0.9,
+    "fallbackAgentId": "coder-01",
+    "modelTier": "haiku",
+    "estimatedCost": 0.001
+  },
+  {
+    "taskId": "245ccfc3-0347-4232-88a3-9310fdc271a7",
+    "title": "Build CSV data processor with validation",
+    "agentId": "qa-01",
+    "agentName": "QA-Alpha",
+    "reason": "Medium+ task (4.3/10) → Haiku (quality, ~$0.001)",
+    "confidence": 0.9,
+    "fallbackAgentId": "coder-01",
+    "modelTier": "haiku",
+    "estimatedCost": 0.001
+  },
+  {
+    "taskId": "ba89fd51-6593-411e-b15d-64b43b3dfbe8",
+    "title": "Create HTTP client with request mocking",
+    "agentId": "qa-01",
+    "agentName": "QA-Alpha",
+    "reason": "Medium+ task (6.8/10) → Haiku (quality, ~$0.001)",
+    "confidence": 0.9,
+    "fallbackAgentId": "coder-01",
+    "modelTier": "haiku",
+    "estimatedCost": 0.001
+  },
+  {
+    "taskId": "3497dea6-5eca-493e-a73e-681d5d46bbdb",
+    "title": "Build SQLite ORM wrapper with CRUD operations",
+    "agentId": "qa-01",
+    "agentName": "QA-Alpha",
+    "reason": "Medium+ task (8.4/10) → Haiku (quality, ~$0.001)",
+    "confidence": 0.9,
+    "fallbackAgentId": "coder-01",
+    "modelTier": "haiku",
+    "estimatedCost": 0.001
+  },
+  {
+    "taskId": "7c6a650b-1a39-4c61-a1e7-70e8d226231b",
+    "title": "Design and implement multi-file web scraper architecture",
+    "agentId": "qa-01",
+    "agentName": "QA-Alpha",
+    "reason": "Medium+ task (6.5/10) → Haiku (quality, ~$0.001)",
+    "confidence": 0.9,
+    "fallbackAgentId": "coder-01",
+    "modelTier": "haiku",
+    "estimatedCost": 0.001
+  },
+  {
+    "taskId": "270fa8d6-9f54-4e91-81b8-28d6664d2f29",
+    "title": "Build asynchronous task queue with worker pool",
+    "agentId": "qa-01",
+    "agentName": "QA-Alpha",
+    "reason": "Medium+ task (6.5/10) → Haiku (quality, ~$0.001)",
+    "confidence": 0.9,
+    "fallbackAgentId": "coder-01",
+    "modelTier": "haiku",
+    "estimatedCost": 0.001
+  },
+  {
+    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
+    "title": "Refactor multi-file project to use dependency injection pattern",
+    "agentId": "qa-01",
+    "agentName": "QA-Alpha",
+    "reason": "Medium+ task (10.0/10) → Haiku (quality, ~$0.001)",
+    "confidence": 0.9,
+    "fallbackAgentId": "coder-01",
+    "modelTier": "haiku",
+    "estimatedCost": 0.001
+  },
+  {
+    "taskId": "68f50ddf-cc9b-4de0-8a41-6d6101111a1a",
+    "title": "Review all generated code for performance and best practices",
+    "agentId": "qa-01",
+    "agentName": "QA-Alpha",
+    "reason": "Medium+ task (8.0/10) → Haiku (quality, ~$0.001)",
+    "confidence": 0.9,
+    "fallbackAgentId": "coder-01",
+    "modelTier": "haiku",
+    "estimatedCost": 0.001
+  }
+]

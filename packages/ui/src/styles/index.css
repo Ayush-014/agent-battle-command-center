@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+:root {
+  --hud-green: #00ff88;
+  --hud-blue: #00aaff;
+  --hud-amber: #ffaa00;
+  --hud-red: #ff4444;
+}
+
+body {
+  @apply bg-command-bg text-gray-100 font-mono;
+  overflow: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-command-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-command-accent rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-command-border;
+}
+
+/* Panel styling */
+@layer components {
+  .panel {
+    @apply bg-command-panel border border-command-border rounded-lg;
+  }
+
+  .panel-header {
+    @apply px-4 py-2 border-b border-command-border font-display text-sm uppercase tracking-wider text-gray-400;
+  }
+
+  .panel-content {
+    @apply p-4;
+  }
+
+  /* HUD elements */
+  .hud-border {
+    @apply border border-hud-green/30;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.1);
+  }
+
+  .hud-text {
+    @apply text-hud-green font-display tracking-wider;
+  }
+
+  /* Status indicators */
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .status-dot-idle {
+    @apply bg-status-completed animate-pulse-slow;
+  }
+
+  .status-dot-busy {
+    @apply bg-status-active animate-scan;
+  }
+
+  .status-dot-stuck {
+    @apply bg-status-stuck animate-pulse;
+  }
+
+  .status-dot-offline {
+    @apply bg-status-pending;
+  }
+
+  /* Resource bars */
+  .resource-bar {
+    @apply h-4 bg-command-accent rounded overflow-hidden;
+  }
+
+  .resource-bar-fill {
+    @apply h-full transition-all duration-500 ease-out;
+  }
+
+  /* Task cards - Compact for fitting more */
+  .task-card {
+    @apply panel p-2 hover:border-hud-blue/50 transition-colors cursor-pointer;
+  }
+
+  .task-card.active {
+    @apply border-hud-blue/70;
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.2);
+  }
+
+  .task-card.pending {
+    @apply border-status-pending/30;
+  }
+
+  .task-card.in-progress {
+    @apply border-status-active/50;
+  }
+
+  .task-card.stuck {
+    @apply border-status-stuck/50;
+  }
+
+  .task-card.completed {
+    @apply border-status-completed/50;
+  }
+
+  /* Agent cards */
+  .agent-card {
+    @apply panel p-3 transition-all duration-300;
+  }
+
+  .agent-card.coder {
+    @apply border-agent-coder/30 hover:border-agent-coder/60;
+  }
+
+  .agent-card.qa {
+    @apply border-agent-qa/30 hover:border-agent-qa/60;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply px-4 py-2 rounded font-display text-sm uppercase tracking-wider transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply btn bg-hud-blue/20 text-hud-blue border border-hud-blue/50 hover:bg-hud-blue/30;
+  }
+
+  .btn-success {
+    @apply btn bg-hud-green/20 text-hud-green border border-hud-green/50 hover:bg-hud-green/30;
+  }
+
+  .btn-warning {
+    @apply btn bg-hud-amber/20 text-hud-amber border border-hud-amber/50 hover:bg-hud-amber/30;
+  }
+
+  .btn-danger {
+    @apply btn bg-hud-red/20 text-hud-red border border-hud-red/50 hover:bg-hud-red/30;
+  }
+
+  /* Mode toggle */
+  .mode-toggle {
+    @apply flex rounded-lg overflow-hidden border border-command-border;
+  }
+
+  .mode-toggle-btn {
+    @apply px-4 py-2 font-display text-xs uppercase tracking-wider transition-all duration-200;
+  }
+
+  .mode-toggle-btn.active {
+    @apply bg-hud-green/20 text-hud-green;
+  }
+
+  .mode-toggle-btn:not(.active) {
+    @apply text-gray-500 hover:text-gray-300;
+  }
+}
+
+/* Minimap styling */
+.minimap {
+  @apply relative overflow-hidden;
+  background:
+    radial-gradient(circle at center, transparent 0%, rgba(0, 255, 136, 0.05) 100%);
+}
+
+.minimap-grid {
+  background-image:
+    linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Scan line effect */
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--hud-green), transparent);
+  animation: scanline 3s linear infinite;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100vh); }
+}

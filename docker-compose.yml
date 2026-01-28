@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: abcc-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: abcc
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama
+    container_name: abcc-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./scripts/ollama-entrypoint.sh:/entrypoint.sh
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    environment:
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1:8b}
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list | grep -q '${OLLAMA_MODEL:-llama3.1:8b}' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  api:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile
+    container_name: abcc-api
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/abcc?schema=public
+      AGENTS_URL: http://agents:8000
+      API_PORT: 3001
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agents:
+        condition: service_started
+    volumes:
+      - ./workspace:/app/workspace
+
+  agents:
+    build:
+      context: ./packages/agents
+      dockerfile: Dockerfile
+    container_name: abcc-agents
+    ports:
+      - "8000:8000"
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ./workspace:/app/workspace
+
+  ui:
+    build:
+      context: .
+      dockerfile: packages/ui/Dockerfile
+    container_name: abcc-ui
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3001
+      VITE_WS_URL: ws://localhost:3001
+    depends_on:
+      - api
+
+  backup:
+    build:
+      context: ./packages/backup
+      dockerfile: Dockerfile
+    container_name: abcc-backup
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: abcc
+      OLLAMA_HOST: ollama
+      OLLAMA_PORT: 11434
+      RETENTION_DAYS: 60
+      BACKUP_INTERVAL_MINUTES: 30
+      TZ: ${TZ:-America/New_York}
+      BACKUP_ENCRYPTION_KEY: ${BACKUP_ENCRYPTION_KEY:-}
+    volumes:
+      - backup_data:/backups
+      - ./workspace:/workspace:ro
+      - ./.env:/env-source/.env:ro
+      - ./:/env-restore
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  ollama_data:
+  backup_data:

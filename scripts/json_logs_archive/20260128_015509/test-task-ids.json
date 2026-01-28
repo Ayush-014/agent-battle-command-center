@@ -1,0 +1,42 @@
+[
+  {
+    "id": "ea5dbc05-9a91-4a94-a2c0-e40e47042769",
+    "title": "Create simple hello world function"
+  },
+  {
+    "id": "7c601b1e-2b19-4b31-8267-2d52b887c7ac",
+    "title": "Create calculator module with basic operations"
+  },
+  {
+    "id": "687bfbee-1e6b-43ce-903c-fb74a4d19cab",
+    "title": "Create string utilities module with tests"
+  },
+  {
+    "id": "7d718969-6e6e-4796-a134-4f7f5a63f731",
+    "title": "Build CSV data processor with validation"
+  },
+  {
+    "id": "aa17c925-2e8e-4ae2-898b-6b2b76976de6",
+    "title": "Create HTTP client with request mocking"
+  },
+  {
+    "id": "cd130ce8-15a9-4cd7-9f2f-1819890451ea",
+    "title": "Build SQLite ORM wrapper with CRUD operations"
+  },
+  {
+    "id": "2e537a61-9721-4d97-a6c0-b9357bb92dbf",
+    "title": "Design and implement multi-file web scraper architecture"
+  },
+  {
+    "id": "d265c78c-0b2e-4806-b2c2-f4f3074f78d4",
+    "title": "Build asynchronous task queue with worker pool"
+  },
+  {
+    "id": "4f3845ec-f507-44b7-9296-2417954b2383",
+    "title": "Refactor multi-file project to use dependency injection pattern"
+  },
+  {
+    "id": "6ebcb289-d13f-411c-8d68-99b51b1f1340",
+    "title": "Review all generated code for performance and best practices"
+  }
+]

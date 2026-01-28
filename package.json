@@ -1,0 +1,29 @@
+{
+  "name": "agent-battle-command-center",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Strategy-game inspired UI for managing AI agents",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter @abcc/api dev\" \"pnpm --filter @abcc/ui dev\"",
+    "dev:api": "pnpm --filter @abcc/api dev",
+    "dev:ui": "pnpm --filter @abcc/ui dev",
+    "dev:agents": "pnpm --filter @abcc/agents dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "db:generate": "pnpm --filter @abcc/api db:generate",
+    "db:push": "pnpm --filter @abcc/api db:push",
+    "db:migrate": "pnpm --filter @abcc/api db:migrate",
+    "db:studio": "pnpm --filter @abcc/api db:studio",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

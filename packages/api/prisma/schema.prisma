@@ -1,0 +1,272 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AgentType {
+  id           String   @id @default(uuid())
+  name         String   @unique @db.VarChar(50)
+  displayName  String   @map("display_name") @db.VarChar(100)
+  description  String?  @db.Text
+  capabilities Json     @default("[]")
+  icon         String?  @db.VarChar(50)
+  color        String?  @db.VarChar(7)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  agents Agent[]
+
+  @@map("agent_types")
+}
+
+model Agent {
+  id            String      @id @default(uuid())
+  agentTypeId   String      @map("agent_type_id")
+  name          String      @db.VarChar(100)
+  status        String      @default("idle") @db.VarChar(20)
+  currentTaskId String?     @map("current_task_id")
+  config        Json        @default("{}")
+  stats         Json        @default("{\"tasksCompleted\":0,\"tasksFailed\":0,\"successRate\":0,\"totalApiCredits\":0,\"totalTimeMs\":0}")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  agentType          AgentType        @relation(fields: [agentTypeId], references: [id])
+  assignedTasks      Task[]           @relation("AssignedAgent")
+  escalatedTasks     Task[]           @relation("EscalatedAgent")
+  taskExecutions     TaskExecution[]
+  executionLogs      ExecutionLog[]
+  fileLocks          FileLock[]
+
+  @@map("agents")
+}
+
+model Task {
+  id                   String    @id @default(uuid())
+  title                String    @db.VarChar(200)
+  description          String?   @db.Text
+  taskType             String    @map("task_type") @db.VarChar(50)
+  requiredAgent        String?   @map("required_agent") @db.VarChar(50)
+  status               String    @default("pending") @db.VarChar(20)
+  priority             Int       @default(5)
+  maxIterations        Int       @default(3) @map("max_iterations")
+  currentIteration     Int       @default(0) @map("current_iteration")
+  assignedAgentId      String?   @map("assigned_agent_id")
+  assignedAt           DateTime? @map("assigned_at")
+  needsHumanAt         DateTime? @map("needs_human_at")
+  humanTimeoutMinutes  Int       @default(30) @map("human_timeout_minutes")
+  escalatedToAgentId   String?   @map("escalated_to_agent_id")
+  result               Json?
+  error                String?   @db.Text
+  apiCreditsUsed       Decimal   @default(0) @map("api_credits_used") @db.Decimal(10, 4)
+  timeSpentMs          Int       @default(0) @map("time_spent_ms")
+  lockedFiles          String[]  @map("locked_files")
+  parentTaskId         String?   @map("parent_task_id")
+  acceptanceCriteria   String?   @map("acceptance_criteria") @db.Text
+  contextNotes         String?   @map("context_notes") @db.Text
+  validationCommand    String?   @map("validation_command") @db.Text
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  completedAt          DateTime? @map("completed_at")
+
+  assignedAgent     Agent?          @relation("AssignedAgent", fields: [assignedAgentId], references: [id])
+  escalatedToAgent  Agent?          @relation("EscalatedAgent", fields: [escalatedToAgentId], references: [id])
+  parentTask        Task?           @relation("SubTasks", fields: [parentTaskId], references: [id])
+  subTasks          Task[]          @relation("SubTasks")
+  taskExecutions    TaskExecution[]
+  executionLogs     ExecutionLog[]
+  fileLocks         FileLock[]
+
+  @@index([status])
+  @@index([requiredAgent])
+  @@index([priority])
+  @@map("tasks")
+}
+
+model TaskExecution {
+  id             String    @id @default(uuid())
+  taskId         String    @map("task_id")
+  agentId        String    @map("agent_id")
+  iteration      Int
+  status         String    @db.VarChar(20)
+  apiCreditsUsed Decimal   @default(0) @map("api_credits_used") @db.Decimal(10, 4)
+  durationMs     Int?      @map("duration_ms")
+  input          Json?
+  output         Json?
+  error          String?   @db.Text
+  logs           String?   @db.Text
+  startedAt      DateTime  @default(now()) @map("started_at")
+  completedAt    DateTime? @map("completed_at")
+
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agentId], references: [id])
+
+  @@map("task_executions")
+}
+
+model FileLock {
+  id            String    @id @default(uuid())
+  filePath      String    @unique @map("file_path") @db.VarChar(500)
+  lockedByAgent String    @map("locked_by_agent")
+  lockedByTask  String    @map("locked_by_task")
+  lockedAt      DateTime  @default(now()) @map("locked_at")
+  expiresAt     DateTime? @map("expires_at")
+
+  agent Agent @relation(fields: [lockedByAgent], references: [id])
+  task  Task  @relation(fields: [lockedByTask], references: [id], onDelete: Cascade)
+
+  @@map("file_locks")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  eventType String   @map("event_type") @db.VarChar(50)
+  payload   Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("events")
+}
+
+model Conversation {
+  id        String        @id @default(uuid())
+  agentId   String        @map("agent_id")
+  taskId    String?       @map("task_id")
+  title     String?       @db.VarChar(200)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  messages  ChatMessage[]
+
+  @@index([agentId])
+  @@index([taskId])
+  @@map("conversations")
+}
+
+model ChatMessage {
+  id             String       @id @default(uuid())
+  conversationId String       @map("conversation_id")
+  role           String       @db.VarChar(20)
+  content        String       @db.Text
+  createdAt      DateTime     @default(now()) @map("created_at")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("chat_messages")
+}
+
+model ExecutionLog {
+  id          String   @id @default(uuid())
+  taskId      String   @map("task_id")
+  agentId     String   @map("agent_id")
+  step        Int
+  timestamp   DateTime @default(now())
+
+  // Agent reasoning
+  thought     String?  @db.Text
+  action      String   @db.VarChar(100)
+  actionInput Json
+  observation String   @db.Text
+
+  // Metadata
+  durationMs  Int?     @map("duration_ms")
+  isLoop      Boolean  @default(false) @map("is_loop")
+  errorTrace  String?  @map("error_trace") @db.Text
+
+  // Token tracking (per step)
+  inputTokens  Int?     @map("input_tokens")
+  outputTokens Int?     @map("output_tokens")
+  modelUsed    String?  @map("model_used") @db.VarChar(50)
+
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agentId], references: [id])
+
+  @@index([taskId])
+  @@index([agentId])
+  @@index([timestamp])
+  @@map("execution_logs")
+}
+
+model CodeReview {
+  id                 String   @id @default(uuid())
+  taskId             String   @map("task_id")
+  reviewerId         String?  @map("reviewer_id")  // Agent ID that performed review (Opus)
+  reviewerModel      String?  @map("reviewer_model") @db.VarChar(50)  // e.g., "claude-opus-4"
+
+  // Complexity assessment
+  initialComplexity  Float    @map("initial_complexity")  // Task router's score
+  opusComplexity     Float?   @map("opus_complexity")     // Opus's assessment
+
+  // Review content
+  findings           Json     @default("[]")  // Array of {severity, category, description, location, suggestion}
+  summary            String?  @db.Text
+  codeQualityScore   Float?   @map("code_quality_score")  // 0-10
+
+  // Status tracking
+  status             String   @default("pending") @db.VarChar(20)  // pending, approved, needs_fixes, rejected
+  fixAttempts        Int      @default(0) @map("fix_attempts")
+  fixedByAgentId     String?  @map("fixed_by_agent_id")
+  fixedByModel       String?  @map("fixed_by_model") @db.VarChar(50)
+
+  // Token usage for cost tracking
+  inputTokens        Int?     @map("input_tokens")
+  outputTokens       Int?     @map("output_tokens")
+  totalCost          Decimal? @map("total_cost") @db.Decimal(10, 6)
+
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@index([taskId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("code_reviews")
+}
+
+model TrainingDataset {
+  id               String   @id @default(uuid())
+
+  // Task context
+  taskId           String?  @map("task_id")
+  taskDescription  String   @db.Text
+  taskType         String   @map("task_type") @db.VarChar(50)
+  expectedOutput   String?  @map("expected_output") @db.Text
+
+  // Claude execution (gold standard)
+  claudeAgentId    String?  @map("claude_agent_id")
+  claudeOutput     Json?    @map("claude_output")
+  claudeLogs       Json?    @map("claude_logs")
+  claudeSuccess    Boolean? @map("claude_success")
+  claudeTokens     Int?     @map("claude_tokens")
+  claudeDurationMs Int?     @map("claude_duration_ms")
+
+  // Local agent execution (for comparison)
+  localAgentId     String?  @map("local_agent_id")
+  localOutput      Json?    @map("local_output")
+  localLogs        Json?    @map("local_logs")
+  localSuccess     Boolean? @map("local_success")
+  localTokens      Int?     @map("local_tokens")
+  localDurationMs  Int?     @map("local_duration_ms")
+
+  // Analysis
+  complexity       Float    @default(0)
+  qualityScore     Float?   @map("quality_score")
+  isDifferent      Boolean? @map("is_different")
+
+  // Quality flags
+  isGoodExample    Boolean  @default(false) @map("is_good_example")
+  humanReviewed    Boolean  @default(false) @map("human_reviewed")
+  reviewNotes      String?  @map("review_notes") @db.Text
+
+  // Metadata
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([taskType])
+  @@index([complexity])
+  @@index([isGoodExample])
+  @@index([humanReviewed])
+  @@index([createdAt])
+  @@map("training_datasets")
+}
