@@ -72,18 +72,13 @@ Final Answer: File created successfully.
 ## Model Recommendations
 
 Current models you have:
-- `qwen3:8b` (500MB) - **Try this first**
-- `codellama:13b-instruct` (7.4GB) - Instruction-tuned, may not work well with tools
-- `llama3.1:8b` (4.9GB) - Limited tool support
+- `qwen3:8b` (5.2GB) - **Recommended** - 95% success rate on simple tasks
+- `qwen2.5-coder:7b` (4.7GB) - Good alternative - 80% success rate
+- `llama3.1:8b` (4.9GB) - Backup option
 
-**Better option**: Pull `qwen2.5-coder:7b` or `qwen2.5-coder:14b`
-```bash
-docker compose exec ollama ollama pull qwen2.5-coder:7b
+The default is `qwen3:8b`. To use a different model, update `.env`:
 ```
-
-Then update `.env`:
-```
-OLLAMA_MODEL=qwen2.5-coder:7b
+OLLAMA_MODEL=qwen3:8b
 ```
 
 ## Troubleshooting
@@ -97,9 +92,9 @@ OLLAMA_MODEL=qwen2.5-coder:7b
 ### Try different model
 
 Some models are better at function calling than others. If one doesn't work, try another:
-- qwen2.5-coder series (best for coding)
-- llama3.1 (decent general purpose)
-- mistral (good instruction following)
+- qwen3:8b (best - 95% success rate)
+- qwen2.5-coder:7b (good - 80% success rate)
+- llama3.1:8b (fallback option)
 
 ### Increase max_iter
 

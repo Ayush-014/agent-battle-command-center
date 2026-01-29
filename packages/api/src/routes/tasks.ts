@@ -33,8 +33,11 @@ const updateTaskSchema = z.object({
   status: z.enum(['pending', 'assigned', 'in_progress', 'needs_human', 'completed', 'failed', 'aborted']).optional(),
   result: z.any().optional(),  // Prisma Json type
   error: z.string().nullable().optional(),
-  timeSpentMs: z.number().optional(),
-  completedAt: z.string().datetime().optional(),
+  timeSpentMs: z.number().nullable().optional(),
+  completedAt: z.string().datetime().nullable().optional(),
+  // Allow clearing assignment for task reset
+  assignedAgentId: z.string().nullable().optional(),
+  assignedAt: z.string().datetime().nullable().optional(),
 });
 
 // List tasks with filters
@@ -123,9 +126,32 @@ tasksRouter.post('/', asyncHandler(async (req, res) => {
 tasksRouter.patch('/:id', asyncHandler(async (req, res) => {
   const data = updateTaskSchema.parse(req.body);
 
+  // Build Prisma update data, only including defined fields
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateData: any = {};
+
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.priority !== undefined) updateData.priority = data.priority;
+  if (data.maxIterations !== undefined) updateData.maxIterations = data.maxIterations;
+  if (data.currentIteration !== undefined) updateData.currentIteration = data.currentIteration;
+  if (data.lockedFiles !== undefined) updateData.lockedFiles = data.lockedFiles;
+  if (data.status !== undefined) updateData.status = data.status;
+  if (data.result !== undefined) updateData.result = data.result;
+  if (data.error !== undefined) updateData.error = data.error;
+  if (data.timeSpentMs !== undefined) updateData.timeSpentMs = data.timeSpentMs;
+  if (data.completedAt !== undefined) updateData.completedAt = data.completedAt;
+  // Handle relation fields - use disconnect for null
+  if (data.assignedAgentId !== undefined) {
+    updateData.assignedAgentId = data.assignedAgentId;
+  }
+  if (data.assignedAt !== undefined) {
+    updateData.assignedAt = data.assignedAt;
+  }
+
   const task = await prisma.task.update({
     where: { id: req.params.id },
-    data,
+    data: updateData,
   });
 
   const io = req.app.get('io') as SocketIOServer;

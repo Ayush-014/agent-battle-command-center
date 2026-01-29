@@ -23,7 +23,7 @@ UI (React:5173) → API (Express:3001) → Agents (FastAPI:8000) → Ollama/Clau
 ### Agent Service (crewai 0.86.0+)
 
 The agents service uses **crewai 0.86.0** which internally uses **litellm** for LLM connections:
-- Model strings use provider prefixes: `anthropic/claude-sonnet-4-20250514`, `ollama/qwen2.5-coder:7b`
+- Model strings use provider prefixes: `anthropic/claude-sonnet-4-20250514`, `ollama/qwen3:8b`
 - `OLLAMA_API_BASE` environment variable required for litellm to connect to Ollama in Docker
 - No longer uses langchain LLM objects directly
 
@@ -310,7 +310,7 @@ pnpm run security:audit       # Fail build if HIGH/CRITICAL vulns found
 | `ANTHROPIC_API_KEY` | Yes* | - | Claude API access |
 | `OLLAMA_URL` | No | http://ollama:11434 | Ollama API URL |
 | `OLLAMA_API_BASE` | Yes** | - | litellm requires this for Ollama in Docker |
-| `OLLAMA_MODEL` | No | qwen2.5-coder:7b | Default local model |
+| `OLLAMA_MODEL` | No | qwen3:8b | Default local model |
 | `DEFAULT_MODEL` | No | anthropic/claude-sonnet-4-20250514 | Default Claude model |
 | `RATE_LIMIT_BUFFER` | No | 0.8 | Trigger rate limiting at this % of limit |
 | `MIN_API_DELAY` | No | 0.5 | Minimum delay (seconds) between API calls |

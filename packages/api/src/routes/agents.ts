@@ -58,20 +58,56 @@ agentsRouter.get('/:id', asyncHandler(async (req, res) => {
   res.json({ ...agent, currentTask });
 }));
 
-// Update agent config
+// Update agent config or status
 agentsRouter.patch('/:id', asyncHandler(async (req, res) => {
   const io = req.app.get('io') as SocketIOServer;
   const agentManager = new AgentManagerService(prisma, io);
 
-  const configSchema = z.object({
+  const updateSchema = z.object({
+    // Config fields
     preferredModel: z.string().optional(),
     maxConcurrentTasks: z.number().min(1).max(5).optional(),
     autoRetry: z.boolean().optional(),
     alwaysUseClaude: z.boolean().optional(),
     maxContextTokens: z.number().min(1000).max(200000).optional(),
+    // Status fields (for test scripts)
+    status: z.enum(['idle', 'busy', 'paused', 'offline']).optional(),
+    currentTaskId: z.string().nullable().optional(),
   });
 
-  const config = configSchema.parse(req.body);
+  const update = updateSchema.parse(req.body);
+
+  // If status or currentTaskId is being updated, do a direct DB update
+  if (update.status !== undefined || update.currentTaskId !== undefined) {
+    const agent = await prisma.agent.update({
+      where: { id: req.params.id },
+      data: {
+        ...(update.status !== undefined && { status: update.status }),
+        ...(update.currentTaskId !== undefined && { currentTaskId: update.currentTaskId }),
+      },
+      include: { agentType: true },
+    });
+
+    if (agent) {
+      io.emit('agent_status_changed', {
+        type: 'agent_status_changed',
+        payload: agent,
+        timestamp: new Date(),
+      });
+    }
+
+    res.json(agent);
+    return;
+  }
+
+  // Otherwise update config
+  const config = {
+    preferredModel: update.preferredModel,
+    maxConcurrentTasks: update.maxConcurrentTasks,
+    autoRetry: update.autoRetry,
+    alwaysUseClaude: update.alwaysUseClaude,
+    maxContextTokens: update.maxContextTokens,
+  };
 
   const agent = await agentManager.updateAgentConfig(req.params.id, config);
 
