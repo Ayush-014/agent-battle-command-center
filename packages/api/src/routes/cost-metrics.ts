@@ -177,7 +177,8 @@ costMetricsRouter.get('/timeline', asyncHandler(async (req, res) => {
 
   // Validate hours
   if (isNaN(hours) || hours < 1 || hours > 168) {
-    return res.status(400).json({ error: 'Hours must be between 1 and 168 (1 week)' });
+    res.status(400).json({ error: 'Hours must be between 1 and 168 (1 week)' });
+    return;
   }
 
   // Get logs from the specified time period

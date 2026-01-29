@@ -46,6 +46,8 @@ describe('TaskQueueService', () => {
     haikuComplexity: null,
     haikuReasoning: null,
     finalComplexity: null,
+    actualComplexity: null,
+    errorCategory: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,

@@ -47,7 +47,11 @@ executionLogsRouter.post('/', asyncHandler(async (req, res) => {
     emitCostUpdate(io, {
       totalCost: costSummary.totalCost,
       byModelTier: costSummary.byModelTier,
-      totalTokens: costSummary.totalTokens,
+      totalTokens: {
+        input: costSummary.totalInputTokens,
+        output: costSummary.totalOutputTokens,
+        total: costSummary.totalInputTokens + costSummary.totalOutputTokens,
+      },
     });
   }
 

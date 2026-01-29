@@ -10,6 +10,8 @@ import {
   playAgentStuck,
   playLoopDetected,
   playTaskMilestone,
+  playOpusReview,
+  playDecomposition,
 } from '../audio/audioManager';
 
 const SOCKET_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
@@ -190,6 +192,18 @@ export function useSocket() {
       if (handlers?.handleStreamError) {
         handlers.handleStreamError(event.payload);
       }
+    });
+
+    // Code review events (Opus reviewing code)
+    socket.on('code_review_started', (event: { payload: { taskId: string; reviewerId?: string } }) => {
+      console.log('Code review started:', event.payload);
+      playOpusReview('cto');
+    });
+
+    // Task decomposition events (CTO breaking down tasks)
+    socket.on('task_decomposition_started', (event: { payload: { taskId: string; agentId?: string } }) => {
+      console.log('Task decomposition started:', event.payload);
+      playDecomposition('cto');
     });
 
     socketRef.current = socket;

@@ -180,3 +180,11 @@ export function playAgentStuck(agentType?: AgentVoiceType) {
 export function playLoopDetected(agentType?: AgentVoiceType) {
   audioManager.playEvent('loop_detected', agentType, 10);
 }
+
+export function playOpusReview(agentType?: AgentVoiceType) {
+  audioManager.playEvent('opus_review', agentType, 6);
+}
+
+export function playDecomposition(agentType?: AgentVoiceType) {
+  audioManager.playEvent('decomposition', agentType, 6);
+}

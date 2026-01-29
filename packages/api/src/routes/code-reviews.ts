@@ -2,6 +2,7 @@ import { Router, type Router as RouterType } from 'express';
 import { z } from 'zod';
 import { prisma } from '../db/client.js';
 import { asyncHandler } from '../types/index.js';
+import type { Server as SocketIOServer } from 'socket.io';
 
 export const codeReviewsRouter: RouterType = Router();
 
@@ -71,6 +72,19 @@ codeReviewsRouter.post('/', asyncHandler(async (req, res) => {
       ...data,
       totalCost: data.totalCost ? data.totalCost : undefined,
     },
+  });
+
+  // Emit code review started event for audio feedback
+  const io = req.app.get('io') as SocketIOServer;
+  io.emit('code_review_started', {
+    type: 'code_review_started',
+    payload: {
+      taskId: data.taskId,
+      reviewId: review.id,
+      reviewerId: data.reviewerId,
+      reviewerModel: data.reviewerModel,
+    },
+    timestamp: new Date(),
   });
 
   res.status(201).json(review);

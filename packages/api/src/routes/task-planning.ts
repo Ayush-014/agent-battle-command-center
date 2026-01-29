@@ -66,11 +66,22 @@ taskPlanningRouter.post('/:taskId/decompose', asyncHandler(async (req, res) => {
     },
   });
 
-  // Emit event
+  // Emit events
   const io = req.app.get('io') as SocketIOServer;
   io.emit('task_updated', {
     type: 'task_updated',
     payload: updatedTask,
+    timestamp: new Date(),
+  });
+
+  // Emit decomposition started event for audio feedback
+  io.emit('task_decomposition_started', {
+    type: 'task_decomposition_started',
+    payload: {
+      taskId: task.id,
+      agentId: ctoAgent.id,
+      agentName: ctoAgent.name,
+    },
     timestamp: new Date(),
   });
 
