@@ -154,7 +154,29 @@ ln -s "${TIMESTAMP}" "${BACKUP_BASE}/latest"
 log "Updated 'latest' symlink"
 
 #######################################
-# 8. Cleanup Old Backups
+# 8. Mirror to Secondary Backup Location
+#######################################
+if [ -d "/backups-mirror" ]; then
+    log "Mirroring backup to secondary location..."
+    MIRROR_DIR="/backups-mirror/daily/${TIMESTAMP}"
+    mkdir -p "${MIRROR_DIR}"
+
+    if cp -r "${BACKUP_DIR}"/* "${MIRROR_DIR}/" 2>/dev/null; then
+        log "Backup mirrored to: ${MIRROR_DIR}"
+
+        # Update latest symlink in mirror
+        rm -f "/backups-mirror/daily/latest"
+        ln -s "${TIMESTAMP}" "/backups-mirror/daily/latest"
+        log "Mirror 'latest' symlink updated"
+    else
+        log "WARNING: Failed to mirror backup to secondary location"
+    fi
+else
+    log "NOTICE: Secondary backup location not mounted at /backups-mirror"
+fi
+
+#######################################
+# 9. Cleanup Old Backups
 #######################################
 log "Cleaning up backups older than ${RETENTION_DAYS} days..."
 DELETED_COUNT=0
@@ -179,6 +201,29 @@ for dir in "${BACKUP_BASE}"/*/; do
     fi
 done
 log "Cleanup complete: removed ${DELETED_COUNT} old backups"
+
+# Also cleanup mirrored backups
+if [ -d "/backups-mirror/daily" ]; then
+    log "Cleaning up mirrored backups older than ${RETENTION_DAYS} days..."
+    MIRROR_DELETED_COUNT=0
+
+    for dir in "/backups-mirror/daily"/*/; do
+        dir_name=$(basename "${dir}")
+        # Skip 'latest' symlink
+        [ "${dir_name}" = "latest" ] && continue
+        # Check if directory is older than retention period
+        if [ -d "${dir}" ]; then
+            # Extract date from directory name (YYYYMMDD_HHMMSS)
+            dir_date="${dir_name:0:8}"
+            if [ "${dir_date}" -lt "${CUTOFF_DATE}" ] 2>/dev/null; then
+                log "Removing old mirrored backup: ${dir_name}"
+                rm -rf "${dir}"
+                MIRROR_DELETED_COUNT=$((MIRROR_DELETED_COUNT + 1))
+            fi
+        fi
+    done
+    log "Mirror cleanup complete: removed ${MIRROR_DELETED_COUNT} old backups"
+fi
 
 #######################################
 # Summary

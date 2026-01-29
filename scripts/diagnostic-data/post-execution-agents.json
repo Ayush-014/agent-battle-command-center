@@ -1,7 +1,7 @@
 [
   {
     "id": "coder-01",
-    "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+    "agentTypeId": "b1251b2e-530b-4cf6-b354-fc55b7d0617d",
     "type": "coder",
     "name": "Coder-01",
     "status": "idle",
@@ -10,18 +10,18 @@
       "preferredModel": "claude-sonnet-4-20250514"
     },
     "stats": {
-      "successRate": 0.51,
-      "tasksFailed": 17,
+      "successRate": 1,
+      "tasksFailed": 0,
       "totalTimeMs": 0,
-      "tasksCompleted": 18,
+      "tasksCompleted": 2,
       "totalApiCredits": 0
     },
-    "createdAt": "2026-01-27T01:44:17.367Z",
-    "updatedAt": "2026-01-28T02:48:25.556Z"
+    "createdAt": "2026-01-28T18:50:21.995Z",
+    "updatedAt": "2026-01-28T20:04:55.295Z"
   },
   {
     "id": "coder-02",
-    "agentTypeId": "56181902-ea07-48ac-92c1-e698f9b5b74d",
+    "agentTypeId": "b1251b2e-530b-4cf6-b354-fc55b7d0617d",
     "type": "coder",
     "name": "Coder-02",
     "status": "idle",
@@ -36,12 +36,12 @@
       "tasksCompleted": 0,
       "totalApiCredits": 0
     },
-    "createdAt": "2026-01-27T01:44:17.372Z",
-    "updatedAt": "2026-01-28T02:30:35.526Z"
+    "createdAt": "2026-01-28T18:50:22.002Z",
+    "updatedAt": "2026-01-28T20:04:55.295Z"
   },
   {
     "id": "cto-01",
-    "agentTypeId": "63616291-15a3-43f2-8eef-1ea9fd94e77d",
+    "agentTypeId": "8ff0c075-b2b4-4341-805e-8c6721bc41bd",
     "type": "cto",
     "name": "CTO-Sentinel",
     "status": "idle",
@@ -53,34 +53,34 @@
     },
     "stats": {
       "successRate": 0,
-      "tasksFailed": 2,
+      "tasksFailed": 0,
       "totalTimeMs": 0,
       "tasksCompleted": 0,
       "totalApiCredits": 0
     },
-    "createdAt": "2026-01-27T01:44:17.382Z",
-    "updatedAt": "2026-01-28T02:30:35.526Z"
+    "createdAt": "2026-01-28T18:50:22.011Z",
+    "updatedAt": "2026-01-28T20:04:55.295Z"
   },
   {
     "id": "qa-01",
-    "agentTypeId": "d1365e48-93bd-4988-959c-4b026c93795f",
+    "agentTypeId": "6a3df33e-a623-4182-b8bf-7bb7b99bc94d",
     "type": "qa",
     "name": "QA-Alpha",
-    "status": "busy",
-    "currentTaskId": "bf686d7e-4764-48eb-8403-90366d82a48a",
+    "status": "idle",
+    "currentTaskId": null,
     "config": {
       "preferredModel": "claude-haiku-4-20250514",
       "alwaysUseClaude": true,
       "maxContextTokens": 8000
     },
     "stats": {
-      "successRate": 0,
-      "tasksFailed": 4,
+      "successRate": 1,
+      "tasksFailed": 0,
       "totalTimeMs": 0,
-      "tasksCompleted": 0,
+      "tasksCompleted": 1,
       "totalApiCredits": 0
     },
-    "createdAt": "2026-01-27T01:44:17.376Z",
-    "updatedAt": "2026-01-28T02:35:37.685Z"
+    "createdAt": "2026-01-28T18:50:22.007Z",
+    "updatedAt": "2026-01-28T20:04:55.295Z"
   }
 ]

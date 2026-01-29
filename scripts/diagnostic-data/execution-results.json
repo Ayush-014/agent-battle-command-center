@@ -1,90 +1,74 @@
 [
   {
-    "taskId": "5057f4d0-9a3b-44a2-8c1b-66f0c9de9933",
-    "title": "Create simple hello world function",
-    "status": "error",
-    "error": "Assignment failed: HTTP 400 - {\"error\":\"Task is not pending\"}"
-  },
-  {
-    "taskId": "d84bf542-4f46-47f1-a053-86f5a78176e0",
-    "title": "Create calculator module with basic operations",
-    "status": "error",
-    "error": "Assignment failed: HTTP 400 - {\"error\":\"Task is not pending\"}"
-  },
-  {
-    "taskId": "bf686d7e-4764-48eb-8403-90366d82a48a",
-    "title": "Create string utilities module with tests",
-    "status": "error",
-    "error": "Assignment failed: HTTP 400 - {\"error\":\"Task is not pending\"}"
-  },
-  {
-    "taskId": "245ccfc3-0347-4232-88a3-9310fdc271a7",
-    "title": "Build CSV data processor with validation",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 221496,
-    "durationSec": 221,
+    "taskId": "068808d0-27ce-426c-8876-e5adf7182f17",
+    "title": "[SFFIX-v2] Create simple hello world function",
+    "status": "completed",
+    "resultStatus": "SUCCESS",
+    "durationMs": 31853,
+    "durationSec": 31,
     "filesCreated": 1,
-    "confidence": 0.4
+    "confidence": 1
   },
   {
-    "taskId": "ba89fd51-6593-411e-b15d-64b43b3dfbe8",
-    "title": "Create HTTP client with request mocking",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 117196,
-    "durationSec": 117,
+    "taskId": "7b5cc8d4-2d86-4891-bc78-faa25bbf1783",
+    "title": "[SFFIX-v2] Create calculator module with basic operations",
+    "status": "completed",
+    "resultStatus": "SUCCESS",
+    "durationMs": 120429,
+    "durationSec": 120,
     "filesCreated": 1,
-    "confidence": 0.4
+    "confidence": 0.7
   },
   {
-    "taskId": "3497dea6-5eca-493e-a73e-681d5d46bbdb",
-    "title": "Build SQLite ORM wrapper with CRUD operations",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 118433,
-    "durationSec": 118,
-    "filesCreated": 1,
-    "confidence": 0.4
-  },
-  {
-    "taskId": "7c6a650b-1a39-4c61-a1e7-70e8d226231b",
-    "title": "Design and implement multi-file web scraper architecture",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 97625,
-    "durationSec": 97,
+    "taskId": "5f4472bf-b6c1-442a-a66b-06ec8e85774f",
+    "title": "[SFFIX-v2] Create string utilities module with tests",
+    "status": "completed",
+    "resultStatus": "SUCCESS",
+    "durationMs": 12570,
+    "durationSec": 12,
     "filesCreated": 2,
-    "confidence": 0.4
-  },
-  {
-    "taskId": "270fa8d6-9f54-4e91-81b8-28d6664d2f29",
-    "title": "Build asynchronous task queue with worker pool",
-    "status": "completed",
-    "resultStatus": "SUCCESS",
-    "durationMs": 61251,
-    "durationSec": 61,
-    "filesCreated": 3,
     "confidence": 1
   },
   {
-    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
-    "title": "Refactor multi-file project to use dependency injection pattern",
-    "status": "completed",
-    "resultStatus": "SUCCESS",
-    "durationMs": 22435,
-    "durationSec": 22,
-    "filesCreated": 1,
-    "confidence": 1
+    "taskId": "9f26ebb7-0052-4da4-b201-076e1cc6ccc1",
+    "title": "[SFFIX-v2] Build CSV data processor with validation",
+    "status": "error",
+    "error": "fetch failed"
   },
   {
-    "taskId": "68f50ddf-cc9b-4de0-8a41-6d6101111a1a",
-    "title": "Review all generated code for performance and best practices",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 114985,
-    "durationSec": 114,
-    "filesCreated": 0,
-    "confidence": 0.4
+    "taskId": "445af6f6-72af-4565-be36-ac479027fa8e",
+    "title": "[SFFIX-v2] Create HTTP client with request mocking",
+    "status": "error",
+    "error": "fetch failed"
+  },
+  {
+    "taskId": "91c157b2-e3bc-47de-b1bd-bc0b89b19a6b",
+    "title": "[SFFIX-v2] Build SQLite ORM wrapper with CRUD operations",
+    "status": "error",
+    "error": "fetch failed"
+  },
+  {
+    "taskId": "21772459-05e4-4b0e-bab8-d182ec9c8dbe",
+    "title": "[SFFIX-v2] Design and implement multi-file web scraper architecture",
+    "status": "error",
+    "error": "fetch failed"
+  },
+  {
+    "taskId": "edc245e3-e1e1-4fa9-b429-5173f062b40f",
+    "title": "[SFFIX-v2] Build asynchronous task queue with worker pool",
+    "status": "error",
+    "error": "fetch failed"
+  },
+  {
+    "taskId": "20ccf849-ea0e-4d09-aad7-bc5809dbc6ed",
+    "title": "[SFFIX-v2] Refactor multi-file project to use dependency injection pattern",
+    "status": "error",
+    "error": "fetch failed"
+  },
+  {
+    "taskId": "d111d174-e79d-4f85-91e4-46212c4d903a",
+    "title": "[SFFIX-v2] Review all generated code for performance and best practices",
+    "status": "error",
+    "error": "fetch failed"
   }
 ]

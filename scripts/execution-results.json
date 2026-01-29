@@ -1,90 +1,12 @@
 [
   {
-    "taskId": "5057f4d0-9a3b-44a2-8c1b-66f0c9de9933",
-    "title": "Create simple hello world function",
-    "status": "error",
-    "error": "Assignment failed: HTTP 400 - {\"error\":\"Task is not pending\"}"
-  },
-  {
-    "taskId": "d84bf542-4f46-47f1-a053-86f5a78176e0",
-    "title": "Create calculator module with basic operations",
-    "status": "error",
-    "error": "Assignment failed: HTTP 400 - {\"error\":\"Task is not pending\"}"
-  },
-  {
-    "taskId": "bf686d7e-4764-48eb-8403-90366d82a48a",
-    "title": "Create string utilities module with tests",
-    "status": "error",
-    "error": "Assignment failed: HTTP 400 - {\"error\":\"Task is not pending\"}"
-  },
-  {
-    "taskId": "245ccfc3-0347-4232-88a3-9310fdc271a7",
-    "title": "Build CSV data processor with validation",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 221496,
-    "durationSec": 221,
-    "filesCreated": 1,
-    "confidence": 0.4
-  },
-  {
-    "taskId": "ba89fd51-6593-411e-b15d-64b43b3dfbe8",
-    "title": "Create HTTP client with request mocking",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 117196,
-    "durationSec": 117,
-    "filesCreated": 1,
-    "confidence": 0.4
-  },
-  {
-    "taskId": "3497dea6-5eca-493e-a73e-681d5d46bbdb",
-    "title": "Build SQLite ORM wrapper with CRUD operations",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 118433,
-    "durationSec": 118,
-    "filesCreated": 1,
-    "confidence": 0.4
-  },
-  {
-    "taskId": "7c6a650b-1a39-4c61-a1e7-70e8d226231b",
-    "title": "Design and implement multi-file web scraper architecture",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 97625,
-    "durationSec": 97,
-    "filesCreated": 2,
-    "confidence": 0.4
-  },
-  {
-    "taskId": "270fa8d6-9f54-4e91-81b8-28d6664d2f29",
-    "title": "Build asynchronous task queue with worker pool",
+    "taskId": "1256d754-8b98-4404-906b-e45e045bc19e",
+    "title": "[HAIKU-TEST] Create hello function",
     "status": "completed",
     "resultStatus": "SUCCESS",
-    "durationMs": 61251,
-    "durationSec": 61,
-    "filesCreated": 3,
-    "confidence": 1
-  },
-  {
-    "taskId": "10474dcb-f0ff-49db-9c69-12487e0342e5",
-    "title": "Refactor multi-file project to use dependency injection pattern",
-    "status": "completed",
-    "resultStatus": "SUCCESS",
-    "durationMs": 22435,
-    "durationSec": 22,
+    "durationMs": 105634,
+    "durationSec": 105,
     "filesCreated": 1,
-    "confidence": 1
-  },
-  {
-    "taskId": "68f50ddf-cc9b-4de0-8a41-6d6101111a1a",
-    "title": "Review all generated code for performance and best practices",
-    "status": "failed",
-    "resultStatus": "SOFT_FAILURE",
-    "durationMs": 114985,
-    "durationSec": 114,
-    "filesCreated": 0,
-    "confidence": 0.4
+    "confidence": 0.7
   }
 ]

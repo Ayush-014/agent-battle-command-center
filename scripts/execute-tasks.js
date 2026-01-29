@@ -7,9 +7,34 @@
 
 const fs = require('fs');
 
+/**
+ * Fetch with timeout support using AbortSignal
+ */
+async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeoutMs / 1000}s: ${url}`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 const POLL_INTERVAL_MS = 5000; // Check status every 5 seconds
 const MAX_WAIT_MINUTES = 15; // Abort if task takes longer than 15 minutes
 const COMPLETION_DELAY_MS = 2000; // Wait 2 seconds after completion before checking agent
+const EXECUTE_TIMEOUT_MS = 180000; // 3 minutes timeout for task execution (allows for retries)
+const API_TIMEOUT_MS = 30000; // 30 seconds timeout for regular API calls
 
 async function waitForAgentIdle(agentId, maxWaitSeconds = 60) {
   const startTime = Date.now();
@@ -38,6 +63,69 @@ async function waitForAgentIdle(agentId, maxWaitSeconds = 60) {
       console.error(`   Error checking agent status: ${error.message}`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
+  }
+}
+
+/**
+ * Force reset an agent to idle status and mark its task as failed
+ * Used when errors occur and normal completion flow doesn't work
+ */
+async function forceResetAgent(agentId, taskId, errorMessage) {
+  console.log(`🔄 Force resetting agent ${agentId}...`);
+
+  try {
+    // First try to mark the task as failed
+    if (taskId) {
+      await fetch(`http://localhost:3001/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'failed',
+          error: errorMessage || 'Task failed due to execution error',
+          completedAt: new Date().toISOString()
+        })
+      });
+    }
+
+    // Then reset the agent directly
+    await fetch(`http://localhost:3001/api/agents/${agentId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        status: 'idle',
+        currentTaskId: null
+      })
+    });
+
+    // Give it a moment to process
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Verify agent is now idle
+    const response = await fetch(`http://localhost:3001/api/agents/${agentId}`);
+    const agent = await response.json();
+
+    if (agent.status === 'idle') {
+      console.log(`✅ Agent ${agentId} reset to idle`);
+      return true;
+    } else {
+      console.log(`⚠️  Agent ${agentId} still shows status: ${agent.status}`);
+      // Last resort: call reset-all
+      console.log(`🔄 Calling reset-all as fallback...`);
+      await fetch('http://localhost:3001/api/agents/reset-all', { method: 'POST' });
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return true;
+    }
+  } catch (err) {
+    console.error(`❌ Error resetting agent: ${err.message}`);
+    // Last resort: call reset-all
+    try {
+      console.log(`🔄 Calling reset-all as fallback...`);
+      await fetch('http://localhost:3001/api/agents/reset-all', { method: 'POST' });
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    } catch (e) {
+      console.error(`❌ Reset-all also failed: ${e.message}`);
+    }
+    return false;
   }
 }
 
@@ -95,12 +183,17 @@ async function executeTasks() {
     console.log('='.repeat(70));
 
     const startTime = Date.now();
+    let routing = null;  // Declare outside try so it's accessible in catch
 
     try {
-      // Get routing recommendation first
+      // Get routing recommendation first (includes Haiku complexity assessment)
       console.log('📡 Getting routing recommendation...');
-      const routeResponse = await fetch(`http://localhost:3001/api/queue/${task.id}/route`);
-      const routing = await routeResponse.json();
+      const routeResponse = await fetchWithTimeout(
+        `http://localhost:3001/api/queue/${task.id}/route`,
+        {},
+        API_TIMEOUT_MS * 2  // 60s - allow time for dual complexity assessment
+      );
+      routing = await routeResponse.json();
 
       // Force use of coder-01 instead of coder-02
       if (routing.agentId === 'coder-02') {
@@ -136,7 +229,27 @@ async function executeTasks() {
       console.log('🚀 Executing task (this may take 30-60s)...');
       const executeStartTime = Date.now();
 
-      const executeResponse = await fetch('http://localhost:8000/execute', {
+      // Determine if we should use Claude based on model tier
+      // Haiku, Sonnet, Opus all require Claude API; Ollama is local
+      const useClaude = routing.modelTier !== 'ollama';
+      // Use valid Anthropic model IDs
+      const modelMap = {
+        'haiku': 'claude-3-haiku-20240307',     // Claude 3 Haiku (cost-effective for 4-7 complexity)
+        'sonnet': 'claude-sonnet-4-20250514',   // Claude Sonnet 4 (for 8+ complexity)
+        'opus': 'claude-opus-4-20250514',       // Claude Opus 4
+        'ollama': null
+      };
+
+      // Override: Use Sonnet for high complexity tasks (8+)
+      let effectiveModelTier = routing.modelTier;
+      if (routing.complexity >= 8 && routing.modelTier === 'haiku') {
+        effectiveModelTier = 'sonnet';
+        console.log(`   ⬆️  Upgraded to Sonnet (complexity ${routing.complexity} >= 8)`);
+      }
+
+      console.log(`   Model tier: ${routing.modelTier} (use_claude: ${useClaude})`);
+
+      const executeResponse = await fetchWithTimeout('http://localhost:8000/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -144,9 +257,10 @@ async function executeTasks() {
           agent_id: routing.agentId,
           task_description: assignedTask.description,
           expected_output: assignedTask.expectedOutput || null,
-          use_claude: assignedTask.assignedAgent?.config?.alwaysUseClaude || false
+          use_claude: useClaude,
+          model: modelMap[effectiveModelTier] || null
         })
-      });
+      }, EXECUTE_TIMEOUT_MS);
 
       const executeTime = Math.floor((Date.now() - executeStartTime) / 1000);
 
@@ -154,30 +268,8 @@ async function executeTasks() {
         const errorText = await executeResponse.text();
         console.log(`❌ Execution failed after ${executeTime}s: ${errorText}`);
 
-        // First, set iteration to max to trigger abort path (which resets agent)
-        await fetch(`http://localhost:3001/api/tasks/${task.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            currentIteration: 10  // Set to max to trigger abort path
-          })
-        });
-
-        // Call completion endpoint (properly resets agent status)
-        const completeResponse = await fetch(`http://localhost:3001/api/tasks/${task.id}/complete`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            success: false,
-            result: {},
-            error: `Execution error: ${errorText}`
-          })
-        });
-
-        if (!completeResponse.ok) {
-          const compErrorText = await completeResponse.text();
-          console.error(`⚠️  Failed to call completion endpoint: ${compErrorText}`);
-        }
+        // Force reset the agent to ensure it's available for next task
+        await forceResetAgent(routing.agentId, task.id, `Execution error: ${errorText}`);
 
         executionResults.push({
           taskId: task.id,
@@ -257,6 +349,12 @@ async function executeTasks() {
 
     } catch (error) {
       console.error(`❌ Error executing task: ${error.message}`);
+
+      // Force reset the agent so it's available for the next task
+      if (routing && routing.agentId) {
+        await forceResetAgent(routing.agentId, task.id, error.message);
+      }
+
       executionResults.push({
         taskId: task.id,
         title: task.title,
