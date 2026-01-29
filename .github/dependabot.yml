@@ -1,0 +1,88 @@
+version: 2
+updates:
+  # Root package.json
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      prod-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "chore(deps)"
+
+  # packages/api
+  - package-ecosystem: "npm"
+    directory: "/packages/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      api-dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      api-prod-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "chore(deps-api)"
+
+  # packages/ui
+  - package-ecosystem: "npm"
+    directory: "/packages/ui"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    groups:
+      ui-dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      ui-prod-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "chore(deps-ui)"
+
+  # packages/shared
+  - package-ecosystem: "npm"
+    directory: "/packages/shared"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    groups:
+      shared-dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "chore(deps-shared)"

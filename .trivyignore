@@ -1,0 +1,5 @@
+# Trivy ignore file
+# Add CVEs to ignore (with justification comments)
+# Format: CVE-XXXX-XXXX
+
+# Example: CVE-XXXX-XXXX # Accepted risk - not exploitable in our context

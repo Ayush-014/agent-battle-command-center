@@ -16,7 +16,11 @@
     "db:studio": "pnpm --filter @abcc/api db:studio",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f"
+    "docker:logs": "docker-compose logs -f",
+    "security:scan": "trivy fs . --format table",
+    "security:report": "pwsh ./scripts/security-scan.ps1 -Format html",
+    "security:ci": "trivy fs . --format sarif --output security-reports/trivy.sarif",
+    "security:audit": "pnpm audit && trivy fs . --severity HIGH,CRITICAL --exit-code 1"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

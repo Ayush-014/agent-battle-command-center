@@ -2,6 +2,8 @@
 
 > This file provides context for AI assistants working on this codebase.
 
+**IMPORTANT:** All major changes to this project must be documented in `MVP_ASSESSMENT.md`.
+
 ## Project Overview
 
 A command center for orchestrating AI coding agents with cost-optimized tiered routing:
@@ -269,7 +271,30 @@ docker logs abcc-backup --tail 20
 
 # View latest backup
 ls C:\dev\abcc-backups\daily\latest\
+
+# Security scanning (requires Trivy: winget install AquaSecurity.Trivy)
+pnpm run security:scan        # Quick terminal vulnerability check
+pnpm run security:report      # Generate HTML report for ISO compliance
+pnpm run security:ci          # SARIF output for CI/CD pipelines
+pnpm run security:audit       # Fail build if HIGH/CRITICAL vulns found
 ```
+
+## Security Scanning
+
+**Trivy** is configured for ISO 27001/27002 compliant vulnerability scanning:
+
+| Command | Purpose |
+|---------|---------|
+| `pnpm run security:scan` | Quick terminal check |
+| `pnpm run security:report` | Generate HTML for compliance/auditors |
+| `pnpm run security:ci` | SARIF output for CI/CD pipelines |
+| `pnpm run security:audit` | Fails if HIGH/CRITICAL vulns found |
+
+**Installation:** `winget install AquaSecurity.Trivy` (Windows) or `brew install trivy` (Mac)
+
+**Reports:** Generated in `security-reports/` (git-ignored). For ISO audits, run weekly and archive HTML reports.
+
+**GitHub Dependabot:** Configured in `.github/dependabot.yml` - activates automatically when repo is pushed to GitHub. Weekly Monday scans for npm dependencies across all packages.
 
 ## Archive Structure
 

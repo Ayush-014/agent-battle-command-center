@@ -398,6 +398,7 @@ Results: result, error, errorCategory, apiCreditsUsed, timeSpentMs
 | **Security** | | | |
 | Input validation | ✅ Complete | Critical | Zod schemas |
 | SQL injection prevention | ✅ Complete | Critical | Prisma ORM |
+| Vulnerability scanning | ✅ Complete | High | Trivy + Dependabot |
 | Rate limiting | ❌ Missing | High | Required for prod |
 | Authentication | ❌ Missing | High | Required for prod |
 | HTTPS/TLS | ❌ Missing | High | Required for prod |
@@ -462,6 +463,7 @@ Results: result, error, errorCategory, apiCreditsUsed, timeSpentMs
 | SQL Injection | ✅ Protected | Low (Prisma ORM) |
 | XSS | ⚠️ Partial | Medium (React escaping) |
 | Input Validation | ✅ Implemented | Low (Zod schemas) |
+| Vulnerability Scanning | ✅ Implemented | Low (Trivy + Dependabot) |
 | Authentication | ❌ None | **Critical** |
 | Authorization | ❌ None | **Critical** |
 | Rate Limiting | ❌ None | High |
@@ -469,6 +471,20 @@ Results: result, error, errorCategory, apiCreditsUsed, timeSpentMs
 | CORS | ⚠️ Permissive | Medium |
 | Secrets | ⚠️ Env vars | Medium |
 | API Keys | ⚠️ Exposed | High |
+
+### Vulnerability Scanning
+
+**Trivy** (ISO 27001/27002 compliant) is configured for local scanning:
+- `pnpm run security:scan` - Quick terminal check
+- `pnpm run security:report` - HTML report for compliance audits
+- `pnpm run security:ci` - SARIF output for CI/CD integration
+- `pnpm run security:audit` - Fails on HIGH/CRITICAL vulnerabilities
+
+**GitHub Dependabot** configured in `.github/dependabot.yml`:
+- Weekly Monday scans (9am ET)
+- Covers all 4 npm packages (root, api, ui, shared)
+- Groups dev/prod dependencies to reduce PR noise
+- Auto-creates PRs for security updates
 
 ### Critical Vulnerabilities
 
@@ -906,6 +922,7 @@ model TrainingDataset {
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-01-29 | AI Assessment | Initial creation |
+| 1.1 | 2026-01-29 | AI Assessment | Added security scanning (Trivy + Dependabot) |
 
 ---
 

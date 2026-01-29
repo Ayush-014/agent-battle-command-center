@@ -51,3 +51,6 @@ packages/api/prisma/*.db-journal
 
 # Workspace (agent-generated files)
 workspace/
+
+# Security reports (contain vulnerability details)
+security-reports/
