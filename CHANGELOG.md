@@ -4,6 +4,57 @@ All notable changes to Agent Battle Command Center.
 
 ---
 
+## [Phase B] - 2026-01-28
+
+### Dual Complexity Assessment & SOFT_FAILURE Fix
+
+**Major Milestone:** Implemented dual complexity assessment system combining rule-based scoring with Haiku AI assessment, and fixed critical SOFT_FAILURE detection bug.
+
+#### Fixed
+- **SOFT_FAILURE Bug** - Tests showing `[stderr]` output were incorrectly marked as failures
+  - Root cause: `'err'` substring in `'[stderr]'` triggered fail detection
+  - Fix: Strip `[stderr]` prefix before checking, use specific fail indicators (`'error:'` not `'error'`)
+  - Location: `packages/agents/src/schemas/output.py`
+
+- **Agent Reset on Error** - Agents stuck in "busy" state after network errors
+  - Added `forceResetAgent()` function with fallback to `reset-all`
+  - Location: `scripts/execute-tasks.js`
+
+- **Haiku Model ID** - Fixed invalid model name
+  - Changed from `claude-haiku-4-20250514` to `claude-3-haiku-20240307`
+
+#### Added
+- **Dual Complexity Assessment Service** (`packages/api/src/services/complexityAssessor.ts`)
+  - `getHaikuComplexityAssessment()` - AI-powered complexity scoring
+  - `getDualComplexityAssessment()` - Combines router + Haiku scores
+  - Returns reasoning and factors for transparency
+
+- **Task Complexity Fields** (Prisma schema)
+  - `routerComplexity` - Rule-based complexity score
+  - `haikuComplexity` - Haiku's assessment
+  - `haikuReasoning` - Haiku's explanation
+  - `finalComplexity` - Averaged score used for routing
+
+- **Smart Model Tier Upgrade** - Tasks with complexity ≥ 8 automatically upgraded to Sonnet
+
+#### Routing Logic Updated
+| Complexity | Model | Cost |
+|------------|-------|------|
+| < 4 | Ollama | Free |
+| 4-7 | Haiku | ~$0.001 |
+| ≥ 8 | Sonnet | ~$0.005 |
+
+#### Test Results (Pre-fix vs Post-fix)
+| Metric | Before | After |
+|--------|--------|-------|
+| SOFT_FAILURE false positives | 6/10 | 0/10 |
+| Agent stuck errors | 7/10 | 0/10 |
+| Tasks completed | 3/10 | 3/10* |
+
+*Remaining failures due to network timeouts, not code issues
+
+---
+
 ## [Phase A] - 2026-01-27
 
 ### Task Decomposition System

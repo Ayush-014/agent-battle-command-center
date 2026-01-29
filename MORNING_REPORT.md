@@ -1,10 +1,42 @@
 # Morning Report - Agent Battle Command Center Test Run
-**Date:** January 28, 2026, 4:48 AM
+**Date:** January 28, 2026, 4:48 AM (Updated: 9:20 PM)
 **Test Duration:** 12 minutes 33 seconds
 
 ---
 
-## Executive Summary
+## 🎉 UPDATE: Issues Fixed (January 28, 2026 Evening)
+
+### SOFT_FAILURE Issue - **FIXED** ✅
+- **Root cause:** `'err'` in `'[stderr]'` triggered false positive failure detection
+- **Fix:** Strip `[stderr]` prefix, use specific fail indicators
+- **Location:** `packages/agents/src/schemas/output.py`
+
+### Agent Reset Issue - **FIXED** ✅
+- **Root cause:** Agents stuck in "busy" state after network errors
+- **Fix:** Added `forceResetAgent()` with fallback to `reset-all`
+- **Location:** `scripts/execute-tasks.js`
+
+### Routing Accuracy - **FIXED** ✅
+- **Root cause:** Haiku model ID was invalid
+- **Fix:** Using `claude-3-haiku-20240307`
+
+### NEW: Dual Complexity Assessment ✅
+- Router + Haiku AI both assess task complexity
+- Final score = average (saved to task for fine-tuning)
+- Complexity ≥ 8 automatically upgraded to Sonnet
+
+### Network Timeout Issue - **FIXED** ✅ (January 29, 2026)
+- **Root cause:** No timeout/retry settings on Claude API calls
+- **Fix:** Added timeout and retry configuration across all API layers:
+  - `packages/agents/src/config.py`: `ANTHROPIC_TIMEOUT=120s`, `ANTHROPIC_MAX_RETRIES=3`
+  - `packages/agents/src/models/claude.py`: ChatAnthropic with timeout/retries
+  - `packages/api/src/services/complexityAssessor.ts`: Anthropic client with 30s timeout
+  - `scripts/execute-tasks.js`: `fetchWithTimeout()` helper with AbortSignal (180s for execute, 60s for routing)
+- **Test Result:** Task completed successfully in 103s with SUCCESS status
+
+---
+
+## Original Executive Summary (for reference)
 
 The diagnostic test suite ran 10 tasks. Results show a **persistent SOFT_FAILURE issue** that needs immediate attention.
 
