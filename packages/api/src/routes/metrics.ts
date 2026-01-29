@@ -1,8 +1,11 @@
 import { Router, type Router as RouterType } from 'express';
 import { prisma } from '../db/client.js';
 import { asyncHandler } from '../types/index.js';
+import { SuccessRateService } from '../services/successRateService.js';
 
 export const metricsRouter: RouterType = Router();
+
+const successRateService = new SuccessRateService(prisma);
 
 // Get overview metrics
 metricsRouter.get('/overview', asyncHandler(async (req, res) => {
@@ -183,5 +186,78 @@ metricsRouter.get('/distribution', asyncHandler(async (req, res) => {
     byType: byType.map(t => ({ type: t.taskType, count: t._count })),
     byStatus: byStatus.map(s => ({ status: s.status, count: s._count })),
     byAgent: byAgent.map(a => ({ agent: a.requiredAgent || 'any', count: a._count })),
+  });
+}));
+
+// Get success rate over time
+metricsRouter.get('/success-rate', asyncHandler(async (req, res) => {
+  const period = (req.query.period as 'hourly' | 'daily') || 'hourly';
+  const hours = parseInt(req.query.hours as string) || 24;
+
+  const data = await successRateService.getSuccessRate(period, hours);
+
+  res.json(data);
+}));
+
+// Get success rate by agent type
+metricsRouter.get('/success-rate/by-agent', asyncHandler(async (req, res) => {
+  const data = await successRateService.getSuccessRateByAgent();
+
+  res.json(data);
+}));
+
+// Get complexity distribution
+metricsRouter.get('/complexity-distribution', asyncHandler(async (req, res) => {
+  // Get tasks with complexity scores
+  const tasks = await prisma.task.findMany({
+    where: {
+      finalComplexity: { not: null },
+    },
+    select: {
+      id: true,
+      finalComplexity: true,
+      actualComplexity: true,
+      status: true,
+    },
+  });
+
+  // Create complexity buckets (1-2, 3-4, 5-6, 7-8, 9-10)
+  const buckets = [
+    { range: '1-2', min: 1, max: 2, count: 0, completed: 0, failed: 0 },
+    { range: '3-4', min: 3, max: 4, count: 0, completed: 0, failed: 0 },
+    { range: '5-6', min: 5, max: 6, count: 0, completed: 0, failed: 0 },
+    { range: '7-8', min: 7, max: 8, count: 0, completed: 0, failed: 0 },
+    { range: '9-10', min: 9, max: 10, count: 0, completed: 0, failed: 0 },
+  ];
+
+  for (const task of tasks) {
+    const complexity = task.finalComplexity || 0;
+
+    // Find matching bucket
+    const bucket = buckets.find(b => complexity >= b.min && complexity <= b.max);
+
+    if (bucket) {
+      bucket.count++;
+
+      if (task.status === 'completed') {
+        bucket.completed++;
+      } else if (task.status === 'aborted' || task.status === 'failed') {
+        bucket.failed++;
+      }
+    }
+  }
+
+  // Calculate success rates per bucket
+  const distribution = buckets.map(b => ({
+    range: b.range,
+    count: b.count,
+    completed: b.completed,
+    failed: b.failed,
+    successRate: b.count > 0 ? (b.completed / b.count) * 100 : 0,
+  }));
+
+  res.json({
+    distribution,
+    totalTasks: tasks.length,
   });
 }));

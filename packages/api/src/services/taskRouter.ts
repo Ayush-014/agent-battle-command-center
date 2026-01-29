@@ -27,6 +27,7 @@
  */
 
 import type { PrismaClient, Task, Agent } from '@prisma/client';
+import { getDualComplexityAssessment } from './complexityAssessor.js';
 
 // Model tiers for the routing system
 export type ModelTier = 'ollama' | 'haiku' | 'sonnet' | 'opus';
@@ -39,6 +40,12 @@ export interface RoutingDecision {
   fallbackAgentId?: string; // Backup if first choice unavailable
   modelTier: ModelTier; // Which model tier to use
   estimatedCost: number; // Estimated cost in USD
+  // Complexity assessment info
+  complexity: number; // Final complexity used for routing
+  routerComplexity?: number; // Rule-based complexity
+  haikuComplexity?: number; // Haiku's assessment
+  haikuReasoning?: string; // Haiku's explanation
+  assessmentMethod?: 'dual' | 'router_only' | 'haiku_only';
 }
 
 export interface DecompositionDecision {
@@ -155,14 +162,53 @@ export class TaskRouter {
           confidence: 0.8,
           modelTier: 'opus' as ModelTier,
           estimatedCost: 0.04,
+          complexity: 10, // High complexity if no agents available
+          routerComplexity: 10,
+          assessmentMethod: 'router_only' as const,
         };
       }
 
       throw new Error('No agents available');
     }
 
-    // Calculate complexity
-    const complexity = this.calculateComplexity(task);
+    // Calculate complexity using dual assessment (router + Haiku)
+    const routerComplexity = this.calculateComplexity(task);
+    let complexity = routerComplexity;
+    let haikuComplexity: number | undefined;
+    let haikuReasoning: string | undefined;
+    let assessmentMethod: 'dual' | 'router_only' | 'haiku_only' = 'router_only';
+
+    // Try dual assessment with Haiku (if API key available and task is not trivial)
+    if (routerComplexity >= 2) {
+      try {
+        const dualAssessment = await getDualComplexityAssessment(
+          task.title,
+          task.description || '',
+          routerComplexity
+        );
+
+        complexity = dualAssessment.finalComplexity;
+        haikuComplexity = dualAssessment.haikuComplexity;
+        haikuReasoning = dualAssessment.haikuReasoning;
+        assessmentMethod = dualAssessment.assessmentMethod;
+
+        // Save complexity assessments to task for future fine-tuning
+        await this.prisma.task.update({
+          where: { id: task.id },
+          data: {
+            routerComplexity,
+            haikuComplexity,
+            haikuReasoning,
+            finalComplexity: complexity,
+          },
+        });
+
+        console.log(`📊 Dual complexity: router=${routerComplexity}, haiku=${haikuComplexity}, final=${complexity}`);
+      } catch (error) {
+        console.warn('Dual assessment failed, using router complexity:', error);
+        complexity = routerComplexity;
+      }
+    }
 
     // Route based on new tiered system
     let selectedAgent: Agent | null = null;
@@ -205,6 +251,16 @@ export class TaskRouter {
         confidence = 0.9;
         modelTier = 'haiku';
         estimatedCost = 0.001;
+      } else {
+        // QA not available - use coder but WITH HAIKU tier for quality
+        // This ensures medium+ tasks still get Claude Haiku even when routed to coder agent
+        selectedAgent = agents.find((a) => a.agentType.name === 'coder') || null;
+        if (selectedAgent) {
+          reason = `Medium+ task (${complexity.toFixed(1)}/10) → Coder w/ Haiku (QA busy, using quality model)`;
+          confidence = 0.75;
+          modelTier = 'haiku'; // Keep haiku tier for quality
+          estimatedCost = 0.001;
+        }
       }
     }
 
@@ -231,13 +287,20 @@ export class TaskRouter {
       }
     }
 
-    // Fallback: First available agent
+    // Fallback: First available agent (preserve appropriate model tier based on complexity)
     if (!selectedAgent) {
       selectedAgent = agents[0];
-      reason = 'Default assignment to first available agent';
+      // Determine appropriate model tier based on task complexity
+      if (complexity >= 4) {
+        reason = `Fallback assignment (complexity ${complexity.toFixed(1)}/10) → using Haiku for quality`;
+        modelTier = 'haiku';
+        estimatedCost = 0.001;
+      } else {
+        reason = `Fallback assignment (complexity ${complexity.toFixed(1)}/10) → using Ollama`;
+        modelTier = 'ollama';
+        estimatedCost = 0;
+      }
       confidence = 0.5;
-      modelTier = 'ollama';
-      estimatedCost = 0;
     }
 
     // Find fallback agent (prefer QA as backup for coder tasks)
@@ -253,6 +316,12 @@ export class TaskRouter {
       fallbackAgentId: fallbackAgent?.id,
       modelTier,
       estimatedCost,
+      // Complexity assessment info
+      complexity,
+      routerComplexity,
+      haikuComplexity,
+      haikuReasoning,
+      assessmentMethod,
     };
   }
 

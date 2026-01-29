@@ -1,8 +1,11 @@
 import { Router, type Router as RouterType } from 'express';
 import { z } from 'zod';
+import type { Server as SocketIOServer } from 'socket.io';
 import { prisma } from '../db/client.js';
 import { asyncHandler } from '../types/index.js';
 import { ExecutionLogService } from '../services/executionLogService.js';
+import { aggregateCosts } from '../services/costCalculator.js';
+import { emitCostUpdate } from '../websocket/handler.js';
 import type { Prisma } from '@prisma/client';
 
 export const executionLogsRouter: RouterType = Router();
@@ -18,6 +21,9 @@ const createLogSchema = z.object({
   durationMs: z.number().int().min(0).optional(),
   isLoop: z.boolean().optional(),
   errorTrace: z.string().optional(),
+  inputTokens: z.number().int().min(0).optional(),
+  outputTokens: z.number().int().min(0).optional(),
+  modelUsed: z.string().optional(),
 });
 
 // Create new execution log
@@ -29,6 +35,21 @@ executionLogsRouter.post('/', asyncHandler(async (req, res) => {
     ...input,
     actionInput: input.actionInput as Prisma.InputJsonValue,
   });
+
+  // Emit cost update via WebSocket (throttled to avoid spam)
+  // Only emit if tokens were used
+  const io = req.app.get('io') as SocketIOServer;
+  if (io && (log.inputTokens || log.outputTokens)) {
+    // Get all logs to calculate total costs
+    const allLogs = await prisma.executionLog.findMany();
+    const costSummary = aggregateCosts(allLogs);
+
+    emitCostUpdate(io, {
+      totalCost: costSummary.totalCost,
+      byModelTier: costSummary.byModelTier,
+      totalTokens: costSummary.totalTokens,
+    });
+  }
 
   res.status(201).json(log);
 }));

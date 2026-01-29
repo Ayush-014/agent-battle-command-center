@@ -4,6 +4,7 @@ import type { Task, Agent, AgentType, TaskStatus } from '../types/index.js';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { TrainingDataService } from './trainingDataService.js';
+import { calculateActualComplexity, categorizeError } from './complexityCalculator.js';
 
 export interface TaskAssignment {
   taskId: string;
@@ -196,6 +197,15 @@ export class TaskQueueService {
       }
     }
 
+    // Get execution logs to calculate actual complexity
+    const logs = await this.prisma.executionLog.findMany({
+      where: { taskId },
+      orderBy: { step: 'asc' },
+    });
+
+    // Calculate actual complexity based on execution
+    const actualComplexity = calculateActualComplexity(task, logs);
+
     // Update task
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
@@ -203,6 +213,7 @@ export class TaskQueueService {
         status: 'completed',
         result: result as Prisma.InputJsonValue,
         completedAt: new Date(),
+        actualComplexity,
       },
     });
 
@@ -315,12 +326,23 @@ export class TaskQueueService {
     // Release file locks
     await this.releaseFileLocks(taskId);
 
+    // Get execution logs to calculate actual complexity and categorize error
+    const logs = await this.prisma.executionLog.findMany({
+      where: { taskId },
+      orderBy: { step: 'asc' },
+    });
+
+    const actualComplexity = calculateActualComplexity(task, logs);
+    const errorCategory = categorizeError(task, logs);
+
     // Update task
     const updatedTask = await this.prisma.task.update({
       where: { id: taskId },
       data: {
         status: 'aborted',
         error: error || 'Max iterations reached',
+        actualComplexity,
+        errorCategory,
       },
     });
 

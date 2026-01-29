@@ -157,3 +157,27 @@ export function emitChatError(
     timestamp: new Date(),
   });
 }
+
+export function emitCostUpdate(
+  io: SocketIOServer,
+  costMetrics: {
+    totalCost: number;
+    byModelTier: {
+      free: number;
+      haiku: number;
+      sonnet: number;
+      opus: number;
+    };
+    totalTokens: {
+      input: number;
+      output: number;
+      total: number;
+    };
+  }
+): void {
+  io.emit('cost_updated', {
+    type: 'cost_updated',
+    payload: costMetrics,
+    timestamp: new Date(),
+  });
+}
