@@ -122,7 +122,11 @@ class AbortRequest(BaseModel):
 def get_llm(use_claude: bool, model: str | None, allow_fallback: bool):
     """Get the appropriate LLM based on configuration.
 
-    For crewai 0.86.0+, returns model string for litellm instead of langchain LLM.
+    For Claude: returns model string for litellm (crewai 0.86.0+)
+    For Ollama: returns model string with ollama/ prefix for litellm
+
+    Note: CrewAI 0.86.0+ uses litellm internally, so we return model strings
+    with provider prefixes rather than LangChain objects.
     """
     if use_claude and settings.ANTHROPIC_API_KEY:
         # Return model string for litellm (crewai 0.86.0+)
@@ -132,11 +136,12 @@ def get_llm(use_claude: bool, model: str | None, allow_fallback: bool):
             model_name = f"anthropic/{model_name}"
         return model_name
     elif check_ollama_available():
-        # Return model string for litellm with ollama prefix
-        model_name = settings.OLLAMA_MODEL
-        if not model_name.startswith("ollama/"):
-            model_name = f"ollama/{model_name}"
-        return model_name
+        # Return model string for litellm with ollama/ prefix
+        # OLLAMA_API_BASE env var tells litellm where to connect
+        ollama_model = settings.OLLAMA_MODEL
+        if not ollama_model.startswith("ollama/"):
+            ollama_model = f"ollama/{ollama_model}"
+        return ollama_model
     else:
         raise ValueError("No LLM available. Set ANTHROPIC_API_KEY or ensure Ollama is running.")
 

@@ -5,6 +5,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { TrainingDataService } from './trainingDataService.js';
 import { calculateActualComplexity, categorizeError } from './complexityCalculator.js';
+import { ResourcePoolService } from './resourcePool.js';
 
 export interface TaskAssignment {
   taskId: string;
@@ -161,6 +162,10 @@ export class TaskQueueService {
 
     // Release file locks
     await this.releaseFileLocks(taskId);
+
+    // Release resource pool slot
+    const resourcePool = ResourcePoolService.getInstance();
+    resourcePool.release(taskId);
 
     // Save output to workspace file
     if (result.output) {
@@ -326,6 +331,10 @@ export class TaskQueueService {
     // Release file locks
     await this.releaseFileLocks(taskId);
 
+    // Release resource pool slot
+    const resourcePool = ResourcePoolService.getInstance();
+    resourcePool.release(taskId);
+
     // Get execution logs to calculate actual complexity and categorize error
     const logs = await this.prisma.executionLog.findMany({
       where: { taskId },
@@ -481,6 +490,10 @@ export class TaskQueueService {
 
     // Release file locks
     await this.releaseFileLocks(taskId);
+
+    // Release resource pool slot
+    const resourcePool = ResourcePoolService.getInstance();
+    resourcePool.release(taskId);
 
     // Reset task
     const updatedTask = await this.prisma.task.update({

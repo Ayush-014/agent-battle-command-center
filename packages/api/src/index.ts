@@ -19,6 +19,7 @@ import { setupWebSocket } from './websocket/handler.js';
 import { TaskQueueService } from './services/taskQueue.js';
 import { HumanEscalationService } from './services/humanEscalation.js';
 import { ChatService } from './services/chatService.js';
+import { ResourcePoolService } from './services/resourcePool.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -38,6 +39,10 @@ app.use(express.json());
 // Make io and services available to routes
 app.set('io', io);
 
+// Initialize resource pool for parallel task execution
+const resourcePool = ResourcePoolService.getInstance();
+resourcePool.initialize(io);
+
 const taskQueue = new TaskQueueService(prisma, io);
 const humanEscalation = new HumanEscalationService(prisma, io, taskQueue);
 const chatService = new ChatService(io);
@@ -45,6 +50,7 @@ const chatService = new ChatService(io);
 app.set('taskQueue', taskQueue);
 app.set('humanEscalation', humanEscalation);
 app.set('chatService', chatService);
+app.set('resourcePool', resourcePool);
 
 // Routes
 app.use('/api/tasks', tasksRouter);

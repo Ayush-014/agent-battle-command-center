@@ -4,6 +4,7 @@ import { prisma } from '../db/client.js';
 import { asyncHandler } from '../types/index.js';
 import type { TaskQueueService } from '../services/taskQueue.js';
 import { TaskRouter } from '../services/taskRouter.js';
+import { ResourcePoolService } from '../services/resourcePool.js';
 
 export const queueRouter: RouterType = Router();
 
@@ -197,4 +198,152 @@ queueRouter.delete('/locks/:filePath', asyncHandler(async (req, res) => {
   });
 
   res.status(204).send();
+}));
+
+// Get resource pool status
+queueRouter.get('/resources', asyncHandler(async (req, res) => {
+  const resourcePool = ResourcePoolService.getInstance();
+  const status = resourcePool.getStatus();
+
+  res.json({
+    resources: status,
+    limits: resourcePool.getLimits(),
+    summary: {
+      ollama: resourcePool.getResourceStatus('ollama'),
+      claude: resourcePool.getResourceStatus('claude'),
+    },
+  });
+}));
+
+/**
+ * Parallel task assignment - assigns tasks based on resource availability
+ *
+ * Unlike /smart-assign, this endpoint:
+ * - Does NOT check if agent is idle (allows parallel execution)
+ * - Checks resource pool availability instead
+ * - Allows multiple tasks to run simultaneously on different resources
+ * - Enables Ollama tasks and Claude tasks to execute in parallel
+ */
+queueRouter.post('/parallel-assign', asyncHandler(async (req, res) => {
+  const taskQueue = req.app.get('taskQueue') as TaskQueueService;
+  const taskRouter = new TaskRouter(prisma);
+  const resourcePool = ResourcePoolService.getInstance();
+
+  // Get locked files from active tasks
+  const locks = await prisma.fileLock.findMany({
+    where: {
+      OR: [
+        { expiresAt: null },
+        { expiresAt: { gt: new Date() } },
+      ],
+    },
+  });
+  const lockedFiles = locks.map((lock) => lock.filePath);
+
+  // Get pending tasks by priority
+  const pendingTasks = await prisma.task.findMany({
+    where: {
+      status: 'pending',
+    },
+    orderBy: [
+      { priority: 'desc' },
+      { createdAt: 'asc' },
+    ],
+  });
+
+  if (pendingTasks.length === 0) {
+    res.json({ assigned: false, message: 'No pending tasks' });
+    return;
+  }
+
+  // Find a task that can run with available resources
+  for (const task of pendingTasks) {
+    // Check file conflicts
+    const taskFiles = task.lockedFiles || [];
+    const hasFileConflict = taskFiles.some((file) => lockedFiles.includes(file));
+    if (hasFileConflict) {
+      continue; // Skip tasks with file conflicts
+    }
+
+    // Calculate complexity to determine resource type
+    const routerComplexity = taskRouter.calculateComplexity(task);
+    const resourceType = resourcePool.getResourceForComplexity(routerComplexity);
+
+    // Check if resource is available
+    if (!resourcePool.canAcquire(resourceType)) {
+      continue; // Skip if no slots available for this resource type
+    }
+
+    // Find appropriate agent for this task
+    // For Ollama tasks, use coder agent; for Claude tasks, use qa agent
+    const agentTypeName = resourceType === 'ollama' ? 'coder' : 'qa';
+    const agent = await prisma.agent.findFirst({
+      where: {
+        agentType: { name: agentTypeName },
+      },
+      include: { agentType: true },
+    });
+
+    if (!agent) {
+      continue; // No agent of required type
+    }
+
+    // Also check if task has required agent constraint
+    if (task.requiredAgent && task.requiredAgent !== agent.agentType.name) {
+      continue; // Task requires different agent type
+    }
+
+    // Acquire resource slot
+    if (!resourcePool.acquire(resourceType, task.id)) {
+      continue; // Failed to acquire (race condition)
+    }
+
+    // Assign task to agent (this updates task and agent status)
+    try {
+      await taskQueue.assignTask(task.id, agent.id);
+
+      const updatedTask = await prisma.task.findUnique({
+        where: { id: task.id },
+        include: {
+          assignedAgent: {
+            include: { agentType: true },
+          },
+        },
+      });
+
+      res.json({
+        assigned: true,
+        task: updatedTask,
+        resource: {
+          type: resourceType,
+          complexity: routerComplexity,
+        },
+        poolStatus: resourcePool.getStatus(),
+      });
+      return;
+    } catch (error) {
+      // Release resource if assignment failed
+      resourcePool.release(task.id);
+      console.error(`[parallel-assign] Failed to assign task ${task.id}:`, error);
+      continue;
+    }
+  }
+
+  // No task could be assigned (all have conflicts or no resources available)
+  res.json({
+    assigned: false,
+    message: 'No tasks can be assigned with current resources',
+    poolStatus: resourcePool.getStatus(),
+  });
+}));
+
+// Clear resource pool (for testing/reset)
+queueRouter.post('/resources/clear', asyncHandler(async (req, res) => {
+  const resourcePool = ResourcePoolService.getInstance();
+  resourcePool.clear();
+
+  res.json({
+    message: 'Resource pool cleared',
+    status: resourcePool.getStatus(),
+  });
 }));
