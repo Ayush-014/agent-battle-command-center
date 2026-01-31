@@ -2,6 +2,7 @@ import { CostDashboard } from './CostDashboard';
 import { SuccessRateChart } from './SuccessRateChart';
 import { AgentComparison } from './AgentComparison';
 import { ComplexityDistribution } from './ComplexityDistribution';
+import { MemoryApproval } from './MemoryApproval';
 
 export function Dashboard() {
   return (
@@ -24,13 +25,18 @@ export function Dashboard() {
           <SuccessRateChart />
         </div>
 
-        {/* Bottom row - Agent Comparison and Complexity */}
+        {/* Middle row - Agent Comparison and Complexity */}
         <div className="bg-command-surface border border-command-border rounded-lg p-6">
           <AgentComparison />
         </div>
 
         <div className="bg-command-surface border border-command-border rounded-lg p-6">
           <ComplexityDistribution />
+        </div>
+
+        {/* Bottom row - Agent Learnings (spans full width) */}
+        <div className="col-span-2">
+          <MemoryApproval />
         </div>
       </div>
     </div>

@@ -282,8 +282,19 @@ export class TaskQueueService {
     });
 
     // Trigger auto code review (async, non-blocking)
+    // Infer model tier from complexity for review scheduling
     if (this.codeReviewService) {
-      this.codeReviewService.triggerReview(taskId).catch((error) => {
+      const complexity = task.finalComplexity || task.routerComplexity || 5;
+      let executedByModel: string;
+      if (complexity < 5) {
+        executedByModel = 'ollama';
+      } else if (complexity < 9) {
+        executedByModel = 'haiku';
+      } else {
+        executedByModel = 'sonnet';
+      }
+
+      this.codeReviewService.triggerReview(taskId, executedByModel).catch((error) => {
         console.error('Failed to trigger code review:', error);
       });
     }

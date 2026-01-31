@@ -278,3 +278,45 @@ model TrainingDataset {
   @@index([createdAt])
   @@map("training_datasets")
 }
+
+// Cross-task memory for agent learning
+model TaskMemory {
+  id              String   @id @default(uuid())
+
+  // Memory categorization
+  taskType        String   @map("task_type") @db.VarChar(50)  // file_creation, bug_fix, refactor, test, etc.
+  category        String?  @db.VarChar(100)                    // More specific category within task type
+
+  // Learning content
+  pattern         String   @db.Text                            // What problem pattern was encountered
+  solution        String   @db.Text                            // How it was solved
+  errorPattern    String?  @map("error_pattern") @db.Text      // If from error resolution, what was the error
+  codeExample     String?  @map("code_example") @db.Text       // Example code snippet
+
+  // Context
+  filePatterns    String[] @map("file_patterns")               // Files typically involved
+  keywords        String[]                                     // Searchable keywords
+
+  // Quality tracking
+  successCount    Int      @default(1) @map("success_count")   // How often this solution worked
+  failureCount    Int      @default(0) @map("failure_count")   // How often it didn't work
+  lastUsed        DateTime @default(now()) @map("last_used")
+
+  // Approval workflow
+  approved        Boolean  @default(false)                     // Human approval required
+  approvedBy      String?  @map("approved_by")                 // Who approved it
+  approvedAt      DateTime? @map("approved_at")
+
+  // Source tracking
+  proposedByTask  String?  @map("proposed_by_task")            // Task ID that generated this learning
+  proposedByAgent String?  @map("proposed_by_agent")           // Agent that proposed this
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([taskType])
+  @@index([approved])
+  @@index([successCount])
+  @@index([lastUsed])
+  @@map("task_memories")
+}

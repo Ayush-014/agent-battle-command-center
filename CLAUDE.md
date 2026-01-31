@@ -7,10 +7,10 @@
 ## Project Overview
 
 A command center for orchestrating AI coding agents with cost-optimized tiered routing:
-- **Sonnet** - Task decomposition for standard complexity (<8)
-- **Opus** - Complex decomposition (8+) and code review
-- **Haiku** - Medium+ task execution (4+) and fixes
-- **Ollama** - Simple task execution (<4), free local model
+- **Ollama** - Simple task execution (1-4), free local model
+- **Haiku** - Moderate task execution (5-8), ~$0.001/task
+- **Sonnet** - Complex task execution (9-10), ~$0.005/task
+- **Opus** - Decomposition (9+) and code reviews ONLY (never writes code)
 
 ## Architecture
 
@@ -106,38 +106,78 @@ Resource Pool:
 Task Arrives → calculateComplexity()
        │
        ├─ DECOMPOSITION (if needed)
-       │   ├─ <8  → Sonnet (~$0.005)
-       │   └─ ≥8  → Opus (~$0.04)
+       │   ├─ <9  → Sonnet (~$0.005)
+       │   └─ ≥9  → Opus (~$0.04)
        │
        ├─ EXECUTION (dual complexity assessment + parallel when possible)
-       │   ├─ <4  → Ollama (free, local) ─────┐
-       │   ├─ 4-7 → Haiku (~$0.001)  ──────────┼─► Run in parallel!
-       │   └─ ≥8  → Sonnet (~$0.005) ──────────┘
+       │   ├─ 1-4  → Ollama (free, local) ────┐
+       │   ├─ 5-8  → Haiku (~$0.001)  ─────────┼─► Run in parallel!
+       │   └─ 9-10 → Sonnet (~$0.005) ─────────┘
+       │   NOTE: Opus NEVER writes code
        │
-       ├─ CODE REVIEW (AUTO-TRIGGERED on completion)
-       │   └─ Opus (~$0.02/task) - skips trivial tasks
+       ├─ CODE REVIEW (tiered, scheduled)
+       │   ├─ Every 5th Ollama task → Haiku review
+       │   └─ Every 10th task (complexity > 5) → Opus review
        │
-       ├─ FIX CYCLE (if review fails)
-       │   ├─ 1st attempt → Haiku
-       │   ├─ 2nd attempt → Sonnet
-       │   └─ 3rd failure → Human escalation
+       ├─ FIX/ESCALATION CYCLE (if review fails)
+       │   ├─ Ollama fails → Haiku retries with MCP context
+       │   └─ Haiku/Sonnet fails → Human escalation
        │
        └─ TRAINING EXPORT (scheduled daily)
            └─ JSONL format for fine-tuning
 ```
 
-## Auto Code Review
+## Tiered Code Review
 
-Tasks are automatically reviewed by Opus when completed:
-- Triggered in `handleTaskCompletion()` (async, non-blocking)
-- Skips trivial tasks (complexity < 3)
-- Skips review/decomposition/debug task types
-- Generates quality score (0-10) and findings
+Code reviews use a tiered schedule to balance cost and quality:
+
+**Haiku Reviews (cheap quality gate):**
+- Every 5th Ollama task gets Haiku review
+- Quick validation of simple task output
+
+**Opus Reviews (deep analysis):**
+- Every 10th task with complexity > 5
+- Full code quality assessment
+
+**Review Failure Criteria:**
+- Quality score < 6
+- Any "critical" severity finding
+- Syntax errors detected
+
+**On Review Failure:**
+- Task marked as pending, context added to MCP
+- Escalated to next tier (Ollama → Haiku → Human)
 
 **Environment variables:**
-- `AUTO_CODE_REVIEW=false` - Disable auto-review (default: enabled)
+- `OLLAMA_REVIEW_INTERVAL=5` - Haiku reviews every Nth Ollama task
+- `OPUS_REVIEW_INTERVAL=10` - Opus reviews every Nth task (complexity > 5)
+- `REVIEW_QUALITY_THRESHOLD=6` - Minimum passing score
 
-**Cost:** ~$0.02 per review (Opus)
+## Cross-Task Memory System
+
+Agents can learn from past tasks and share knowledge:
+
+**Agent Tools:**
+- `recall_similar_solutions(task_type, keywords)` - Get solutions from similar past tasks
+- `learn_from_success(task_type, pattern, solution)` - Propose a learning for approval
+- `get_previous_attempt(task_id)` - Get context from failed review
+- `get_project_context(section)` - Get architectural guidance
+
+**Human Approval:**
+- Agents propose learnings, humans approve in Dashboard
+- Approved memories are available to all agents
+- Success/failure feedback improves memory quality
+
+**API Endpoints:**
+- `GET /api/memories/pending` - Unapproved learnings
+- `GET /api/memories/search?keywords=...` - Search memories
+- `POST /api/memories/:id/approve` - Approve a learning
+- `GET /api/memories/architecture` - Get project context
+
+**Generate Context:**
+```bash
+node scripts/generate-arch-context.js
+```
 
 ## Training Data Export
 
@@ -179,9 +219,10 @@ Tasks are scored 1-10 using **dual assessment** (router + Haiku AI):
 |-------|----------|----------------------------------------------------------|--------|-----------|
 | 1-2   | Trivial  | Single-step; clear I/O; no decision-making               | Ollama | FREE      |
 | 3-4   | Low      | Linear sequences; well-defined domain; no ambiguity      | Ollama | FREE      |
-| 5-6   | Moderate | Multiple paths; 2-3 source integration; standard logic   | Haiku  | ~$0.001   |
-| 7-8   | High     | Nested branches; conflicting dependencies; multi-file    | Sonnet | ~$0.005   |
-| 9-10  | Extreme  | Fuzzy goals; dynamic requirements; architectural scope   | Opus   | ~$0.04    |
+| 5-8   | Moderate | Multiple paths; dependencies; standard to complex logic  | Haiku  | ~$0.001   |
+| 9-10  | Extreme  | Fuzzy goals; dynamic requirements; architectural scope   | Sonnet | ~$0.005   |
+
+**Note:** Opus is reserved for decomposition (9+) and code reviews only - it never writes code.
 
 **Complexity Factors (Campbell's Theory):**
 
@@ -202,10 +243,10 @@ Tasks are scored 1-10 using **dual assessment** (router + Haiku AI):
 
 **Routing tiers:**
 - Trivial/Low (1-4) → Coder (Ollama) - FREE, ~12s/task
-- Moderate (5-6) → QA (Haiku) - ~$0.001/task
-- High (7-8) → QA (Sonnet) - ~$0.005/task
-- Extreme (9-10) → CTO (Opus) - ~$0.04/task
-- Failed tasks use fix cycle (Haiku → Sonnet → Human)
+- Moderate (5-8) → QA (Haiku) - ~$0.001/task
+- Extreme (9-10) → QA (Sonnet) - ~$0.005/task
+- Decomposition (9+) → CTO (Opus) - ~$0.04/task (no coding)
+- Failed tasks use fix cycle (Ollama → Haiku → Human)
 
 **Task fields for complexity tracking:**
 - `routerComplexity` - Rule-based score

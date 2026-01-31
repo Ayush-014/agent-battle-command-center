@@ -7,7 +7,14 @@
  */
 
 import { createClient, RedisClientType } from 'redis';
-import { logger } from '../utils/logger.js';
+
+// Simple logger (console-based)
+const logger = {
+  info: (...args: unknown[]) => console.log('[MCP Bridge]', ...args),
+  warn: (...args: unknown[]) => console.warn('[MCP Bridge]', ...args),
+  error: (...args: unknown[]) => console.error('[MCP Bridge]', ...args),
+  debug: (...args: unknown[]) => console.debug('[MCP Bridge]', ...args),
+};
 
 export interface TaskUpdateEvent {
   type: 'task_created' | 'task_updated' | 'task_completed' | 'task_assigned' | 'task_failed';

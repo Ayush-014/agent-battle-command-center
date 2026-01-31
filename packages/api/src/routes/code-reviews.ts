@@ -3,8 +3,47 @@ import { z } from 'zod';
 import { prisma } from '../db/client.js';
 import { asyncHandler } from '../types/index.js';
 import type { Server as SocketIOServer } from 'socket.io';
+import type { CodeReviewService } from '../services/codeReviewService.js';
 
 export const codeReviewsRouter: RouterType = Router();
+
+// Get review schedule status (tiered review counters)
+codeReviewsRouter.get('/schedule', asyncHandler(async (req, res) => {
+  const codeReviewService = req.app.get('codeReviewService') as CodeReviewService;
+
+  if (!codeReviewService) {
+    res.status(503).json({ error: 'Code review service not available' });
+    return;
+  }
+
+  const status = codeReviewService.getScheduleStatus();
+  const isEnabled = codeReviewService.isEnabled();
+
+  res.json({
+    enabled: isEnabled,
+    schedule: {
+      ollamaReviewInterval: parseInt(process.env.OLLAMA_REVIEW_INTERVAL || '5', 10),
+      opusReviewInterval: parseInt(process.env.OPUS_REVIEW_INTERVAL || '10', 10),
+      opusMinComplexity: 5,
+      qualityThreshold: parseInt(process.env.REVIEW_QUALITY_THRESHOLD || '6', 10),
+    },
+    counters: status,
+  });
+}));
+
+// Reset review counters (for testing)
+codeReviewsRouter.post('/schedule/reset', asyncHandler(async (req, res) => {
+  const codeReviewService = req.app.get('codeReviewService') as CodeReviewService;
+
+  if (!codeReviewService) {
+    res.status(503).json({ error: 'Code review service not available' });
+    return;
+  }
+
+  codeReviewService.resetCounters();
+
+  res.json({ success: true, message: 'Review counters reset' });
+}));
 
 // Get code review for a task
 codeReviewsRouter.get('/task/:taskId', asyncHandler(async (req, res) => {

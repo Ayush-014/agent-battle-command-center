@@ -25,6 +25,13 @@ if settings.USE_MCP:
         mcp_file_write,
         mcp_file_edit,
     )
+    from src.tools.mcp_memory import (
+        recall_similar_solutions,
+        learn_from_success,
+        record_memory_feedback,
+        get_previous_attempt,
+        get_project_context,
+    )
 
 
 def create_base_agent(
@@ -66,11 +73,20 @@ CTO_TOOLS_HTTP = [
     code_search,  # CTO can search codebase
 ]
 
-# MCP tool sets (real-time collaboration mode)
+# MCP tool sets (real-time collaboration mode with memory)
 if settings.USE_MCP:
-    CODER_TOOLS_MCP = [mcp_file_read, mcp_file_write, mcp_file_edit, file_list, shell_run, code_search, find_file]
-    QA_TOOLS_MCP = [mcp_file_read, mcp_file_write, file_list, shell_run, code_search, find_file]
-    CTO_TOOLS_MCP = CTO_TOOLS_HTTP  # CTO doesn't use file write, so no MCP needed
+    # Memory and context tools for learning from past tasks
+    MEMORY_TOOLS = [
+        recall_similar_solutions,
+        learn_from_success,
+        record_memory_feedback,
+        get_previous_attempt,
+        get_project_context,
+    ]
+
+    CODER_TOOLS_MCP = [mcp_file_read, mcp_file_write, mcp_file_edit, file_list, shell_run, code_search, find_file] + MEMORY_TOOLS
+    QA_TOOLS_MCP = [mcp_file_read, mcp_file_write, file_list, shell_run, code_search, find_file] + MEMORY_TOOLS
+    CTO_TOOLS_MCP = CTO_TOOLS_HTTP + MEMORY_TOOLS  # CTO can recall and learn
 else:
     CODER_TOOLS_MCP = CODER_TOOLS_HTTP
     QA_TOOLS_MCP = QA_TOOLS_HTTP

@@ -9,25 +9,28 @@
  * |-------|----------|----------------------------------------------------------|---------|
  * | 1-2   | Trivial  | Single-step; clear I/O; no decision-making               | Ollama  |
  * | 3-4   | Low      | Linear sequences; well-defined domain; no ambiguity      | Ollama  |
- * | 5-6   | Moderate | Multiple paths; 2-3 source integration; standard logic   | Haiku   |
- * | 7-8   | High     | Nested branches; conflicting dependencies; multi-file    | Sonnet  |
- * | 9-10  | Extreme  | Fuzzy goals; dynamic requirements; architectural scope   | Opus    |
+ * | 5-8   | Moderate | Multiple paths; dependencies; standard to complex logic  | Haiku   |
+ * | 9-10  | Extreme  | Fuzzy goals; dynamic requirements; architectural scope   | Sonnet  |
  *
- * TIER ROUTING:
- * =============
+ * TIER ROUTING (Execution):
+ * =========================
  * - Trivial/Low (1-4)   → Ollama (FREE, ~12s/task)
- * - Moderate (5-6)      → Haiku (~$0.001/task)
- * - High (7-8)          → Sonnet (~$0.005/task)
- * - Extreme (9-10)      → Opus (~$0.04/task)
+ * - Moderate (5-8)      → Haiku (~$0.001/task)
+ * - Extreme (9-10)      → Sonnet (~$0.005/task)
+ * - NOTE: Opus NEVER writes code - decomposition & reviews only
  *
  * DECOMPOSITION:
- * - Standard (<8)  → Sonnet decomposes into subtasks
- * - Complex (>=8)  → Opus strategic decomposition
+ * - Standard (<9)  → Sonnet decomposes into subtasks
+ * - Complex (>=9)  → Opus strategic decomposition
  *
- * FIX CYCLE:
- * - 1st failure → Haiku
- * - 2nd failure → Sonnet
- * - 3rd failure → Human escalation
+ * CODE REVIEW:
+ * - Every 5th Ollama task → Haiku review
+ * - Every 10th task (complexity > 5) → Opus review
+ *
+ * FIX/ESCALATION CYCLE:
+ * - Ollama fails/bad review → Haiku retries with context
+ * - Haiku fails/bad review  → Human escalation
+ * - Sonnet fails/bad review → Human escalation
  */
 
 import type { PrismaClient, Task, Agent } from '@prisma/client';
@@ -341,8 +344,8 @@ export class TaskRouter {
       }
     }
 
-    // MODERATE (5-6): Multiple paths, 2-3 source integration → Haiku
-    if (!selectedAgent && complexity >= 5 && complexity < 7) {
+    // MODERATE (5-8): Multiple paths, dependencies, standard to complex logic → Haiku
+    if (!selectedAgent && complexity >= 5 && complexity < 9) {
       selectedAgent = agents.find((a) => a.agentType.name === 'qa') || null;
       if (selectedAgent) {
         reason = `Moderate complexity (${complexity.toFixed(1)}/10) → Haiku (quality, ~$0.001)`;
@@ -352,25 +355,14 @@ export class TaskRouter {
       }
     }
 
-    // HIGH (7-8): Nested logic, conflicting dependencies → Sonnet
-    if (!selectedAgent && complexity >= 7 && complexity < 9) {
+    // EXTREME (9-10): Fuzzy goals, architectural scope → Sonnet (Opus never codes)
+    if (!selectedAgent && complexity >= 9) {
       selectedAgent = agents.find((a) => a.agentType.name === 'qa') || null;
       if (selectedAgent) {
-        reason = `High complexity (${complexity.toFixed(1)}/10) → Sonnet (advanced, ~$0.005)`;
+        reason = `Extreme complexity (${complexity.toFixed(1)}/10) → Sonnet (expert coding, ~$0.005)`;
         confidence = 0.85;
         modelTier = 'sonnet';
         estimatedCost = 0.005;
-      }
-    }
-
-    // EXTREME (9-10): Fuzzy goals, architectural scope → Opus
-    if (!selectedAgent && complexity >= 9) {
-      selectedAgent = agents.find((a) => a.agentType.name === 'cto') || null;
-      if (selectedAgent) {
-        reason = `Extreme complexity (${complexity.toFixed(1)}/10) → Opus (expert, ~$0.04)`;
-        confidence = 0.8;
-        modelTier = 'opus';
-        estimatedCost = 0.04;
       }
     }
 
@@ -382,12 +374,12 @@ export class TaskRouter {
         || agents[0];
 
       if (selectedAgent) {
-        // Determine tier based on complexity
+        // Determine tier based on complexity (matching new thresholds)
         if (complexity < 5) {
           reason = `Fallback: ${complexity.toFixed(1)}/10 → Ollama`;
           modelTier = 'ollama';
           estimatedCost = 0;
-        } else if (complexity < 7) {
+        } else if (complexity < 9) {
           reason = `Fallback: ${complexity.toFixed(1)}/10 → Haiku`;
           modelTier = 'haiku';
           estimatedCost = 0.001;
@@ -426,10 +418,10 @@ export class TaskRouter {
    * Determine which model to use for task decomposition
    */
   getDecompositionDecision(complexity: number): DecompositionDecision {
-    if (complexity >= 8) {
+    if (complexity >= 9) {
       return {
         modelTier: 'opus',
-        reason: `High complexity (${complexity.toFixed(1)}/10) requires Opus for strategic decomposition`,
+        reason: `Extreme complexity (${complexity.toFixed(1)}/10) requires Opus for strategic decomposition`,
       };
     }
     return {
@@ -440,6 +432,11 @@ export class TaskRouter {
 
   /**
    * Determine fix strategy based on failure count
+   *
+   * Escalation path (cost-optimized):
+   * - Ollama fails → Haiku retries with context
+   * - Haiku fails  → Human escalation (Sonnet too expensive for fix cycles)
+   * - Sonnet fails → Human escalation
    */
   getFixDecision(failureCount: number): FixDecision {
     if (failureCount === 1) {
@@ -450,19 +447,12 @@ export class TaskRouter {
         reason: '1st failure → Haiku fix attempt (~$0.001)',
       };
     }
-    if (failureCount === 2) {
-      return {
-        modelTier: 'sonnet',
-        fixAttempt: 2,
-        escalateToHuman: false,
-        reason: '2nd failure → Sonnet fix attempt (~$0.005)',
-      };
-    }
+    // After Haiku tries, escalate to human (no Sonnet in fix cycle)
     return {
-      modelTier: 'sonnet',
+      modelTier: 'haiku',
       fixAttempt: failureCount,
       escalateToHuman: true,
-      reason: `${failureCount} failures → Escalate to human`,
+      reason: `${failureCount} failures → Escalate to human (Haiku already tried)`,
     };
   }
 

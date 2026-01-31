@@ -15,6 +15,7 @@ import trainingDataRouter from './routes/training-data.js';
 import { taskPlanningRouter } from './routes/task-planning.js';
 import { codeReviewsRouter } from './routes/code-reviews.js';
 import { costMetricsRouter } from './routes/cost-metrics.js';
+import { memoriesRouter } from './routes/memories.js';
 import { setupWebSocket } from './websocket/handler.js';
 import { TaskQueueService } from './services/taskQueue.js';
 import { HumanEscalationService } from './services/humanEscalation.js';
@@ -78,6 +79,7 @@ app.use('/api/training-data', trainingDataRouter);
 app.use('/api/task-planning', taskPlanningRouter);
 app.use('/api/code-reviews', codeReviewsRouter);
 app.use('/api/cost-metrics', costMetricsRouter);
+app.use('/api/memories', memoriesRouter);
 
 // Health check
 app.get('/health', (req, res) => {
