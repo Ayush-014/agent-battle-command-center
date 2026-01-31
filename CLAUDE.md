@@ -114,14 +114,47 @@ Task Arrives → calculateComplexity()
        │   ├─ 4-7 → Haiku (~$0.001)  ──────────┼─► Run in parallel!
        │   └─ ≥8  → Sonnet (~$0.005) ──────────┘
        │
-       ├─ CODE REVIEW (batch, all tasks)
-       │   └─ Opus (~$0.02/task)
+       ├─ CODE REVIEW (AUTO-TRIGGERED on completion)
+       │   └─ Opus (~$0.02/task) - skips trivial tasks
        │
-       └─ FIX CYCLE (if review fails)
-           ├─ 1st attempt → Haiku
-           ├─ 2nd attempt → Sonnet
-           └─ 3rd failure → Human escalation
+       ├─ FIX CYCLE (if review fails)
+       │   ├─ 1st attempt → Haiku
+       │   ├─ 2nd attempt → Sonnet
+       │   └─ 3rd failure → Human escalation
+       │
+       └─ TRAINING EXPORT (scheduled daily)
+           └─ JSONL format for fine-tuning
 ```
+
+## Auto Code Review
+
+Tasks are automatically reviewed by Opus when completed:
+- Triggered in `handleTaskCompletion()` (async, non-blocking)
+- Skips trivial tasks (complexity < 3)
+- Skips review/decomposition/debug task types
+- Generates quality score (0-10) and findings
+
+**Environment variables:**
+- `AUTO_CODE_REVIEW=false` - Disable auto-review (default: enabled)
+
+**Cost:** ~$0.02 per review (Opus)
+
+## Training Data Export
+
+Training data is automatically exported for model fine-tuning:
+- **Format:** JSONL (OpenAI/Anthropic compatible)
+- **Schedule:** Every 24 hours (configurable)
+- **Exports:** Only high-quality examples (`isGoodExample: true`)
+- **Retention:** 30 days
+
+**Environment variables:**
+- `TRAINING_EXPORT_ENABLED=false` - Disable export
+- `TRAINING_EXPORT_INTERVAL_HOURS=24` - Export interval
+- `TRAINING_EXPORT_PATH=/app/workspace/training-exports` - Output directory
+
+**Endpoints:**
+- `GET /api/training-data/scheduler/status` - Check scheduler status
+- `POST /api/training-data/scheduler/export` - Manually trigger export
 
 ## Key Concepts
 

@@ -154,4 +154,41 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/training-data/scheduler/status
+ * Get scheduler status for training exports
+ */
+router.get('/scheduler/status', (req, res) => {
+  try {
+    const scheduler = req.app.get('scheduler');
+    if (!scheduler) {
+      res.status(500).json({ error: 'Scheduler not initialized' });
+      return;
+    }
+    res.json(scheduler.getStatus());
+  } catch (error) {
+    console.error('Failed to get scheduler status:', error);
+    res.status(500).json({ error: 'Failed to get scheduler status' });
+  }
+});
+
+/**
+ * POST /api/training-data/scheduler/export
+ * Manually trigger a training data export
+ */
+router.post('/scheduler/export', async (req, res) => {
+  try {
+    const scheduler = req.app.get('scheduler');
+    if (!scheduler) {
+      res.status(500).json({ error: 'Scheduler not initialized' });
+      return;
+    }
+    const result = await scheduler.triggerExport();
+    res.json(result);
+  } catch (error) {
+    console.error('Failed to trigger export:', error);
+    res.status(500).json({ error: 'Failed to trigger export' });
+  }
+});
+
 export default router;

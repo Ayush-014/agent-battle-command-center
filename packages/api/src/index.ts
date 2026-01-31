@@ -20,6 +20,8 @@ import { TaskQueueService } from './services/taskQueue.js';
 import { HumanEscalationService } from './services/humanEscalation.js';
 import { ChatService } from './services/chatService.js';
 import { ResourcePoolService } from './services/resourcePool.js';
+import { CodeReviewService } from './services/codeReviewService.js';
+import { SchedulerService } from './services/schedulerService.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -43,14 +45,25 @@ app.set('io', io);
 const resourcePool = ResourcePoolService.getInstance();
 resourcePool.initialize(io);
 
-const taskQueue = new TaskQueueService(prisma, io);
+// Initialize code review service (auto-reviews completed tasks)
+const codeReviewService = new CodeReviewService(prisma, io);
+const autoReviewEnabled = process.env.AUTO_CODE_REVIEW !== 'false';
+codeReviewService.setEnabled(autoReviewEnabled);
+console.log(`Code review service: ${codeReviewService.isEnabled() ? 'enabled' : 'disabled'}`);
+
+const taskQueue = new TaskQueueService(prisma, io, codeReviewService);
 const humanEscalation = new HumanEscalationService(prisma, io, taskQueue);
 const chatService = new ChatService(io);
+
+// Initialize scheduler for periodic tasks (training export)
+const scheduler = new SchedulerService(prisma);
 
 app.set('taskQueue', taskQueue);
 app.set('humanEscalation', humanEscalation);
 app.set('chatService', chatService);
 app.set('resourcePool', resourcePool);
+app.set('codeReviewService', codeReviewService);
+app.set('scheduler', scheduler);
 
 // Routes
 app.use('/api/tasks', tasksRouter);
@@ -91,6 +104,9 @@ async function start() {
     // Start human escalation checker
     humanEscalation.startChecker();
 
+    // Start scheduler (training data export)
+    scheduler.start();
+
     httpServer.listen(config.server.port, config.server.host, () => {
       console.log(`API server running on http://${config.server.host}:${config.server.port}`);
     });
@@ -106,6 +122,7 @@ start();
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down...');
   humanEscalation.stopChecker();
+  scheduler.stop();
   await prisma.$disconnect();
   process.exit(0);
 });

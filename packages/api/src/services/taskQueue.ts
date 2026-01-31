@@ -6,6 +6,7 @@ import path from 'path';
 import { TrainingDataService } from './trainingDataService.js';
 import { calculateActualComplexity, categorizeError } from './complexityCalculator.js';
 import { ResourcePoolService } from './resourcePool.js';
+import type { CodeReviewService } from './codeReviewService.js';
 
 export interface TaskAssignment {
   taskId: string;
@@ -14,12 +15,15 @@ export interface TaskAssignment {
 
 export class TaskQueueService {
   private trainingDataService: TrainingDataService;
+  private codeReviewService: CodeReviewService | null = null;
 
   constructor(
     private prisma: PrismaClient,
-    private io: SocketIOServer
+    private io: SocketIOServer,
+    codeReviewService?: CodeReviewService
   ) {
     this.trainingDataService = new TrainingDataService(prisma);
+    this.codeReviewService = codeReviewService || null;
   }
 
   async assignNextTask(agentId: string): Promise<TaskAssignment | null> {
@@ -269,6 +273,13 @@ export class TaskQueueService {
     this.captureTrainingData(taskId, task.assignedAgentId!, result, true).catch((error) => {
       console.error('Failed to capture training data:', error);
     });
+
+    // Trigger auto code review (async, non-blocking)
+    if (this.codeReviewService) {
+      this.codeReviewService.triggerReview(taskId).catch((error) => {
+        console.error('Failed to trigger code review:', error);
+      });
+    }
 
     this.emitTaskUpdate(updatedTask as unknown as Task);
   }
