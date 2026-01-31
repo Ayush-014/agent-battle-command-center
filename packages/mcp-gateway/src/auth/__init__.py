@@ -1,0 +1,1 @@
+"""Authentication for MCP clients."""

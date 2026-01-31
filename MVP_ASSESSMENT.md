@@ -564,7 +564,173 @@ node scripts/run-8-mixed-test.js
 
 ---
 
-## 12. Document History
+## 12. MCP Gateway Integration (Phase D - In Progress)
+
+### 12.1 Overview
+
+**Goal:** Enable real-time agent-to-agent collaboration via Model Context Protocol (MCP) server.
+
+**Current Status:** Infrastructure setup complete (Phase 1-2 of 7)
+
+- ✅ MCP Gateway package structure created
+- ✅ Docker services (Redis + MCP Gateway) configured
+- ⏳ Redis adapters (in progress)
+- ⏳ PostgreSQL sync service (pending)
+- ⏳ MCP resources & tools (pending)
+- ⏳ Agent MCP client integration (pending)
+- ⏳ Node.js API bridge (pending)
+
+### 12.2 Architecture
+
+**Three-tier state management:**
+
+```
+PostgreSQL (truth) ← sync → Redis (cache) ← MCP Gateway → Agents
+                              ↓ pub/sub
+                        Real-time broadcasts
+```
+
+**New Services:**
+
+| Service | Container | Port | Purpose |
+|---------|-----------|------|---------|
+| redis | abcc-redis | 6379 | State cache + pub/sub |
+| mcp-gateway | abcc-mcp-gateway | 8001 | MCP server coordination |
+
+### 12.3 MCP Resources Exposed
+
+Multi-tenant namespaced resources:
+
+- `tasks://{taskId}/state` - Task status, assignedAgentId, complexity
+- `tasks://{taskId}/files` - List of files touched by task
+- `workspace://{taskId}/{path}` - File content (task-scoped)
+- `logs://{taskId}` - Execution log stream (real-time)
+- `collaboration://{taskId}` - Which agents are co-working
+
+### 12.4 MCP Tools
+
+- `mcp_file_read(task_id, path)` - Read file via MCP with task scoping
+- `mcp_file_write(task_id, path, content)` - Write with conflict detection
+- `mcp_claim_file(task_id, path)` - Acquire file lock (60s timeout)
+- `mcp_release_file(task_id, path)` - Release file lock
+- `mcp_log_step(task_id, step)` - Log execution step + broadcast
+- `mcp_subscribe_logs(task_id)` - Subscribe to real-time log updates
+
+### 12.5 State Sync Strategy
+
+**Sync Flow:**
+```
+Agent Tool Call → MCP Gateway → Redis (cache + broadcast)
+                                   ↓ (every 5s)
+                              PostgreSQL (batch write)
+```
+
+**Background Tasks:**
+- Pull from PostgreSQL: Every 1s (keep Redis cache fresh)
+- Push to PostgreSQL: Every 5s (batch writes to reduce DB load)
+
+### 12.6 Migration Plan
+
+**Gradual Rollout:**
+- Month 1-2: `USE_MCP=true` for 10% of tasks (canary)
+- Month 3: Expand to 50% of tasks
+- Month 4: Full migration (100% of tasks)
+
+**Rollback Safety:**
+- PostgreSQL remains source of truth
+- Set `USE_MCP=false` to instantly disable MCP tools
+- Agents fall back to HTTP tools with no data loss
+
+### 12.7 Environment Variables
+
+New variables added to `.env.example`:
+
+```bash
+# MCP Gateway
+USE_MCP=false                           # Enable MCP tools (default: disabled)
+MCP_GATEWAY_URL=http://localhost:8001   # MCP server URL
+REDIS_URL=redis://localhost:6379/0      # Redis connection
+JWT_SECRET=change-me-in-production      # MCP client auth
+
+# Sync Configuration
+SYNC_FROM_POSTGRES_INTERVAL=1.0         # Pull every 1s
+SYNC_TO_POSTGRES_INTERVAL=5.0           # Push every 5s
+TASK_CACHE_TTL=3600                     # Cache for 1 hour
+FILE_LOCK_TIMEOUT=60                    # Lock expires after 60s
+```
+
+### 12.8 Package Structure
+
+```
+packages/mcp-gateway/
+├── src/
+│   ├── server.py          # MCP server main entry point
+│   ├── config.py          # Settings management
+│   ├── resources/
+│   │   ├── tasks.py       # Task resource provider
+│   │   ├── files.py       # Workspace file provider
+│   │   └── logs.py        # Execution log stream
+│   ├── tools/
+│   │   ├── file_ops.py    # File operation tools
+│   │   └── collaboration.py  # Collaboration tools
+│   ├── adapters/
+│   │   ├── postgres.py    # PostgreSQL sync
+│   │   └── redis.py       # Redis cache operations
+│   └── auth/
+│       └── token.py       # JWT authentication
+├── Dockerfile
+├── pyproject.toml
+└── requirements.txt
+```
+
+### 12.9 Implementation Timeline
+
+**Phase 1-2 (Weeks 1-2):** ✅ COMPLETE
+- MCP Gateway package structure
+- Docker services setup
+
+**Phase 3 (Weeks 3-4):** 🚧 IN PROGRESS
+- Redis state cache adapter
+- Distributed file locks
+- Execution log streaming
+
+**Phase 4 (Week 4-5):** ⏳ PENDING
+- PostgreSQL sync service
+- Background sync tasks
+
+**Phase 5-6 (Weeks 5-7):** ⏳ PENDING
+- MCP resources & tools implementation
+- Agent MCP client integration
+
+**Phase 7 (Weeks 8-10):** ⏳ PENDING
+- Node.js API bridge
+- Load testing
+- Production deployment
+
+**Total Estimated Duration:** 10 weeks (2.5 months)
+
+### 12.10 Success Criteria
+
+**Infrastructure (Phase 1-4):**
+- ✅ MCP gateway starts without errors
+- ⏳ Redis cache hit rate > 80%
+- ⏳ Sync lag < 1 second
+- ⏳ File locks acquired/released correctly
+
+**Agent Integration (Phase 5-6):**
+- ⏳ Coder agent can use MCP tools
+- ⏳ QA agent can subscribe to Coder's logs
+- ⏳ Multi-agent collaboration demo works
+
+**Production (Phase 7):**
+- ⏳ 100 concurrent agents, <5% error rate
+- ⏳ Latency p95 < 500ms
+- ⏳ Redis memory usage < 80%
+- ⏳ Rollback works without data loss
+
+---
+
+## 13. Document History
 
 | Version | Date | Changes |
 |---------|------|---------|
@@ -572,11 +738,12 @@ node scripts/run-8-mixed-test.js
 | 1.1 | 2026-01-29 | Added security scanning |
 | 1.2 | 2026-01-29 | crewai 0.86.0 migration |
 | 1.3 | 2026-01-29 | Anthropic API rate limiting |
-| **2.0** | **2026-01-30** | **Ollama reliability fix, full tier validation, test documentation** |
+| 2.0 | 2026-01-30 | Ollama reliability fix, full tier validation, test documentation |
+| **2.1** | **2026-01-31** | **MCP Gateway integration (Phase D) - Infrastructure setup** |
 
 ---
 
-## 13. Quick Reference Commands
+## 14. Quick Reference Commands
 
 ```bash
 # Start system
