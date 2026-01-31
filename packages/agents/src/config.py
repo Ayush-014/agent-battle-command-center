@@ -21,5 +21,10 @@ class Settings:
     LITELLM_NUM_RETRIES: int = int(os.getenv("LITELLM_NUM_RETRIES", "5"))
     LITELLM_REQUEST_TIMEOUT: int = int(os.getenv("LITELLM_REQUEST_TIMEOUT", "120"))
 
+    # MCP Gateway settings (Real-time Agent Collaboration)
+    USE_MCP: bool = os.getenv("USE_MCP", "false").lower() == "true"
+    MCP_GATEWAY_URL: str = os.getenv("MCP_GATEWAY_URL", "http://mcp-gateway:8001")
+    MCP_GATEWAY_TIMEOUT: int = int(os.getenv("MCP_GATEWAY_TIMEOUT", "30"))
+
 
 settings = Settings()
