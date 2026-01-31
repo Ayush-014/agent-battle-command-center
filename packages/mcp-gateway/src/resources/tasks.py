@@ -29,12 +29,47 @@ class TaskResourceProvider:
         """List available task resources.
 
         Returns:
-            List of resource descriptors
+            List of resource descriptors with URI, name, description
         """
-        # TODO: Implement resource listing
-        # This will query Redis for active tasks and return resource URIs
         logger.info("Listing task resources")
-        return []
+
+        resources = []
+
+        # Get all task keys from Redis
+        task_keys = await self.redis.keys("task:*")
+
+        for task_key in task_keys:
+            # Skip keys with additional suffixes (e.g., task:123:files)
+            # We only want task state keys (task:123)
+            if task_key.count(":") > 1:
+                continue
+
+            # Extract task ID from key (task:123 -> 123)
+            task_id = task_key.split(":", 1)[1]
+
+            # Get task data
+            task_data = await self.redis.get_task(task_id)
+            if not task_data:
+                continue
+
+            # Add state resource
+            resources.append({
+                "uri": f"tasks://{task_id}/state",
+                "name": f"Task {task_id} State",
+                "description": f"Current state of task: {task_data.get('title', 'Unknown')}",
+                "mimeType": "application/json"
+            })
+
+            # Add files resource
+            resources.append({
+                "uri": f"tasks://{task_id}/files",
+                "name": f"Task {task_id} Files",
+                "description": f"Files touched by task {task_id}",
+                "mimeType": "application/json"
+            })
+
+        logger.info(f"Listed {len(resources)} task resources")
+        return resources
 
     async def read_resource(self, uri: str) -> str:
         """Read task resource by URI.

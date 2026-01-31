@@ -205,6 +205,18 @@ class RedisAdapter:
         """
         await self.client.publish(channel, message)
 
+    async def keys(self, pattern: str) -> list[str]:
+        """Get all keys matching pattern.
+
+        Args:
+            pattern: Key pattern (e.g., "task:*")
+
+        Returns:
+            List of matching keys
+        """
+        keys = await self.client.keys(pattern)
+        return [key.decode() if isinstance(key, bytes) else key for key in keys]
+
     def pubsub(self):
         """Get Redis pub/sub client.
 
