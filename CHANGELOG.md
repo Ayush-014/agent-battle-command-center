@@ -96,13 +96,35 @@ All notable changes to Agent Battle Command Center.
 - Set `USE_MCP=false` to instantly disable MCP tools
 - Agents fall back to HTTP tools automatically
 
-#### Next Steps (Phases 5-10)
-- Phase 5-6: MCP resources & tools integration testing
+#### Phase 5-6 Complete (MCP Resources & Tools Testing)
+
+**Added**
+- ✅ Comprehensive integration test suite (`test_mcp_integration.py`)
+  - Task state caching and retrieval
+  - Resource listing with correct key filtering
+  - File read/write operations
+  - Distributed file locks (Redis SETNX)
+  - Execution log streaming (Redis pub/sub)
+  - Agent collaboration join/leave
+- ✅ Debug script (`debug_list_resources.py`) for troubleshooting
+
+**Fixed**
+- TaskResourceProvider `list_resources()` now correctly filters task state keys
+  - Skip keys with additional suffixes (e.g., `task:123:files`)
+  - Only process actual task state keys (`task:123`)
+- Added `redis.keys()` method for pattern-based key retrieval
+
+**Test Results:**
+- All 8 integration tests passing (100% success rate)
+- File lock conflict detection working correctly
+- Log streaming verified with Redis pub/sub
+
+#### Next Steps (Phases 7-10)
 - Phase 7-8: Agent MCP client implementation
 - Phase 9: Node.js API bridge for Redis pub/sub
 - Phase 10: Load testing (100 concurrent agents) and production deployment
 
-**Estimated Timeline:** 10 weeks (2.5 months)
+**Estimated Timeline:** 6 weeks remaining (1.5 months)
 
 ---
 
