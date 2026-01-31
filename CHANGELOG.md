@@ -4,6 +4,108 @@ All notable changes to Agent Battle Command Center.
 
 ---
 
+## [Phase D] - 2026-01-31
+
+### MCP Gateway Infrastructure (Real-Time Agent Collaboration)
+
+**Major Milestone:** Model Context Protocol (MCP) server integration to enable real-time agent-to-agent collaboration via shared state layer.
+
+#### Added
+- **MCP Gateway Package** (`packages/mcp-gateway/`)
+  - MCP server with stdio transport and daemon mode
+  - Multi-tenant namespaced resources (tasks, files, logs)
+  - MCP tools for file operations and collaboration
+  - JWT authentication for MCP clients
+  - Comprehensive package documentation
+
+- **Redis Cache Layer** (`packages/mcp-gateway/src/adapters/redis.py`)
+  - Task state caching (1 hour TTL)
+  - Distributed file locks (Redis SETNX, 60s auto-expiry)
+  - Execution log streaming (Redis Lists + Pub/Sub)
+  - File tracking per task
+  - Collaboration set management
+
+- **PostgreSQL Sync Service** (`packages/mcp-gateway/src/adapters/postgres.py`)
+  - Bi-directional sync with PostgreSQL as source of truth
+  - Pull from PostgreSQL every 1s (keep cache fresh)
+  - Batch writes to PostgreSQL every 5s (reduce DB load)
+  - Write queue management with asyncio
+  - Sync lag monitoring (currently 1.53ms)
+
+- **Docker Services**
+  - Redis (redis:7-alpine) on port 6379
+    - 512MB memory limit with LRU eviction
+    - AOF persistence enabled
+    - Health checks every 5s
+  - MCP Gateway (custom) on port 8001
+    - Daemon mode for continuous sync tasks
+    - Health checks via `--health-check` flag
+    - Depends on PostgreSQL + Redis
+
+- **MCP Resources** (Multi-tenant Namespaced)
+  - `tasks://{taskId}/state` - Task status, assigned agent, complexity
+  - `workspace://{taskId}/{path}` - File content (task-scoped)
+  - `logs://{taskId}` - Execution log stream (real-time)
+  - `collaboration://{taskId}` - Active agents on task
+
+- **MCP Tools**
+  - `mcp_file_read(task_id, path)` - Read file via MCP
+  - `mcp_file_write(task_id, path, content)` - Write with conflict detection
+  - `mcp_claim_file(task_id, path)` - Acquire file lock (60s timeout)
+  - `mcp_release_file(task_id, path)` - Release file lock
+  - `mcp_log_step(task_id, step)` - Log execution step + broadcast
+  - `mcp_subscribe_logs(task_id)` - Subscribe to real-time updates
+
+- **Documentation**
+  - `MCP_INTEGRATION_STATUS.md` - Implementation tracking and status
+  - `packages/mcp-gateway/README.md` - Package documentation
+  - `MVP_ASSESSMENT.md` Section 12 - MCP Gateway integration overview
+
+#### Changed
+- **docker-compose.yml**
+  - Added Redis service with health checks
+  - Added MCP Gateway service with daemon mode
+  - Updated API service to depend on Redis + MCP Gateway
+  - Updated Agents service with `USE_MCP` and `MCP_GATEWAY_URL` env vars
+  - Added `redis_data` volume
+
+- **.env.example**
+  - Added `USE_MCP` feature flag (default: false)
+  - Added `MCP_GATEWAY_URL` for client connections
+  - Added `REDIS_URL` connection string
+  - Added `JWT_SECRET` for MCP client auth
+  - Added sync configuration (`SYNC_FROM_POSTGRES_INTERVAL`, `SYNC_TO_POSTGRES_INTERVAL`)
+  - Added cache TTL and lock timeout settings
+
+#### Health Check Results (Phase 1-4 Complete)
+- ✅ Redis: PONG (1.02 MB memory usage)
+- ✅ MCP Gateway: healthy (version 1.0.0)
+- ✅ PostgreSQL: Connected, 206 tasks, sync lag 1.53ms
+- ✅ Background sync tasks: Running (sync_from_postgres, sync_to_postgres)
+- ✅ Redis adapter: Set/get/cache operations PASSED
+- ✅ PostgreSQL adapter: Query/sync operations PASSED
+
+#### Migration Plan
+**Gradual Rollout (4-month timeline):**
+- Month 1-2: `USE_MCP=true` for 10% of tasks (canary testing)
+- Month 3: Expand to 50% of tasks
+- Month 4: Full migration (100% of tasks)
+
+**Rollback Safety:**
+- PostgreSQL remains source of truth (no data loss)
+- Set `USE_MCP=false` to instantly disable MCP tools
+- Agents fall back to HTTP tools automatically
+
+#### Next Steps (Phases 5-10)
+- Phase 5-6: MCP resources & tools integration testing
+- Phase 7-8: Agent MCP client implementation
+- Phase 9: Node.js API bridge for Redis pub/sub
+- Phase 10: Load testing (100 concurrent agents) and production deployment
+
+**Estimated Timeline:** 10 weeks (2.5 months)
+
+---
+
 ## [Phase C] - 2026-01-31
 
 ### Parallel Execution + Auto Code Review + Training Export
