@@ -37,7 +37,7 @@ node scripts/load-test-3-concurrent.js
 
 ---
 
-### 2. `load-test-20-tasks.js` - 20-Task Concurrency Suite (Full Test)
+### 2. `load-test-20-tasks.js` - 20-Task Concurrency Suite (Wave-Based)
 
 **Purpose:** Production-realistic workload testing with high volume
 
@@ -48,6 +48,61 @@ node scripts/load-test-3-concurrent.js
 - **Wave delay:** 5 seconds (avoid rate limits)
 - **Duration:** ~10-15 minutes
 - **Cost:** ~$0.04 (Claude Haiku for 4 tasks)
+
+**Note:** Wave-based approach has inefficiency - Ollama tasks complete quickly but wait for slow Claude tasks before starting next wave. For optimal throughput, use the queue-based version below.
+
+---
+
+### 3. `load-test-20-tasks-queue.js` - 20-Task Queue-Based Suite (OPTIMIZED)
+
+**Purpose:** Maximum throughput testing with continuous task assignment
+
+**Configuration:**
+- **Execution mode:** Queue-based (no waves)
+- **Total tasks:** 20 (16 Ollama + 4 Claude)
+- **Concurrency:** 1 Ollama + 1 Claude (run in parallel)
+- **Poll interval:** 1 second (faster agent monitoring)
+- **Duration:** ~5-7 minutes (⚡ ~3x faster than wave-based)
+- **Cost:** ~$0.04 (Claude Haiku for 4 tasks)
+
+**Key Improvements:**
+- ✅ **No wave delays** - Tasks assigned immediately when agents become idle
+- ✅ **Continuous execution** - Ollama doesn't wait for slow Claude tasks
+- ✅ **Maximum throughput** - ~3x faster than wave-based approach
+- ✅ **Zero idle time** - Agents always working when tasks available
+
+**Task Breakdown:**
+- **16 Ollama tasks** (same as wave-based test)
+  - square, double, negate, is_even, absolute
+  - add, subtract, multiply, max_of_two, min_of_two
+  - is_positive, is_negative, cube, power_of_two
+  - is_zero, half
+- **4 Claude tasks** (same as wave-based test)
+  - FizzBuzz implementation
+  - Palindrome checker
+  - Prime number checker
+  - List deduplicator
+
+**Use Cases:**
+- **Performance benchmarking** - Measure true system throughput
+- **Pre-production validation** - Test with realistic continuous load
+- **Efficiency testing** - Validate resource pool utilization
+- **Cost-per-task measurement** - Accurate cost metrics
+
+**Run:**
+```bash
+curl -X POST http://localhost:3001/api/agents/reset-all
+curl -X POST http://localhost:3001/api/queue/resources/clear
+node scripts/load-test-20-tasks-queue.js
+```
+
+**Expected Results:**
+- Success rate: 90-100%
+- Total duration: 5-7 minutes (vs 10-15 for wave-based)
+- Avg Ollama time: ~30-60s per task
+- Avg Claude time: ~30-40s per task
+- Peak concurrency: 2/2 agents (100% utilization)
+- Throughput: ~3x faster than wave-based approach
 
 **Task Breakdown:**
 - **16 Ollama tasks** (simple math functions)
