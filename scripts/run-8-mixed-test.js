@@ -219,8 +219,8 @@ async function createTask(task) {
 // Model mapping for each tier
 const TIER_MODELS = {
   'ollama': null,  // Uses local Ollama
-  'haiku': 'claude-3-haiku-20240307',
-  'sonnet': 'claude-sonnet-4-20250514',
+  'haiku': 'claude-haiku-4-5-20251001',
+  'sonnet': 'claude-sonnet-4-5-20250929',
 };
 
 async function executeTask(taskId, agentId, description, expectedOutput, tier) {

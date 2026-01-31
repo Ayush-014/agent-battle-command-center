@@ -549,9 +549,9 @@ Reference implementation: `scripts/run-8-mixed-test.js` (10-task full tier test,
    Without this, agents get stuck "assigned" and won't accept new tasks.
 
 2. **Correct Model Names**:
-   - Haiku: `claude-3-haiku-20240307`
-   - Sonnet: `claude-sonnet-4-20250514`
-   - Opus: `claude-opus-4-20250514`
+   - Haiku: `claude-haiku-4-5-20251001`
+   - Sonnet: `claude-sonnet-4-5-20250929`
+   - Opus: `claude-opus-4-5-20251101`
    - Ollama: `null` (uses local model from OLLAMA_MODEL env)
 
 3. **Agent Selection by Tier**:
@@ -581,9 +581,9 @@ Reference implementation: `scripts/run-8-mixed-test.js` (10-task full tier test,
 | Tier | Tasks | Model | Cost/Task | Total |
 |------|-------|-------|-----------|-------|
 | Ollama | 5 | qwen2.5-coder:7b | $0 | $0 |
-| Haiku | 3 | claude-3-haiku | ~$0.05 | ~$0.15 |
-| Sonnet | 1 | claude-sonnet-4 | ~$0.30 | ~$0.30 |
-| Opus | 1 | claude-opus-4 | ~$1.00 | ~$1.00 |
+| Haiku | 3 | claude-haiku-4-5 | ~$0.05 | ~$0.15 |
+| Sonnet | 1 | claude-sonnet-4-5 | ~$0.30 | ~$0.30 |
+| Opus | 1 | claude-opus-4-5 | ~$1.00 | ~$1.00 |
 | **Total** | **10** | | | **~$1.50** |
 
 **Important:** Opus is intended for decomposition/code review via CTO agent, not direct coding.

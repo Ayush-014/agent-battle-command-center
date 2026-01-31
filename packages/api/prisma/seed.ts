@@ -52,7 +52,7 @@ async function main() {
       agentTypeId: coderType.id,
       name: 'Coder-01',
       status: 'idle',
-      config: { preferredModel: 'claude-sonnet-4-20250514' },
+      config: { preferredModel: 'claude-sonnet-4-5-20250929' },
       stats: {
         tasksCompleted: 0,
         tasksFailed: 0,
@@ -71,7 +71,7 @@ async function main() {
       agentTypeId: coderType.id,
       name: 'Coder-02',
       status: 'idle',
-      config: { preferredModel: 'claude-sonnet-4-20250514' },
+      config: { preferredModel: 'claude-sonnet-4-5-20250929' },
       stats: {
         tasksCompleted: 0,
         tasksFailed: 0,
@@ -91,7 +91,7 @@ async function main() {
       name: 'QA-Alpha',
       status: 'idle',
       config: {
-        preferredModel: 'claude-haiku-4-20250514',
+        preferredModel: 'claude-haiku-4-5-20251001',
         alwaysUseClaude: true,
         maxContextTokens: 8000,
       },

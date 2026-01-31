@@ -105,7 +105,7 @@ Save to tasks/dedupe.py`,
 // Model mapping for each tier
 const TIER_MODELS = {
   'ollama': null,
-  'haiku': 'claude-3-haiku-20240307',
+  'haiku': 'claude-haiku-4-5-20251001',
 };
 
 const TIER_INFO = {

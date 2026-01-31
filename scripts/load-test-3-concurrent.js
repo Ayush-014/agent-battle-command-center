@@ -175,7 +175,7 @@ async function assignTask(taskId, agentId) {
  */
 async function executeTask(taskId, agentId, description, expectedOutput, tier) {
   const useClaude = tier !== 'ollama';
-  const model = tier === 'claude' ? 'claude-3-haiku-20240307' : null;
+  const model = tier === 'claude' ? 'claude-haiku-4-5-20251001' : null;
 
   const response = await fetch(`${AGENTS_BASE}/execute`, {
     method: 'POST',

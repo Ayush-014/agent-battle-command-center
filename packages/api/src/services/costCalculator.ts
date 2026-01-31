@@ -18,13 +18,15 @@ const COST_RATES: Record<string, { input: number; output: number }> = {
   'claude-3-5-sonnet-20241022': { input: 3, output: 15 },
   'claude-3-5-sonnet-20240620': { input: 3, output: 15 },
 
-  // Claude Sonnet 4 - Latest Sonnet
+  // Claude Sonnet 4.5 - Latest Sonnet
   'claude-sonnet-4': { input: 3, output: 15 },
-  'claude-sonnet-4-20250514': { input: 3, output: 15 },
+  'claude-sonnet-4-5': { input: 3, output: 15 },
+  'claude-sonnet-4-5-20250929': { input: 3, output: 15 },
 
-  // Claude Opus 4 - Most capable
+  // Claude Opus 4.5 - Most capable
   'claude-opus-4': { input: 15, output: 75 },
-  'claude-opus-4-20250514': { input: 15, output: 75 },
+  'claude-opus-4-5': { input: 15, output: 75 },
+  'claude-opus-4-5-20251101': { input: 15, output: 75 },
 };
 
 /**

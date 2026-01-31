@@ -214,7 +214,7 @@ export class CodeReviewService {
         data: {
           taskId,
           reviewerId: 'auto-review',
-          reviewerModel: decision.reviewer === 'opus' ? 'claude-opus-4-20250514' : 'claude-3-haiku-20240307',
+          reviewerModel: decision.reviewer === 'opus' ? 'claude-opus-4-5-20251101' : 'claude-haiku-4-5-20251001',
           initialComplexity: task.finalComplexity || task.routerComplexity || 5,
           opusComplexity: reviewResult.qualityScore,
           findings: reviewResult.findings as unknown as undefined,
@@ -410,7 +410,7 @@ export class CodeReviewService {
       throw new Error('Anthropic client not initialized');
     }
 
-    const model = reviewer === 'opus' ? 'claude-opus-4-20250514' : 'claude-3-haiku-20240307';
+    const model = reviewer === 'opus' ? 'claude-opus-4-5-20251101' : 'claude-haiku-4-5-20251001';
 
     const systemPrompt = `You are an expert code reviewer. Analyze the provided code and return a JSON response with:
 - qualityScore: 0-10 (10 = excellent)

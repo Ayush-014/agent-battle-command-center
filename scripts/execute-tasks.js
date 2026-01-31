@@ -235,9 +235,9 @@ async function executeTasks() {
       const useClaude = routing.modelTier !== 'ollama';
       // Use valid Anthropic model IDs
       const modelMap = {
-        'haiku': 'claude-3-haiku-20240307',     // Claude 3 Haiku (cost-effective for 4-7 complexity)
-        'sonnet': 'claude-sonnet-4-20250514',   // Claude Sonnet 4 (for 8+ complexity)
-        'opus': 'claude-opus-4-20250514',       // Claude Opus 4
+        'haiku': 'claude-haiku-4-5-20251001',   // Claude 4.5 Haiku (cost-effective for 5-8 complexity)
+        'sonnet': 'claude-sonnet-4-5-20250929', // Claude Sonnet 4.5 (for 9-10 complexity)
+        'opus': 'claude-opus-4-5-20251101',     // Claude Opus 4.5 (decomposition & review only)
         'ollama': null
       };
 

@@ -163,9 +163,9 @@ New `scripts/run-8-mixed-test.js` validates all tiers:
 | Tier | Tasks | Model | Agent | Cost |
 |------|-------|-------|-------|------|
 | Ollama | 5 | qwen2.5-coder:7b | coder-01 | $0 |
-| Haiku | 3 | claude-3-haiku-20240307 | qa-01 | ~$0.15 |
-| Sonnet | 1 | claude-sonnet-4-20250514 | qa-01 | ~$0.30 |
-| Opus | 1 | claude-opus-4-20250514 | qa-01 | ~$1.00 |
+| Haiku | 3 | claude-haiku-4-5-20251001 | qa-01 | ~$0.15 |
+| Sonnet | 1 | claude-sonnet-4-5-20250929 | qa-01 | ~$0.30 |
+| Opus | 1 | claude-opus-4-5-20251101 | qa-01 | ~$1.00 |
 | **Total** | **10** | | | **~$1.50** |
 
 ### 2.4 Agent Role Clarification
@@ -191,7 +191,7 @@ New `scripts/run-8-mixed-test.js` validates all tiers:
 Added `CLAUDE.md` section documenting critical test requirements:
 
 1. **Task Completion Step** - Must call `/tasks/{id}/complete` to release agent
-2. **Correct Model Names** - Haiku: `claude-3-haiku-20240307` (NOT haiku-4)
+2. **Correct Model Names** - Haiku: `claude-haiku-4-5-20251001`
 3. **Agent Selection by Tier** - coder-01 for Ollama, qa-01 for Claude models
 4. **Validation Escaping** - Use base64 encoding for shell safety
 5. **Agent Wait** - Poll agent status before next task
@@ -528,7 +528,7 @@ node scripts/run-8-mixed-test.js
 ### 10.3 Critical Test Requirements
 
 1. **Task Completion** - Call `/tasks/{id}/complete` after execution
-2. **Model Names** - Use exact names: `claude-3-haiku-20240307`
+2. **Model Names** - Use exact names: `claude-haiku-4-5-20251001`
 3. **Agent Selection** - coder-01 (Ollama), qa-01 (Claude tiers)
 4. **Validation Escaping** - Use base64 for shell safety
 5. **Agent Wait** - Poll status before next task
