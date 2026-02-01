@@ -23,6 +23,7 @@ import { ChatService } from './services/chatService.js';
 import { ResourcePoolService } from './services/resourcePool.js';
 import { CodeReviewService } from './services/codeReviewService.js';
 import { SchedulerService } from './services/schedulerService.js';
+import { StuckTaskRecoveryService } from './services/stuckTaskRecovery.js';
 import { mcpBridge } from './services/mcpBridge.js';
 
 const app = express();
@@ -60,12 +61,16 @@ const chatService = new ChatService(io);
 // Initialize scheduler for periodic tasks (training export)
 const scheduler = new SchedulerService(prisma);
 
+// Initialize stuck task recovery service (auto-recovers tasks stuck in_progress)
+const stuckTaskRecovery = new StuckTaskRecoveryService(prisma, io);
+
 app.set('taskQueue', taskQueue);
 app.set('humanEscalation', humanEscalation);
 app.set('chatService', chatService);
 app.set('resourcePool', resourcePool);
 app.set('codeReviewService', codeReviewService);
 app.set('scheduler', scheduler);
+app.set('stuckTaskRecovery', stuckTaskRecovery);
 
 // Routes
 app.use('/api/tasks', tasksRouter);
@@ -115,6 +120,9 @@ async function start() {
     // Start scheduler (training data export)
     scheduler.start();
 
+    // Start stuck task recovery checker
+    stuckTaskRecovery.start();
+
     httpServer.listen(config.server.port, config.server.host, () => {
       console.log(`API server running on http://${config.server.host}:${config.server.port}`);
     });
@@ -131,6 +139,7 @@ process.on('SIGTERM', async () => {
   console.log('SIGTERM received, shutting down...');
   humanEscalation.stopChecker();
   scheduler.stop();
+  stuckTaskRecovery.stop();
   await mcpBridge.disconnect();
   await prisma.$disconnect();
   process.exit(0);

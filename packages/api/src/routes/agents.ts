@@ -4,6 +4,7 @@ import { prisma } from '../db/client.js';
 import { asyncHandler } from '../types/index.js';
 import { AgentManagerService } from '../services/agentManager.js';
 import type { TaskQueueService } from '../services/taskQueue.js';
+import type { StuckTaskRecoveryService } from '../services/stuckTaskRecovery.js';
 import type { Server as SocketIOServer } from 'socket.io';
 
 export const agentsRouter: RouterType = Router();
@@ -33,6 +34,88 @@ agentsRouter.get('/', asyncHandler(async (req, res) => {
 agentsRouter.get('/types', asyncHandler(async (req, res) => {
   const types = await prisma.agentType.findMany();
   res.json(types);
+}));
+
+// Get Ollama rest status (for debugging)
+// Must be before /:id to avoid being matched as an agent ID
+agentsRouter.get('/ollama-status', asyncHandler(async (req, res) => {
+  const taskQueue = req.app.get('taskQueue') as TaskQueueService;
+
+  if (!taskQueue) {
+    res.status(500).json({ error: 'TaskQueue service not initialized' });
+    return;
+  }
+
+  res.json({
+    agentTaskCounts: taskQueue.getOllamaTaskCounts(),
+    config: taskQueue.getOllamaConfig(),
+  });
+}));
+
+// Reset Ollama task counter (for testing)
+agentsRouter.post('/ollama-reset-counter', asyncHandler(async (req, res) => {
+  const taskQueue = req.app.get('taskQueue') as TaskQueueService;
+
+  if (!taskQueue) {
+    res.status(500).json({ error: 'TaskQueue service not initialized' });
+    return;
+  }
+
+  taskQueue.resetOllamaTaskCounts();
+  res.json({ success: true, message: 'Ollama task counters reset to 0' });
+}));
+
+// Get stuck task recovery status
+agentsRouter.get('/stuck-recovery/status', asyncHandler(async (req, res) => {
+  const stuckTaskRecovery = req.app.get('stuckTaskRecovery') as StuckTaskRecoveryService;
+
+  if (!stuckTaskRecovery) {
+    res.status(500).json({ error: 'StuckTaskRecovery service not initialized' });
+    return;
+  }
+
+  res.json(stuckTaskRecovery.getStatus());
+}));
+
+// Manually trigger stuck task recovery check
+agentsRouter.post('/stuck-recovery/check', asyncHandler(async (req, res) => {
+  const stuckTaskRecovery = req.app.get('stuckTaskRecovery') as StuckTaskRecoveryService;
+
+  if (!stuckTaskRecovery) {
+    res.status(500).json({ error: 'StuckTaskRecovery service not initialized' });
+    return;
+  }
+
+  const results = await stuckTaskRecovery.triggerCheck();
+  res.json({
+    success: true,
+    recoveredCount: results.length,
+    recovered: results,
+  });
+}));
+
+// Update stuck task recovery configuration
+agentsRouter.patch('/stuck-recovery/config', asyncHandler(async (req, res) => {
+  const stuckTaskRecovery = req.app.get('stuckTaskRecovery') as StuckTaskRecoveryService;
+
+  if (!stuckTaskRecovery) {
+    res.status(500).json({ error: 'StuckTaskRecovery service not initialized' });
+    return;
+  }
+
+  const configSchema = z.object({
+    taskTimeoutMs: z.number().min(60000).max(3600000).optional(), // 1 min to 1 hour
+    checkIntervalMs: z.number().min(10000).max(600000).optional(), // 10 sec to 10 min
+    enabled: z.boolean().optional(),
+  });
+
+  const config = configSchema.parse(req.body);
+  stuckTaskRecovery.updateConfig(config);
+
+  res.json({
+    success: true,
+    config: stuckTaskRecovery.getConfig(),
+  });
 }));
 
 // Get single agent
@@ -226,7 +309,6 @@ agentsRouter.get('/:id/stats', asyncHandler(async (req, res) => {
 
   res.json({ stats, executions });
 }));
-
 // DEBUG: Reset all agents (clear stuck states)
 agentsRouter.post('/reset-all', asyncHandler(async (req, res) => {
   const io = req.app.get('io') as SocketIOServer;
