@@ -1,7 +1,6 @@
-import { Settings, Bell, Zap, Clock, RotateCw, MessageSquare, RefreshCcw, Volume2, VolumeX, Terminal } from 'lucide-react';
-import { ResourceBar } from '../resources/ResourceBar';
+import { Settings, Bell, Zap, MessageSquare, RefreshCcw, Volume2, VolumeX, Terminal, DollarSign } from 'lucide-react';
 import { useUIStore } from '../../store/uiState';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { audioManager } from '../../audio/audioManager';
 
 export function TopBar() {
@@ -16,10 +15,31 @@ export function TopBar() {
     toggleToolLog,
     audioSettings,
     setMuted,
-    metrics,
+    budget,
+    updateBudget,
   } = useUIStore();
   const unacknowledgedAlerts = alerts.filter(a => a && a.acknowledged === false).length;
   const [resetting, setResetting] = useState(false);
+
+  // Fetch initial budget status
+  useEffect(() => {
+    fetch('/api/budget/status')
+      .then(res => res.json())
+      .then(data => {
+        updateBudget({
+          dailySpentCents: data.dailySpentCents,
+          dailyLimitCents: data.dailyLimitCents,
+          allTimeSpentCents: data.allTimeSpentCents,
+          percentUsed: data.percentUsed,
+          isOverBudget: data.isOverBudget,
+          isWarning: data.isWarning,
+          claudeBlocked: data.claudeBlocked,
+          avgCostPerTaskCents: data.costPerTask?.avgCostCents || 0,
+          todayTasks: data.costPerTask?.todayTasks || 0,
+        });
+      })
+      .catch(err => console.error('Failed to fetch budget:', err));
+  }, [updateBudget]);
 
   const toggleMute = () => {
     const newMuted = !audioSettings.muted;
@@ -65,28 +85,61 @@ export function TopBar() {
 
       {/* Resource Bars */}
       <div className="flex-1 flex items-center gap-6">
-        <ResourceBar
-          label="API Credits"
-          icon={<Zap className="w-4 h-4" />}
-          value={metrics.totalApiCredits}
-          max={5000}
-          color="green"
-        />
-        <ResourceBar
-          label="Time"
-          icon={<Clock className="w-4 h-4" />}
-          value={Math.floor(metrics.totalTimeMs / 1000 / 60)}
-          max={8 * 60}
-          color="blue"
-          format="time"
-        />
-        <ResourceBar
-          label="Iterations"
-          icon={<RotateCw className="w-4 h-4" />}
-          value={metrics.totalIterations}
-          max={100}
-          color="purple"
-        />
+        {/* Budget Display */}
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded border ${
+          budget.isOverBudget
+            ? 'bg-red-500/10 border-red-500/30'
+            : budget.isWarning
+              ? 'bg-amber-500/10 border-amber-500/30'
+              : 'bg-green-500/10 border-green-500/30'
+        }`}>
+          <DollarSign className={`w-4 h-4 ${
+            budget.isOverBudget ? 'text-red-400' : budget.isWarning ? 'text-amber-400' : 'text-green-400'
+          }`} />
+          <div className="flex flex-col">
+            <span className={`text-sm font-mono font-bold ${
+              budget.isOverBudget ? 'text-red-400' : budget.isWarning ? 'text-amber-400' : 'text-green-400'
+            }`}>
+              ${(budget.dailySpentCents / 100).toFixed(2)} / ${(budget.dailyLimitCents / 100).toFixed(2)}
+            </span>
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider">
+              Today {budget.claudeBlocked && <span className="text-red-400 font-bold">BLOCKED</span>}
+            </span>
+          </div>
+          {/* Progress bar */}
+          <div className="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all ${
+                budget.isOverBudget ? 'bg-red-500' : budget.isWarning ? 'bg-amber-500' : 'bg-green-500'
+              }`}
+              style={{ width: `${Math.min(budget.percentUsed * 100, 100)}%` }}
+            />
+          </div>
+        </div>
+
+        {/* All-time cost */}
+        <div className="flex flex-col items-center px-2">
+          <span className="text-sm font-mono text-hud-blue font-bold">
+            ${(budget.allTimeSpentCents / 100).toFixed(2)}
+          </span>
+          <span className="text-[10px] text-gray-500 uppercase tracking-wider">All-Time</span>
+        </div>
+
+        {/* Avg cost per task */}
+        <div className="flex flex-col items-center px-2">
+          <span className="text-sm font-mono text-hud-purple font-bold">
+            ${(budget.avgCostPerTaskCents / 100).toFixed(4)}
+          </span>
+          <span className="text-[10px] text-gray-500 uppercase tracking-wider">Avg/Task</span>
+        </div>
+
+        {/* Tasks today */}
+        <div className="flex flex-col items-center px-2">
+          <span className="text-sm font-mono text-gray-300 font-bold">
+            {budget.todayTasks}
+          </span>
+          <span className="text-[10px] text-gray-500 uppercase tracking-wider">Tasks Today</span>
+        </div>
       </div>
 
       {/* Mode Toggle */}

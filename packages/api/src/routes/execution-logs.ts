@@ -6,6 +6,7 @@ import { asyncHandler } from '../types/index.js';
 import { ExecutionLogService } from '../services/executionLogService.js';
 import { aggregateCosts } from '../services/costCalculator.js';
 import { emitCostUpdate } from '../websocket/handler.js';
+import { budgetService } from '../services/budgetService.js';
 import type { Prisma } from '@prisma/client';
 
 export const executionLogsRouter: RouterType = Router();
@@ -35,6 +36,15 @@ executionLogsRouter.post('/', asyncHandler(async (req, res) => {
     ...input,
     actionInput: input.actionInput as Prisma.InputJsonValue,
   });
+
+  // Record usage in budget service
+  if (log.inputTokens || log.outputTokens) {
+    budgetService.recordUsage(
+      log.inputTokens || 0,
+      log.outputTokens || 0,
+      log.modelUsed || ''
+    );
+  }
 
   // Emit cost update via WebSocket (throttled to avoid spam)
   // Only emit if tokens were used

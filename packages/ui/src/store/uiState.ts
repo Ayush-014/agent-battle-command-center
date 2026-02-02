@@ -94,6 +94,20 @@ interface UIState {
   };
   updateAgentHealth: (agentId: string, health: Partial<UIState['agentHealth'][string]>) => void;
   resetAgentHealth: (agentId: string) => void;
+
+  // Budget tracking
+  budget: {
+    dailySpentCents: number;
+    dailyLimitCents: number;
+    allTimeSpentCents: number;
+    percentUsed: number;
+    isOverBudget: boolean;
+    isWarning: boolean;
+    claudeBlocked: boolean;
+    avgCostPerTaskCents: number;
+    todayTasks: number;
+  };
+  updateBudget: (budget: Partial<UIState['budget']>) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -233,4 +247,21 @@ export const useUIStore = create<UIState>((set) => ({
       delete newHealth[agentId];
       return { agentHealth: newHealth };
     }),
+
+  // Budget tracking
+  budget: {
+    dailySpentCents: 0,
+    dailyLimitCents: 500, // $5.00 default
+    allTimeSpentCents: 0,
+    percentUsed: 0,
+    isOverBudget: false,
+    isWarning: false,
+    claudeBlocked: false,
+    avgCostPerTaskCents: 0,
+    todayTasks: 0,
+  },
+  updateBudget: (budget) =>
+    set((state) => ({
+      budget: { ...state.budget, ...budget },
+    })),
 }));

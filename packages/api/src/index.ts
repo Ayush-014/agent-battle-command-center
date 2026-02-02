@@ -16,7 +16,9 @@ import { taskPlanningRouter } from './routes/task-planning.js';
 import { codeReviewsRouter } from './routes/code-reviews.js';
 import { costMetricsRouter } from './routes/cost-metrics.js';
 import { memoriesRouter } from './routes/memories.js';
+import { budgetRouter } from './routes/budget.js';
 import { setupWebSocket } from './websocket/handler.js';
+import { budgetService } from './services/budgetService.js';
 import { TaskQueueService } from './services/taskQueue.js';
 import { HumanEscalationService } from './services/humanEscalation.js';
 import { ChatService } from './services/chatService.js';
@@ -47,6 +49,9 @@ app.set('io', io);
 // Initialize resource pool for parallel task execution
 const resourcePool = ResourcePoolService.getInstance();
 resourcePool.initialize(io);
+
+// Initialize budget service for cost tracking
+budgetService.setSocketIO(io);
 
 // Initialize code review service (auto-reviews completed tasks)
 const codeReviewService = new CodeReviewService(prisma, io);
@@ -85,6 +90,7 @@ app.use('/api/task-planning', taskPlanningRouter);
 app.use('/api/code-reviews', codeReviewsRouter);
 app.use('/api/cost-metrics', costMetricsRouter);
 app.use('/api/memories', memoriesRouter);
+app.use('/api/budget', budgetRouter);
 
 // Health check
 app.get('/health', (req, res) => {

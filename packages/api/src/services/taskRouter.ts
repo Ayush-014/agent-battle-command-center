@@ -37,6 +37,7 @@
 
 import type { PrismaClient, Task, Agent } from '@prisma/client';
 import { getDualComplexityAssessment } from './complexityAssessor.js';
+import { budgetService } from './budgetService.js';
 
 // Model tiers for the routing system
 export type ModelTier = 'ollama' | 'haiku' | 'sonnet' | 'opus';
@@ -329,13 +330,25 @@ export class TaskRouter {
     // Based on Campbell's Task Complexity Theory + Ollama stress testing (Feb 2026)
     // Ollama achieves 100% success on C1-C6 with rest delays + periodic context reset
 
+    // BUDGET CHECK: If Claude is blocked, force all tasks to Ollama
+    const claudeBlocked = budgetService.isClaudeBlocked();
+    if (claudeBlocked) {
+      console.log('💸 Budget exceeded - forcing task to Ollama (free)');
+    }
+
     // TRIVIAL/MODERATE (1-6): Single-step to moderate logic → Ollama (FREE)
-    if (!selectedAgent && complexity < 7) {
+    // Also route here if Claude is blocked due to budget
+    if (!selectedAgent && (complexity < 7 || claudeBlocked)) {
       selectedAgent = agents.find((a) => a.agentType.name === 'coder') || null;
       if (selectedAgent) {
-        const level = complexity < 3 ? 'Trivial' : complexity < 5 ? 'Low' : 'Moderate';
-        reason = `${level} complexity (${complexity.toFixed(1)}/10) → Ollama (free, ~30s)`;
-        confidence = 0.9;
+        if (claudeBlocked && complexity >= 7) {
+          reason = `⚠️ Budget exceeded - routing ${complexity.toFixed(1)}/10 task to Ollama (free)`;
+          confidence = 0.7; // Lower confidence for forced routing
+        } else {
+          const level = complexity < 3 ? 'Trivial' : complexity < 5 ? 'Low' : 'Moderate';
+          reason = `${level} complexity (${complexity.toFixed(1)}/10) → Ollama (free, ~30s)`;
+          confidence = 0.9;
+        }
         modelTier = 'ollama';
         estimatedCost = 0;
       }

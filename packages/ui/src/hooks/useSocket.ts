@@ -166,6 +166,31 @@ export function useSocket() {
       useUIStore.getState().updateCostMetrics(event.payload);
     });
 
+    // Budget events
+    socket.on('budget_updated', (event: { payload: {
+      dailySpentCents: number;
+      dailyLimitCents: number;
+      allTimeSpentCents: number;
+      percentUsed: number;
+      isOverBudget: boolean;
+      isWarning: boolean;
+      claudeBlocked: boolean;
+      costPerTask?: { avgCostCents: number; todayTasks: number };
+    } }) => {
+      console.log('Budget updated:', event.payload);
+      useUIStore.getState().updateBudget({
+        dailySpentCents: event.payload.dailySpentCents,
+        dailyLimitCents: event.payload.dailyLimitCents,
+        allTimeSpentCents: event.payload.allTimeSpentCents,
+        percentUsed: event.payload.percentUsed,
+        isOverBudget: event.payload.isOverBudget,
+        isWarning: event.payload.isWarning,
+        claudeBlocked: event.payload.claudeBlocked,
+        avgCostPerTaskCents: event.payload.costPerTask?.avgCostCents || 0,
+        todayTasks: event.payload.costPerTask?.todayTasks || 0,
+      });
+    });
+
     // Chat events - delegate to chat handlers if available
     socket.on('chat_message_chunk', (event: { payload: ChatStreamChunk }) => {
       const handlers = (window as unknown as { chatHandlers?: {
