@@ -61,6 +61,8 @@ scripts/results-*.json
 scripts/*-report-*.json
 scripts/temp_tasks.json
 scripts/execution-results.json
+scripts/diagnostic-data/
+scripts/ollama-stress-results.json
 
 # Documentation archives (old/obsolete docs moved here)
 # docs/archive/  # Commented out - we want to track archived docs
