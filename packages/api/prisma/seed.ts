@@ -52,7 +52,10 @@ async function main() {
       agentTypeId: coderType.id,
       name: 'Coder-01',
       status: 'idle',
-      config: { preferredModel: 'claude-sonnet-4-5-20250929' },
+      config: {
+        preferredModel: 'ollama/qwen2.5-coder:7b',
+        maxContextTokens: 4000,
+      },
       stats: {
         tasksCompleted: 0,
         tasksFailed: 0,
@@ -71,7 +74,10 @@ async function main() {
       agentTypeId: coderType.id,
       name: 'Coder-02',
       status: 'idle',
-      config: { preferredModel: 'claude-sonnet-4-5-20250929' },
+      config: {
+        preferredModel: 'ollama/qwen2.5-coder:7b',
+        maxContextTokens: 4000,
+      },
       stats: {
         tasksCompleted: 0,
         tasksFailed: 0,

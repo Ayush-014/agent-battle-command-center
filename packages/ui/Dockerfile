@@ -13,6 +13,17 @@ RUN pnpm install
 
 # Build shared first, then ui
 RUN pnpm --filter @abcc/shared build
+
+# Build args for Vite environment variables
+ARG VITE_API_URL
+ARG VITE_WS_URL
+ARG VITE_API_KEY
+
+# Set environment variables for Vite build
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_WS_URL=${VITE_WS_URL}
+ENV VITE_API_KEY=${VITE_API_KEY}
+
 RUN pnpm --filter @abcc/ui build
 
 # Production image
