@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-echo "Running database migrations..."
-npx prisma migrate deploy
+echo "Setting up database schema..."
+npx prisma db push --skip-generate
 
 echo "Seeding database..."
 npx prisma db seed || echo "Seeding skipped or already done"
