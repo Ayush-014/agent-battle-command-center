@@ -25,12 +25,12 @@ export function CommandCenter() {
         {/* Sidebar */}
         <div
           className={`transition-all duration-300 ${
-            sidebarCollapsed ? 'w-16' : 'w-[60rem]'
+            sidebarCollapsed ? 'w-16' : 'w-[40rem]'
           } flex flex-col border-r border-command-border`}
         >
-          {/* Minimap - Square radar display (60rem = 960px) */}
+          {/* Minimap - Square radar display (40rem = 640px) */}
           <div className={`border-b border-command-border ${
-            sidebarCollapsed ? 'w-16 h-16' : 'w-[60rem] h-[60rem]'
+            sidebarCollapsed ? 'w-16 h-16' : 'w-[40rem] h-[40rem]'
           } flex-shrink-0`}>
             <ComponentErrorBoundary componentName="Minimap">
               <Minimap />

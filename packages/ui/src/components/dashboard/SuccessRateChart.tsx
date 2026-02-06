@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { apiGet } from '../../lib/api';
 
 interface SuccessRateDataPoint {
   timestamp: Date;
@@ -40,10 +41,9 @@ export function SuccessRateChart({ period = 'hourly', hours = 24 }: SuccessRateC
 
   const fetchData = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/api/metrics/success-rate?period=${selectedPeriod}&hours=${selectedHours}`
+      const result = await apiGet<SuccessRateData>(
+        `/api/metrics/success-rate?period=${selectedPeriod}&hours=${selectedHours}`
       );
-      const result = await response.json();
       setData(result);
     } catch (error) {
       console.error('Failed to fetch success rate data:', error);
