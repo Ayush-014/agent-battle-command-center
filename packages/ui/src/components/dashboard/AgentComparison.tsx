@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { apiGet } from '../../lib/api';
 
 interface AgentStats {
   agentType: string;
@@ -29,13 +30,10 @@ export function AgentComparison() {
 
   const fetchData = async () => {
     try {
-      const [successRes, costRes] = await Promise.all([
-        fetch('http://localhost:3001/api/metrics/success-rate/by-agent'),
-        fetch('http://localhost:3001/api/cost-metrics/by-agent'),
+      const [successResult, costResult] = await Promise.all([
+        apiGet<AgentStats[]>('/api/metrics/success-rate/by-agent'),
+        apiGet<{ agents: AgentCostStats[] }>('/api/cost-metrics/by-agent'),
       ]);
-
-      const successResult = await successRes.json();
-      const costResult = await costRes.json();
 
       setSuccessData(successResult);
       setCostData(costResult.agents || []);

@@ -50,6 +50,12 @@ export function Minimap() {
   return (
     <div className="h-full minimap minimap-grid p-2">
       <div className="relative w-full h-full">
+        {/* Radar sweep effect */}
+        <div className="radar-sweep" />
+
+        {/* Radar concentric rings */}
+        <div className="radar-rings" />
+
         {/* Grid overlay */}
         <div className="absolute inset-0 opacity-30">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">

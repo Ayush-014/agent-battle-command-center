@@ -6,6 +6,7 @@ and sends them to the API for storage and analysis.
 import time
 import json
 import re
+import os
 from typing import Optional, Dict, Any
 from datetime import datetime
 import requests
@@ -146,9 +147,17 @@ class ExecutionLogger:
             # Remove None values
             log_entry = {k: v for k, v in log_entry.items() if v is not None}
 
+            # Get API key from environment
+            api_key = os.environ.get("API_KEY", "")
+            headers = {
+                "Content-Type": "application/json",
+                "X-API-Key": api_key,
+            }
+
             response = requests.post(
                 f"{self.api_url}/api/execution-logs",
                 json=log_entry,
+                headers=headers,
                 timeout=5,
             )
 
@@ -171,12 +180,20 @@ class ExecutionLogger:
 
         print(f"🔄 Retrying {len(self.logs_buffer)} buffered logs...")
 
+        # Get API key from environment
+        api_key = os.environ.get("API_KEY", "")
+        headers = {
+            "Content-Type": "application/json",
+            "X-API-Key": api_key,
+        }
+
         failed = []
         for log_entry in self.logs_buffer:
             try:
                 response = requests.post(
                     f"{self.api_url}/api/execution-logs",
                     json=log_entry,
+                    headers=headers,
                     timeout=5,
                 )
                 if response.status_code != 201:

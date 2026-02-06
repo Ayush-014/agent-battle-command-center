@@ -28,15 +28,17 @@ export function CommandCenter() {
             sidebarCollapsed ? 'w-16' : 'w-80'
           } flex flex-col border-r border-command-border`}
         >
-          {/* Minimap - Much larger now */}
-          <div className="flex-1 border-b border-command-border min-h-[400px]">
+          {/* Minimap - Square radar display */}
+          <div className={`border-b border-command-border ${
+            sidebarCollapsed ? 'w-16 h-16' : 'w-80 h-80'
+          } flex-shrink-0`}>
             <ComponentErrorBoundary componentName="Minimap">
               <Minimap />
             </ComponentErrorBoundary>
           </div>
 
-          {/* Sidebar content - Smaller section */}
-          <div className="h-64 overflow-hidden">
+          {/* Sidebar content - Flexible height */}
+          <div className="flex-1 overflow-hidden">
             <ComponentErrorBoundary componentName="Sidebar">
               <Sidebar />
             </ComponentErrorBoundary>

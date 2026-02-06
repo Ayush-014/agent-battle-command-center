@@ -165,18 +165,27 @@ body {
   }
 }
 
-/* Minimap styling */
+/* Minimap styling - Radar display */
 .minimap {
   @apply relative overflow-hidden;
   background:
-    radial-gradient(circle at center, transparent 0%, rgba(0, 255, 136, 0.05) 100%);
+    /* Circular radar screen gradient */
+    radial-gradient(circle at center, rgba(0, 20, 10, 0.9) 0%, rgba(0, 40, 20, 0.7) 50%, rgba(0, 60, 30, 0.5) 100%),
+    /* Vignette effect */
+    radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  border: 2px solid rgba(0, 255, 136, 0.3);
+  border-radius: 4px;
 }
 
 .minimap-grid {
   background-image:
-    linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
+    /* Fine grid lines */
+    linear-gradient(rgba(0, 255, 136, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.15) 1px, transparent 1px),
+    /* Crosshair lines */
+    linear-gradient(to bottom, transparent 49.5%, rgba(0, 255, 136, 0.3) 49.5%, rgba(0, 255, 136, 0.3) 50.5%, transparent 50.5%),
+    linear-gradient(to right, transparent 49.5%, rgba(0, 255, 136, 0.3) 49.5%, rgba(0, 255, 136, 0.3) 50.5%, transparent 50.5%);
+  background-size: 20px 20px, 20px 20px, 100% 100%, 100% 100%;
 }
 
 /* Scan line effect */
@@ -208,8 +217,25 @@ body {
 /* Command center backdrop with subtle grid */
 .command-bg-enhanced {
   background:
+    /* Diagonal tactical stripes */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 50px,
+      rgba(0, 255, 136, 0.01) 50px,
+      rgba(0, 255, 136, 0.01) 51px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 50px,
+      rgba(0, 170, 255, 0.01) 50px,
+      rgba(0, 170, 255, 0.01) 51px
+    ),
+    /* Radial highlights */
     radial-gradient(ellipse at 50% 0%, rgba(0, 255, 136, 0.03) 0%, transparent 60%),
     radial-gradient(ellipse at 100% 100%, rgba(0, 170, 255, 0.02) 0%, transparent 40%),
+    /* Base gradient */
     linear-gradient(180deg, #0a0e14 0%, #0d1219 100%);
 }
 

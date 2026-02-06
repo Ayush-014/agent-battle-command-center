@@ -15,6 +15,7 @@
 
 const API_BASE = 'http://localhost:3001/api';
 const AGENTS_BASE = 'http://localhost:8000';
+const API_KEY = process.env.API_KEY || 'ceb3e905f7b1b5e899645c6ec467ca34';
 const TASK_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes per task
 const REST_DELAY_MS = 3000; // 3 seconds rest between tasks
 const RESET_EVERY_N_TASKS = 5; // Reset agent memory every N tasks
@@ -186,7 +187,10 @@ async function resetSystem() {
   console.log('🔄 Resetting system...');
 
   try {
-    await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST' });
+    await fetch(`${API_BASE}/agents/reset-all`, {
+      method: 'POST',
+      headers: { 'X-API-Key': API_KEY }
+    });
     console.log('   ✓ Agents reset');
   } catch (e) {
     console.log('   ⚠ Could not reset agents');
@@ -216,7 +220,10 @@ DO NOT just output the code - you MUST call file_write(path="tasks/${fileName}.p
 
   const response = await fetch(`${API_BASE}/tasks`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY
+    },
     body: JSON.stringify({
       title: `[STRESS-C${task.complexity}] ${task.name}`,
       description: fullDescription,
@@ -254,7 +261,9 @@ async function waitForAgent(maxWaitMs = 30000) {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     try {
-      const response = await fetch(`${API_BASE}/agents/coder-01`);
+      const response = await fetch(`${API_BASE}/agents/coder-01`, {
+        headers: { 'X-API-Key': API_KEY }
+      });
       const agent = await response.json();
       if (agent.status === 'idle') return true;
     } catch (e) {}
@@ -332,7 +341,10 @@ async function main() {
 
       await fetch(`${API_BASE}/queue/assign`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': API_KEY
+        },
         body: JSON.stringify({ taskId: created.id, agentId: 'coder-01' })
       });
 
@@ -350,7 +362,10 @@ async function main() {
       // Mark complete
       await fetch(`${API_BASE}/tasks/${created.id}/complete`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': API_KEY
+        },
         body: JSON.stringify({ success: execResult.success, result: execResult })
       });
 
@@ -379,7 +394,10 @@ async function main() {
       console.log(`   💥 ERROR: ${e.message.substring(0, 60)}`);
 
       try {
-        await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST' });
+        await fetch(`${API_BASE}/agents/reset-all`, {
+      method: 'POST',
+      headers: { 'X-API-Key': API_KEY }
+    });
       } catch (resetErr) {}
 
       await sleep(2000);
@@ -403,7 +421,10 @@ async function main() {
     if ((i + 1) % RESET_EVERY_N_TASKS === 0 && i < TASKS.length - 1) {
       console.log(`\n🔄 Resetting agent (clearing context after ${RESET_EVERY_N_TASKS} tasks)...`);
       try {
-        await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST' });
+        await fetch(`${API_BASE}/agents/reset-all`, {
+      method: 'POST',
+      headers: { 'X-API-Key': API_KEY }
+    });
         console.log('   ✓ Agent memory cleared\n');
       } catch (e) {
         console.log('   ⚠ Could not reset agent\n');
