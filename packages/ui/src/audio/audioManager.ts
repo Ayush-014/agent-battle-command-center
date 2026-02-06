@@ -5,6 +5,13 @@
 
 import { VoiceEvent, getVoiceLine, AgentVoiceType } from './voicePacks';
 
+// Use window object to persist singleton across HMR and React.StrictMode
+declare global {
+  interface Window {
+    __ABCC_AUDIO_MANAGER__?: AudioManager;
+  }
+}
+
 interface QueuedSound {
   audioFile: string;
   text: string;
@@ -12,7 +19,7 @@ interface QueuedSound {
 }
 
 class AudioManager {
-  private static instance: AudioManager;
+  private static instance: AudioManager | null = null;
   private audioContext: AudioContext | null = null;
   private currentAudio: HTMLAudioElement | null = null;
   private queue: QueuedSound[] = [];
@@ -28,8 +35,18 @@ class AudioManager {
   }
 
   public static getInstance(): AudioManager {
+    // Check window global first (survives HMR and StrictMode)
+    if (typeof window !== 'undefined' && window.__ABCC_AUDIO_MANAGER__) {
+      AudioManager.instance = window.__ABCC_AUDIO_MANAGER__;
+      return AudioManager.instance;
+    }
+
     if (!AudioManager.instance) {
       AudioManager.instance = new AudioManager();
+      // Store on window for persistence
+      if (typeof window !== 'undefined') {
+        window.__ABCC_AUDIO_MANAGER__ = AudioManager.instance;
+      }
     }
     return AudioManager.instance;
   }

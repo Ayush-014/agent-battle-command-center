@@ -2,6 +2,8 @@ import { Settings, Bell, Zap, MessageSquare, RefreshCcw, Volume2, VolumeX, Termi
 import { useUIStore } from '../../store/uiState';
 import { useState, useEffect } from 'react';
 import { audioManager } from '../../audio/audioManager';
+import { SettingsModal } from '../modals/SettingsModal';
+import { AnimatedCurrency } from '../shared/AnimatedCounter';
 
 export function TopBar() {
   const {
@@ -17,6 +19,8 @@ export function TopBar() {
     setMuted,
     budget,
     updateBudget,
+    settingsModalOpen,
+    toggleSettingsModal,
   } = useUIStore();
   const unacknowledgedAlerts = alerts.filter(a => a && a.acknowledged === false).length;
   const [resetting, setResetting] = useState(false);
@@ -100,7 +104,7 @@ export function TopBar() {
             <span className={`text-sm font-mono font-bold ${
               budget.isOverBudget ? 'text-red-400' : budget.isWarning ? 'text-amber-400' : 'text-green-400'
             }`}>
-              ${(budget.dailySpentCents / 100).toFixed(2)} / ${(budget.dailyLimitCents / 100).toFixed(2)}
+              <AnimatedCurrency cents={budget.dailySpentCents} className="inline" /> / ${(budget.dailyLimitCents / 100).toFixed(2)}
             </span>
             <span className="text-[10px] text-gray-500 uppercase tracking-wider">
               Today {budget.claudeBlocked && <span className="text-red-400 font-bold">BLOCKED</span>}
@@ -119,9 +123,7 @@ export function TopBar() {
 
         {/* All-time cost */}
         <div className="flex flex-col items-center px-2">
-          <span className="text-sm font-mono text-hud-blue font-bold">
-            ${(budget.allTimeSpentCents / 100).toFixed(2)}
-          </span>
+          <AnimatedCurrency cents={budget.allTimeSpentCents} className="text-sm font-mono text-hud-blue font-bold" />
           <span className="text-[10px] text-gray-500 uppercase tracking-wider">All-Time</span>
         </div>
 
@@ -227,10 +229,19 @@ export function TopBar() {
         >
           <RefreshCcw className={`w-5 h-5 text-hud-red ${resetting ? 'animate-spin' : ''}`} />
         </button>
-        <button className="p-2 hover:bg-command-accent rounded transition-colors">
-          <Settings className="w-5 h-5 text-gray-400" />
+        <button
+          onClick={toggleSettingsModal}
+          className={`p-2 hover:bg-command-accent rounded transition-colors ${
+            settingsModalOpen ? 'bg-hud-green/20' : ''
+          }`}
+          title="Settings"
+        >
+          <Settings className={`w-5 h-5 ${settingsModalOpen ? 'text-hud-green' : 'text-gray-400'}`} />
         </button>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal />
     </header>
   );
 }

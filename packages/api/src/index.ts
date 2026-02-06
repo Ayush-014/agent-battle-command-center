@@ -27,21 +27,33 @@ import { CodeReviewService } from './services/codeReviewService.js';
 import { SchedulerService } from './services/schedulerService.js';
 import { StuckTaskRecoveryService } from './services/stuckTaskRecovery.js';
 import { mcpBridge } from './services/mcpBridge.js';
+import { requireApiKey } from './middleware/auth.js';
+import { standardRateLimiter } from './middleware/rateLimiter.js';
 
 const app = express();
 const httpServer = createServer(app);
 
-// Socket.io setup
+// Socket.io setup with CORS restrictions
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: '*',
+    origin: config.cors.origins,
     methods: ['GET', 'POST'],
+    credentials: true,
   },
 });
 
-// Middleware
-app.use(cors());
+// Middleware with CORS restrictions
+app.use(cors({
+  origin: config.cors.origins,
+  credentials: true,
+}));
 app.use(express.json());
+
+// Rate limiting (before auth to prevent auth bypass attempts)
+app.use(standardRateLimiter);
+
+// Authentication
+app.use(requireApiKey);
 
 // Make io and services available to routes
 app.set('io', io);

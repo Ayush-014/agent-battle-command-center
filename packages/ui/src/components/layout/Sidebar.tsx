@@ -2,13 +2,17 @@ import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { AgentCard } from '../shared/AgentCard';
 import { useUIStore } from '../../store/uiState';
 
+// Agents to hide from UI (unused/test agents)
+const HIDDEN_AGENTS = ['coder-02'];
+
 export function Sidebar() {
   const { agents, sidebarCollapsed, toggleSidebar, alerts } = useUIStore();
   const unacknowledgedAlerts = alerts.filter(a => a && a.acknowledged === false).length;
 
-  // Group agents by type
-  const coderAgents = agents.filter(a => a.type === 'coder');
-  const qaAgents = agents.filter(a => a.type === 'qa');
+  // Filter out hidden agents and group by type
+  const visibleAgents = agents.filter(a => !HIDDEN_AGENTS.includes(a.id));
+  const coderAgents = visibleAgents.filter(a => a.type === 'coder');
+  const qaAgents = visibleAgents.filter(a => a.type === 'qa');
 
   if (sidebarCollapsed) {
     return (
@@ -22,7 +26,7 @@ export function Sidebar() {
 
         {/* Collapsed agent indicators */}
         <div className="flex-1 flex flex-col gap-2">
-          {agents.map(agent => (
+          {visibleAgents.map(agent => (
             <div
               key={agent.id}
               className={`w-8 h-8 rounded flex items-center justify-center ${

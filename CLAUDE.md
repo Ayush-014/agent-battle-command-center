@@ -50,6 +50,8 @@ This backstory helps the model stay focused and complete tasks efficiently rathe
 - VRAM usage: ~6GB (75% of 8GB) - optimal for qwen2.5-coder:7b
 - GPU not maxed out = model fits entirely in VRAM (no CPU offload)
 - This is the sweet spot: room for context + tools without swapping
+- **14B model tested and rejected** (Feb 5, 2026): 9GB overflows VRAM → CPU offload → 40% pass rate
+- Only 3 models kept in Ollama: qwen2.5-coder:7b, qwen3:8b, llama3.1:8b (~14.8GB total)
 
 ### Ollama Rest Optimization (IMPLEMENTED Feb 2026)
 
@@ -70,9 +72,10 @@ Rest delays between tasks prevent this issue.
 | `OLLAMA_RESET_EVERY_N_TASKS` | 5 | Trigger extended rest interval |
 | `OLLAMA_COMPLEXITY_THRESHOLD` | 7 | Tasks < 7 go to Ollama |
 
-**Stress Test Results (C1-C8, 20 tasks):**
-- Without rest: 85% success, C4-C6 had failures
-- With rest: 90% success, C1-C6 at **100%**
+**Stress Test Results:**
+- Without rest: 85% success, C4-C6 had failures (20 tasks)
+- With rest (5-task reset): 100% success, C1-C8 all pass (20 tasks)
+- With rest (3-task reset): 88% success, C1-C9 (40 tasks, includes extreme classes)
 
 **Endpoints:**
 - `GET /api/agents/ollama-status` - View task counts and config
@@ -322,13 +325,14 @@ Tasks are scored 1-10 using **dual assessment** (router + Haiku AI):
 
 **Academic Complexity Scale:**
 
-| Score | Level    | Characteristics                                          | Model  | Cost/Task |
-|-------|----------|----------------------------------------------------------|--------|-----------|
-| 1-2   | Trivial  | Single-step; clear I/O; no decision-making               | Ollama | FREE      |
-| 3-4   | Low      | Linear sequences; well-defined domain; no ambiguity      | Ollama | FREE      |
-| 5-6   | Moderate | Multiple conditions; validation; helper logic            | Ollama | FREE      |
-| 7-8   | Complex  | Multiple functions; algorithms; data structures          | Haiku  | ~$0.003   |
-| 9-10  | Extreme  | Fuzzy goals; dynamic requirements; architectural scope   | Sonnet | ~$0.01    |
+| Score | Level    | Characteristics                                          | Model  | Cost/Task | Ollama Rate |
+|-------|----------|----------------------------------------------------------|--------|-----------|-------------|
+| 1-2   | Trivial  | Single-step; clear I/O; no decision-making               | Ollama | FREE      | 100%        |
+| 3-4   | Low      | Linear sequences; well-defined domain; no ambiguity      | Ollama | FREE      | 80-100%     |
+| 5-6   | Moderate | Multiple conditions; validation; helper logic            | Ollama | FREE      | 60-100%     |
+| 7-8   | Complex  | Multiple functions; algorithms; data structures          | Ollama/Haiku | FREE/~$0.003 | 80-100% |
+| 9     | Extreme  | Single-class tasks (Stack, LRU, RPN)                     | Ollama/Haiku | FREE/~$0.003 | 80%     |
+| 9-10  | Extreme  | Multi-class; fuzzy goals; architectural scope            | Sonnet | ~$0.01    | N/A         |
 
 **Note:** Opus is reserved for decomposition (9+) and code reviews only - it never writes code.
 
@@ -507,29 +511,52 @@ model CodeReview {
 
 ### Phase 2: Tier System Refinement (COMPLETED Feb 2026)
 
-**Breakthrough Finding:** Ollama achieves **100% success rate on ALL complexity levels (C1-C8)** when given:
-- CodeX-7 "elite agent" backstory with mission examples
-- 3 second rest between tasks
-- Agent reset (memory clear) every 5 tasks
+**Breakthrough Finding:** Ollama achieves **88% success rate across C1-C9 (40 tasks)** including extreme
+class-based tasks (LRU Cache, RPN Calculator, Stack, TextStats). C1-C8 proven at 100% on 20-task runs.
 
-**Latest Stress Test Results (Feb 3, 2026 - 20 tasks, complexity 1-8):**
+**Ultimate Stress Test Results (Feb 5, 2026 - 40 tasks, complexity 1-9):**
 | Complexity | Success Rate | Tasks | Avg Time |
 |------------|--------------|-------|----------|
-| C1 | **100%** | 2/2 | 20s |
-| C2 | **100%** | 2/2 | 16s |
-| C3 | **100%** | 2/2 | 111s |
-| C4 | **100%** | 4/4 | 25s |
-| C5 | **100%** | 3/3 | 53s |
-| C6 | **100%** | 3/3 | 77s |
-| C7 | **100%** | 2/2 | 43s |
-| C8 | **100%** | 2/2 | 130s |
-| **Total** | **100%** | **20/20** | 47s avg |
+| C1 | **100%** | 3/3 | 30s |
+| C2 | **100%** | 3/3 | 84s |
+| C3 | **100%** | 4/4 | 111s |
+| C4 | **80%** | 4/5 | 19s |
+| C5 | **60%** | 3/5 | 94s |
+| C6 | **100%** | 5/5 | 55s |
+| C7 | **100%** | 5/5 | 25s |
+| C8 | **80%** | 4/5 | 18s |
+| C9 | **80%** | 4/5 | 34s |
+| **Total** | **88%** | **35/40** | 54s avg |
+
+**C9 Extreme Tasks Passed:** Stack class, LRU Cache (LeetCode medium!), RPN Calculator, TextStats class
+**C9 Failure:** Sorted Linked List (2 classes) - truncated output
+
+**Failure Analysis (5/40 failures):**
+- 3/5 were syntax/format errors (not logic bugs) - model garbles output occasionally
+- 2/5 were actual logic errors (flatten: didn't handle mixed lists, truncate: off-by-one)
+- Failures scattered across C4-C9, no cliff-edge pattern
+
+**Code Quality Highlights (35 passing tasks):**
+- 7/35 solutions were **better than reference** (more Pythonic, more elegant)
+- C8 merge_sorted used proper O(n) two-pointer algorithm (not sorted() shortcut)
+- C9 LRU Cache included type hints and correct eviction logic unprompted
+
+**Previous Test Results:**
+- 20-task C1-C8 (Feb 3): 100% (20/20) - `node scripts/ollama-stress-test.js`
+- 10-task C1-C8 (Feb 5): 100% (10/10) - `node scripts/ollama-stress-test-14b.js` (with 7b)
+
+**14B Model Comparison (Feb 5, 2026):**
+- qwen2.5-coder:14b-instruct-q4_K_M tested on same 10-task suite
+- **Result: 40% pass rate (4/10)** - MUCH worse than 7b on 8GB VRAM
+- Root cause: 9GB model overflows 8GB VRAM → CPU offload → slow inference → tool calling breakdown
+- 14B needs 16GB+ VRAM to be viable. 7b is the optimal model for RTX 3060 Ti.
+- Full comparison: `scripts/QWEN25_CODER_7B_vs_14B_REPORT.md`
 
 **Key Optimizations Applied:**
 1. **CodeX-7 Backstory** - Elite agent identity with "one write, one verify, mission complete" ethos
 2. **Mission Examples** - 3 concrete examples showing ideal 3-step execution pattern
 3. **Rest Delays** - 3s between tasks prevents context pollution
-4. **Periodic Reset** - Memory clear every 5 tasks keeps agent fresh
+4. **Periodic Reset** - Memory clear every 3 tasks (was 5, tightened for 40-task runs)
 
 **Parallel Test Results (Feb 3, 2026 - 20 tasks, Ollama + Haiku):**
 - Completed: 14/20 in 600s (hit timeout, not failures)
@@ -537,12 +564,21 @@ model CodeReview {
 - Haiku: 4/4 completed (avg 27s) - 100% with MCP disabled
 - No actual failures - remaining tasks were still queued when timeout hit
 
-**Routing Thresholds (Current):**
-- Ollama: Complexity 1-8 (can handle all, route 1-6 for cost optimization)
+**Routing Thresholds (Updated Feb 5):**
+- Ollama: Complexity 1-8 (proven 80-100%, route 1-6 for cost optimization)
+- Ollama: Complexity 9 single-class tasks (80% success - Stack, LRU, RPN)
 - Haiku: Complexity 7-8 (as backup/parallel)
-- Sonnet: Complexity 9-10
+- Sonnet: Complexity 9-10 (multi-class tasks, architectural scope)
 
-**Test Script:** `node scripts/ollama-stress-test.js`
+**Test Scripts:**
+- `node scripts/ollama-stress-test.js` - 20 tasks C1-C8 (baseline)
+- `node scripts/ollama-stress-test-40.js` - 40 tasks C1-C9 (ultimate)
+- `node scripts/ollama-stress-test-14b.js` - 10 tasks for model comparison
+
+**Reports:**
+- `scripts/QWEN25_CODER_7B_REPORT.md` - 10-task code review
+- `scripts/QWEN25_CODER_7B_vs_14B_REPORT.md` - 7b vs 14b comparison
+- `scripts/QWEN25_CODER_7B_ULTIMATE_REPORT.md` - 40-task full code review
 
 ### Phase 3: UI/UX Overhaul (WOW Factor)
 1. **Agent Workspace View** - New main panel showing:
@@ -609,6 +645,12 @@ node scripts/run-manual-test.js
 
 # Run 20-task Ollama stress test (graduated complexity C1-C8, 100% pass rate)
 node scripts/ollama-stress-test.js
+
+# Run 40-task ULTIMATE Ollama stress test (C1-C9, 88% pass rate, includes extreme classes)
+node scripts/ollama-stress-test-40.js
+
+# Run 10-task model comparison test (change MODEL const in script)
+node scripts/ollama-stress-test-14b.js
 
 # Run 10-task full tier test (Ollama + Haiku + Sonnet + Opus, ~$1.50 cost)
 node scripts/run-full-tier-test.js

@@ -1,11 +1,13 @@
 import { Clock, AlertTriangle, CheckCircle, XCircle, Code, TestTube, Eye, Bug, RefreshCw, Play, Edit, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import type { Task } from '@abcc/shared';
 import { useUIStore } from '../../store/uiState';
 import { executeApi } from '../../api/client';
 import { useTasks } from '../../hooks/useTasks';
 import { EditTaskModal } from '../main-view/EditTaskModal';
+
+type AnimationState = 'enter' | 'complete' | 'failed' | 'loop' | null;
 
 const taskTypeIcons = {
   code: Code,
@@ -38,17 +40,71 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
-  const { selectedTaskId, selectTask, agents } = useUIStore();
+  const { selectedTaskId, selectTask, agents, agentHealth } = useUIStore();
   const { deleteTask } = useTasks();
   const isSelected = selectedTaskId === task.id;
   const [executing, setExecuting] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [animation, setAnimation] = useState<AnimationState>('enter');
+  const prevStatusRef = useRef(task.status);
 
   const TaskIcon = taskTypeIcons[task.taskType as keyof typeof taskTypeIcons] || Code;
   const priorityLevel = task.priority >= 8 ? 'high' : task.priority >= 5 ? 'medium' : 'low';
 
   const isCompleted = ['completed', 'failed', 'aborted'].includes(task.status);
+
+  // Check for loop detection
+  const hasLoop = task.assignedAgentId && agentHealth[task.assignedAgentId]?.loopDetected;
+
+  // Handle status change animations
+  useEffect(() => {
+    if (prevStatusRef.current !== task.status) {
+      if (task.status === 'completed') {
+        setAnimation('complete');
+      } else if (task.status === 'failed') {
+        setAnimation('failed');
+      }
+
+      // Clear animation after it plays
+      const timer = setTimeout(() => setAnimation(null), 600);
+      prevStatusRef.current = task.status;
+      return () => clearTimeout(timer);
+    }
+  }, [task.status]);
+
+  // Handle loop animation
+  useEffect(() => {
+    if (hasLoop) {
+      setAnimation('loop');
+    } else if (animation === 'loop') {
+      setAnimation(null);
+    }
+  }, [hasLoop, animation]);
+
+  // Clear enter animation after mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (animation === 'enter') setAnimation(null);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Get animation class
+  const getAnimationClass = () => {
+    switch (animation) {
+      case 'enter':
+        return 'task-card-enter';
+      case 'complete':
+        return 'task-card-complete';
+      case 'failed':
+        return 'task-card-failed';
+      case 'loop':
+        return 'task-card-loop';
+      default:
+        return '';
+    }
+  };
 
   const handleClick = () => {
     selectTask(task.id);
@@ -112,7 +168,8 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
         className={clsx(
           'panel p-2 cursor-pointer transition-all h-full flex flex-col',
           statusColors[task.status],
-          isSelected && 'ring-1 ring-hud-blue/50'
+          isSelected && 'ring-1 ring-hud-blue/50',
+          getAnimationClass()
         )}
         onClick={handleClick}
       >
@@ -159,7 +216,10 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
       className={clsx(
         'task-card',
         statusColors[task.status],
-        isSelected && 'active'
+        isSelected && 'active',
+        getAnimationClass(),
+        task.status === 'in_progress' && 'status-glow-active',
+        task.status === 'needs_human' && 'status-glow-warning'
       )}
       onClick={handleClick}
     >

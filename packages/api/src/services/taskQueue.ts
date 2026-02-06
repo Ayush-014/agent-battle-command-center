@@ -260,6 +260,7 @@ export class TaskQueueService {
   }
 
   private emitTaskUpdate(task: Task): void {
+    console.log(`[TaskQueue] Emitting task_updated for task ${task.id}, status: ${task.status}`);
     this.io.emit('task_updated', { type: 'task_updated', payload: task, timestamp: new Date() });
   }
 

@@ -4,17 +4,19 @@ import { Minimap } from '../minimap/Minimap';
 import { TaskQueue } from '../main-view/TaskQueue';
 import { ActiveMissions } from '../main-view/ActiveMissions';
 import { ToolLog } from '../main-view/ToolLog';
+import { TokenBurnLog } from '../main-view/TokenBurnLog';
 import { AlertPanel } from '../resources/AlertPanel';
 import { ChatPanel } from '../chat/ChatPanel';
 import { MicromanagerView } from '../micromanager/MicromanagerView';
 import { Dashboard } from '../dashboard/Dashboard';
 import { useUIStore } from '../../store/uiState';
+import { ComponentErrorBoundary } from '../ComponentErrorBoundary';
 
 export function CommandCenter() {
   const { mode, sidebarCollapsed, alertsPanelOpen, chatPanelOpen, toolLogOpen, toggleChatPanel, agents } = useUIStore();
 
   return (
-    <div className="h-full flex flex-col bg-command-bg">
+    <div className="h-full flex flex-col command-bg-enhanced">
       {/* Top Bar */}
       <TopBar />
 
@@ -28,12 +30,16 @@ export function CommandCenter() {
         >
           {/* Minimap - Much larger now */}
           <div className="flex-1 border-b border-command-border min-h-[400px]">
-            <Minimap />
+            <ComponentErrorBoundary componentName="Minimap">
+              <Minimap />
+            </ComponentErrorBoundary>
           </div>
 
           {/* Sidebar content - Smaller section */}
           <div className="h-64 overflow-hidden">
-            <Sidebar />
+            <ComponentErrorBoundary componentName="Sidebar">
+              <Sidebar />
+            </ComponentErrorBoundary>
           </div>
         </div>
 
@@ -43,39 +49,62 @@ export function CommandCenter() {
             <>
               {/* Task Queue (Bounty Board) - Large area for task cards */}
               <div className="flex-1 border-b border-command-border overflow-hidden">
-                <TaskQueue />
+                <ComponentErrorBoundary componentName="Task Queue">
+                  <TaskQueue />
+                </ComponentErrorBoundary>
               </div>
 
               {/* Active Missions - Compact running tasks strip */}
               <div className="h-[140px] min-h-[140px] overflow-hidden">
-                <ActiveMissions />
+                <ComponentErrorBoundary componentName="Active Missions">
+                  <ActiveMissions />
+                </ComponentErrorBoundary>
               </div>
 
-              {/* Tool Log Panel - Optional bottom panel */}
+              {/* Tool Log Panel - Split view with Token Burn Rate */}
               {toolLogOpen && (
-                <div className="h-64 border-t border-command-border overflow-hidden">
-                  <ToolLog />
+                <div className="h-64 border-t border-command-border overflow-hidden flex gap-2 p-2 bg-command-bg">
+                  {/* Left: Execution Log */}
+                  <div className="flex-1 overflow-hidden">
+                    <ComponentErrorBoundary componentName="Tool Log">
+                      <ToolLog />
+                    </ComponentErrorBoundary>
+                  </div>
+                  {/* Right: Token Burn Rate */}
+                  <div className="flex-1 overflow-hidden">
+                    <ComponentErrorBoundary componentName="Token Burn Log">
+                      <TokenBurnLog />
+                    </ComponentErrorBoundary>
+                  </div>
                 </div>
               )}
             </>
           ) : mode === 'micromanager' ? (
-            <MicromanagerView />
+            <ComponentErrorBoundary componentName="Micromanager">
+              <MicromanagerView />
+            </ComponentErrorBoundary>
           ) : (
-            <Dashboard />
+            <ComponentErrorBoundary componentName="Dashboard">
+              <Dashboard />
+            </ComponentErrorBoundary>
           )}
         </div>
 
         {/* Alerts Panel */}
         {alertsPanelOpen && (
           <div className="w-80 border-l border-command-border">
-            <AlertPanel />
+            <ComponentErrorBoundary componentName="Alerts Panel">
+              <AlertPanel />
+            </ComponentErrorBoundary>
           </div>
         )}
 
         {/* Chat Panel */}
         {chatPanelOpen && (
           <div className="w-80 border-l border-command-border">
-            <ChatPanel agents={agents} onClose={toggleChatPanel} />
+            <ComponentErrorBoundary componentName="Chat Panel">
+              <ChatPanel agents={agents} onClose={toggleChatPanel} />
+            </ComponentErrorBoundary>
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { useUIStore } from '../../store/uiState';
+import { TimelineMinimap } from './TimelineMinimap';
 
 const STATUS_COLORS = {
   pending: '#6B7280',
@@ -11,7 +12,19 @@ const STATUS_COLORS = {
 };
 
 export function Minimap() {
-  const { tasks, selectTask, selectedTaskId } = useUIStore();
+  const { tasks, selectTask, selectedTaskId, settings } = useUIStore();
+
+  // Use Timeline minimap if selected in settings
+  if (settings.minimapStyle === 'timeline') {
+    return <TimelineMinimap />;
+  }
+
+  // Filter out tasks older than 24 hours
+  const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const recentTasks = tasks.filter(task => {
+    const taskDate = new Date(task.createdAt).getTime();
+    return taskDate > twentyFourHoursAgo;
+  });
 
   // Calculate positions for tasks in a grid-like pattern
   const getTaskPosition = (index: number, total: number) => {
@@ -29,7 +42,7 @@ export function Minimap() {
   };
 
   // Sort tasks by status for better visualization
-  const sortedTasks = [...tasks].sort((a, b) => {
+  const sortedTasks = [...recentTasks].sort((a, b) => {
     const order = ['in_progress', 'assigned', 'needs_human', 'pending', 'completed', 'failed', 'aborted'];
     return order.indexOf(a.status) - order.indexOf(b.status);
   });

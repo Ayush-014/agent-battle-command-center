@@ -200,3 +200,285 @@ body {
   0% { transform: translateY(0); }
   100% { transform: translateY(100vh); }
 }
+
+/* ========================================
+   Military Command Center Theme
+   ======================================== */
+
+/* Command center backdrop with subtle grid */
+.command-bg-enhanced {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(0, 255, 136, 0.03) 0%, transparent 60%),
+    radial-gradient(ellipse at 100% 100%, rgba(0, 170, 255, 0.02) 0%, transparent 40%),
+    linear-gradient(180deg, #0a0e14 0%, #0d1219 100%);
+}
+
+/* Subtle tactical grid overlay */
+.tactical-grid {
+  background-image:
+    linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Radar sweep effect for minimap */
+.radar-sweep {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(0, 255, 136, 0.15) 30deg, transparent 60deg);
+  animation: radar-rotate 4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes radar-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Radar rings */
+.radar-rings {
+  position: absolute;
+  inset: 10%;
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.radar-rings::before,
+.radar-rings::after {
+  content: '';
+  position: absolute;
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  border-radius: 50%;
+}
+
+.radar-rings::before {
+  inset: 25%;
+}
+
+.radar-rings::after {
+  inset: 50%;
+}
+
+/* HUD-style panel headers */
+.panel-header-hud {
+  position: relative;
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.08) 0%, transparent 50%);
+  border-left: 3px solid var(--hud-green);
+  padding: 0.75rem 1rem;
+}
+
+.panel-header-hud::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.03));
+}
+
+/* HUD corner brackets */
+.hud-corners {
+  position: relative;
+}
+
+.hud-corners::before,
+.hud-corners::after,
+.hud-corners > .corner-bl,
+.hud-corners > .corner-br {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--hud-green);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.hud-corners::before {
+  content: '';
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.hud-corners::after {
+  content: '';
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+/* Status glow effects */
+.status-glow-active {
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+  animation: glow-pulse-blue 2s ease-in-out infinite;
+}
+
+.status-glow-warning {
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+  animation: glow-pulse-amber 1.5s ease-in-out infinite;
+}
+
+.status-glow-success {
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+.status-glow-error {
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+@keyframes glow-pulse-blue {
+  0%, 100% { box-shadow: 0 0 8px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(59, 130, 246, 0.5), 0 0 24px rgba(59, 130, 246, 0.2); }
+}
+
+@keyframes glow-pulse-amber {
+  0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 0 16px rgba(245, 158, 11, 0.5), 0 0 24px rgba(245, 158, 11, 0.2); }
+}
+
+/* Task card animations */
+.task-card-enter {
+  animation: slide-up 0.3s ease-out;
+}
+
+.task-card-complete {
+  animation: scale-pulse 0.4s ease-out, border-flash-green 0.5s ease-out;
+}
+
+.task-card-failed {
+  animation: shake 0.5s ease-in-out, border-flash-red 0.5s ease-out;
+}
+
+.task-card-loop {
+  animation: warning-blink 1s linear infinite;
+  border-color: var(--hud-amber) !important;
+}
+
+@keyframes slide-up {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes border-flash-green {
+  0% { border-color: rgba(16, 185, 129, 0.5); }
+  50% { border-color: rgba(16, 185, 129, 1); }
+  100% { border-color: rgba(16, 185, 129, 0.5); }
+}
+
+@keyframes border-flash-red {
+  0% { border-color: rgba(239, 68, 68, 0.5); }
+  50% { border-color: rgba(239, 68, 68, 1); }
+  100% { border-color: rgba(239, 68, 68, 0.5); }
+}
+
+@keyframes warning-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Agent card busy state */
+.agent-card-busy {
+  animation: glow-pulse-blue 2s ease-in-out infinite;
+}
+
+.agent-card-stuck {
+  animation: glow-pulse-amber 1.5s ease-in-out infinite;
+}
+
+/* Timeline minimap styles */
+.timeline-minimap {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at center, rgba(0, 255, 136, 0.02) 0%, transparent 70%),
+    linear-gradient(180deg, #0a0e14 0%, #0d1219 100%);
+}
+
+.timeline-lane {
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.timeline-lane::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
+}
+
+.timeline-task-dot {
+  transition: all 0.5s ease-out;
+}
+
+.timeline-task-dot:hover {
+  transform: scale(1.3);
+  filter: brightness(1.2);
+}
+
+.timeline-connection {
+  stroke-dasharray: 4 2;
+  animation: dash-flow 1s linear infinite;
+}
+
+@keyframes dash-flow {
+  0% { stroke-dashoffset: 6; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Animated counter styles */
+.animated-counter {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.3s ease-out;
+}
+
+/* Budget progress ring */
+.budget-ring {
+  transform: rotate(-90deg);
+}
+
+.budget-ring-track {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.budget-ring-progress {
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease-out;
+}
+
+/* Scrollbar enhancements */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.3);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 136, 0.5);
+}

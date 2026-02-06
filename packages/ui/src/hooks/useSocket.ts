@@ -16,14 +16,79 @@ import {
 
 const SOCKET_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 
+// Use window object to persist socket across HMR and React.StrictMode double-renders
+declare global {
+  interface Window {
+    __ABCC_SOCKET__?: Socket | null;
+    __ABCC_SOCKET_CONNECTED__?: boolean;
+    __ABCC_LAST_SOUND_TIME__?: number;
+  }
+}
+
+// Initialize from window (persists across HMR reloads)
+const getGlobalSocket = (): Socket | null => window.__ABCC_SOCKET__ ?? null;
+const setGlobalSocket = (socket: Socket | null) => { window.__ABCC_SOCKET__ = socket; };
+const isGlobalConnected = (): boolean => window.__ABCC_SOCKET_CONNECTED__ ?? false;
+const setGlobalConnected = (connected: boolean) => { window.__ABCC_SOCKET_CONNECTED__ = connected; };
+
+// Audio delay to prevent overlapping sounds (3s to cover assigned -> in_progress transition)
+const SOUND_DELAY_MS = 3000;
+
+// Audio enabled - delay mechanism handles overlap
+const AUDIO_DISABLED = false;
+const getLastSoundTime = (): number => window.__ABCC_LAST_SOUND_TIME__ ?? 0;
+const setLastSoundTime = (time: number) => { window.__ABCC_LAST_SOUND_TIME__ = time; };
+
+// Play sound with delay if needed to prevent overlap
+const playWithDelay = (playFn: () => void) => {
+  // Skip if audio disabled for debugging
+  if (AUDIO_DISABLED) return;
+
+  const now = Date.now();
+  const lastSound = getLastSoundTime();
+  const timeSinceLastSound = now - lastSound;
+
+  if (timeSinceLastSound < SOUND_DELAY_MS) {
+    // Delay this sound to prevent overlap
+    const delay = SOUND_DELAY_MS - timeSinceLastSound;
+    setTimeout(() => {
+      setLastSoundTime(Date.now());
+      playFn();
+    }, delay);
+  } else {
+    setLastSoundTime(now);
+    playFn();
+  }
+};
+
 export function useSocket() {
-  const socketRef = useRef<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const connectedRef = useRef(false);
+  const socketRef = useRef<Socket | null>(getGlobalSocket());
+  const [isConnected, setIsConnected] = useState(isGlobalConnected());
+  const connectedRef = useRef(isGlobalConnected());
 
   const connect = useCallback(() => {
-    // Prevent multiple connections
-    if (connectedRef.current || socketRef.current?.connected) return;
+    const existingSocket = getGlobalSocket();
+    const connected = isGlobalConnected();
+
+    console.log('[useSocket] connect() called', {
+      existingSocket: !!existingSocket,
+      existingSocketConnected: existingSocket?.connected,
+      globalConnected: connected,
+      socketRefCurrent: !!socketRef.current,
+    });
+
+    // Prevent multiple connections (check both local ref and global)
+    if (connected || existingSocket?.connected) {
+      // Reuse existing socket
+      socketRef.current = existingSocket;
+      connectedRef.current = connected;
+      setIsConnected(connected);
+      console.log('[useSocket] Reusing existing socket connection');
+      return;
+    }
+
+    console.log('[useSocket] Creating NEW socket connection');
+    setGlobalConnected(true);
     connectedRef.current = true;
 
     const socket = io(SOCKET_URL, {
@@ -35,12 +100,14 @@ export function useSocket() {
     });
 
     socket.on('connect', () => {
-      console.log('Socket connected');
+      console.log('[useSocket] Socket connected');
+      setGlobalConnected(true);
       setIsConnected(true);
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
+      console.log('[useSocket] Socket disconnected:', reason);
+      setGlobalConnected(false);
       setIsConnected(false);
     });
 
@@ -68,19 +135,19 @@ export function useSocket() {
 
         switch (newTask.status) {
           case 'assigned':
-            playTaskAssigned(agentType);
+            playWithDelay(() => playTaskAssigned(agentType));
             break;
           case 'in_progress':
-            playTaskInProgress(agentType);
+            playWithDelay(() => playTaskInProgress(agentType));
             break;
           case 'completed':
-            playTaskCompleted(agentType);
+            playWithDelay(() => playTaskCompleted(agentType));
             break;
           case 'failed':
-            playTaskFailed(agentType);
+            playWithDelay(() => playTaskFailed(agentType));
             break;
           case 'needs_human':
-            playAgentStuck(agentType);
+            playWithDelay(() => playAgentStuck(agentType));
             break;
         }
       }
@@ -93,7 +160,7 @@ export function useSocket() {
 
         // Play milestone sound every 2 iterations
         if (newTask.currentIteration % 2 === 0) {
-          playTaskMilestone(agentType);
+          playWithDelay(() => playTaskMilestone(agentType));
         }
       }
 
@@ -123,7 +190,7 @@ export function useSocket() {
 
         // Check for loop detection
         if (payload.isLoop) {
-          playLoopDetected();
+          playWithDelay(() => playLoopDetected());
           useUIStore.getState().updateAgentHealth(agentId, {
             loopDetected: true,
             lastActionTime: now,
@@ -222,23 +289,29 @@ export function useSocket() {
     // Code review events (Opus reviewing code)
     socket.on('code_review_started', (event: { payload: { taskId: string; reviewerId?: string } }) => {
       console.log('Code review started:', event.payload);
-      playOpusReview('cto');
+      playWithDelay(() => playOpusReview('cto'));
     });
 
     // Task decomposition events (CTO breaking down tasks)
     socket.on('task_decomposition_started', (event: { payload: { taskId: string; agentId?: string } }) => {
       console.log('Task decomposition started:', event.payload);
-      playDecomposition('cto');
+      playWithDelay(() => playDecomposition('cto'));
     });
 
     socketRef.current = socket;
+    setGlobalSocket(socket);
   }, []); // No dependencies - connect once
 
   const disconnect = useCallback(() => {
-    if (socketRef.current) {
+    // Only disconnect if this is the actual global socket
+    // In StrictMode, we want to keep the connection alive
+    if (socketRef.current && socketRef.current === getGlobalSocket()) {
+      console.log('[useSocket] Disconnecting socket');
       socketRef.current.disconnect();
       socketRef.current = null;
+      setGlobalSocket(null);
       connectedRef.current = false;
+      setGlobalConnected(false);
       setIsConnected(false);
     }
   }, []);
@@ -250,10 +323,20 @@ export function useSocket() {
   }, []);
 
   useEffect(() => {
+    // Sync local state with global on mount
+    const existingSocket = getGlobalSocket();
+    if (existingSocket && isGlobalConnected()) {
+      console.log('[useSocket] Syncing with existing global socket');
+      socketRef.current = existingSocket;
+      setIsConnected(true);
+    }
+
     return () => {
-      disconnect();
+      // Don't disconnect in cleanup - let the socket persist
+      // This prevents React.StrictMode from creating multiple connections
+      // The socket will be cleaned up when the page unloads
     };
-  }, [disconnect]);
+  }, []);
 
   return {
     connect,

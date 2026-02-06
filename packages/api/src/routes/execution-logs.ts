@@ -27,6 +27,19 @@ const createLogSchema = z.object({
   modelUsed: z.string().optional(),
 });
 
+// Get recent execution logs (all agents/tasks)
+executionLogsRouter.get('/', asyncHandler(async (req, res) => {
+  const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+
+  const logs = await prisma.executionLog.findMany({
+    orderBy: { timestamp: 'desc' },
+    take: Math.min(limit, 200), // Cap at 200
+  });
+
+  // Return in chronological order (oldest first)
+  res.json(logs.reverse());
+}));
+
 // Create new execution log
 executionLogsRouter.post('/', asyncHandler(async (req, res) => {
   const logService = new ExecutionLogService(prisma);

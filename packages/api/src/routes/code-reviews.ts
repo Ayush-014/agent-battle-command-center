@@ -152,6 +152,41 @@ codeReviewsRouter.patch('/:id', asyncHandler(async (req, res) => {
   res.json(review);
 }));
 
+// Trigger a code review for a task (calls Opus to review)
+codeReviewsRouter.post('/trigger/:taskId', asyncHandler(async (req, res) => {
+  const codeReviewService = req.app.get('codeReviewService') as CodeReviewService;
+
+  if (!codeReviewService) {
+    res.status(503).json({ error: 'Code review service not available' });
+    return;
+  }
+
+  const task = await prisma.task.findUnique({
+    where: { id: req.params.taskId },
+  });
+
+  if (!task) {
+    res.status(404).json({ error: 'Task not found' });
+    return;
+  }
+
+  if (task.status !== 'completed') {
+    res.status(400).json({ error: 'Can only review completed tasks' });
+    return;
+  }
+
+  // Trigger the review asynchronously
+  codeReviewService.triggerReview(req.params.taskId, null).catch((error) => {
+    console.error('Code review failed:', error);
+  });
+
+  res.json({
+    success: true,
+    message: 'Code review triggered',
+    taskId: req.params.taskId,
+  });
+}));
+
 // Get review stats summary
 codeReviewsRouter.get('/stats', asyncHandler(async (req, res) => {
   const [

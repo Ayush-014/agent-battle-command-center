@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import type { Task, Agent, Alert, UIMode } from '@abcc/shared';
 
+interface Settings {
+  toolLogOpenByDefault: boolean;
+  minimapStyle: 'timeline' | 'grid' | 'flow';
+  themeAccent: 'green' | 'blue' | 'amber';
+}
+
 interface UIState {
   // Mode
   mode: UIMode;
@@ -21,6 +27,12 @@ interface UIState {
   toggleChatPanel: () => void;
   toolLogOpen: boolean;
   toggleToolLog: () => void;
+  settingsModalOpen: boolean;
+  toggleSettingsModal: () => void;
+
+  // Settings
+  settings: Settings;
+  updateSettings: (settings: Partial<Settings>) => void;
 
   // Chat state
   activeChatAgentId: string | null;
@@ -128,8 +140,21 @@ export const useUIStore = create<UIState>((set) => ({
   toggleAlertsPanel: () => set((state) => ({ alertsPanelOpen: !state.alertsPanelOpen })),
   chatPanelOpen: false,
   toggleChatPanel: () => set((state) => ({ chatPanelOpen: !state.chatPanelOpen })),
-  toolLogOpen: false,
+  toolLogOpen: true,
   toggleToolLog: () => set((state) => ({ toolLogOpen: !state.toolLogOpen })),
+  settingsModalOpen: false,
+  toggleSettingsModal: () => set((state) => ({ settingsModalOpen: !state.settingsModalOpen })),
+
+  // Settings
+  settings: {
+    toolLogOpenByDefault: true,
+    minimapStyle: 'timeline',
+    themeAccent: 'green',
+  },
+  updateSettings: (newSettings) =>
+    set((state) => ({
+      settings: { ...state.settings, ...newSettings },
+    })),
 
   // Chat state
   activeChatAgentId: null,
