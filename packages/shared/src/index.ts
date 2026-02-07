@@ -225,7 +225,6 @@ export interface ExecuteTaskRequest {
   useClaude?: boolean;
   model?: string;
   allowFallback?: boolean;
-  stepByStep?: boolean;
 }
 
 export interface ExecuteTaskResponse {
@@ -266,7 +265,7 @@ export interface TimelineDataPoint {
 }
 
 // UI State Types
-export type UIMode = 'overseer' | 'micromanager' | 'dashboard';
+export type UIMode = 'overseer' | 'dashboard';
 
 export interface UIState {
   mode: UIMode;

@@ -247,7 +247,6 @@ Added `CLAUDE.md` section documenting critical test requirements:
 | Task Queue | ✅ Complete | Grid with filters |
 | Active Missions | ✅ Complete | Real-time agent strip |
 | Cost Dashboard | ✅ Complete | Charts, breakdowns |
-| Micromanager View | ✅ Complete | Step-by-step execution |
 | Code Review Panel | ✅ Complete | Findings display |
 | Audio System | ✅ Complete | C&C Red Alert style |
 | Real-time Updates | ✅ Complete | WebSocket |
@@ -276,9 +275,9 @@ Added `CLAUDE.md` section documenting critical test requirements:
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         UI (React + Vite)                           │
 │                         localhost:5173                              │
-│   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐              │
-│   │TaskQueue │ │Dashboard │ │Micromanager│ │ChatPanel│              │
-│   └──────────┘ └──────────┘ └──────────┘ └──────────┘              │
+│   ┌──────────┐ ┌──────────┐ ┌──────────┐                           │
+│   │TaskQueue │ │Dashboard │ │ChatPanel │                           │
+│   └──────────┘ └──────────┘ └──────────┘                           │
 └─────────────────────────┬───────────────────────────────────────────┘
                           │ HTTP/WebSocket
 ┌─────────────────────────▼───────────────────────────────────────────┐
@@ -1027,7 +1026,6 @@ Replaced polling-based log updates (2s delay) with real-time WebSocket:
 - `packages/ui/src/components/layout/CommandCenter.tsx` - Enhanced background
 - `packages/ui/src/components/minimap/Minimap.tsx` - Timeline style conditional
 - `packages/ui/src/components/shared/TaskCard.tsx` - Animation states, glow effects
-- `packages/ui/src/components/micromanager/MicromanagerView.tsx` - WebSocket logs, filtering
 - `packages/ui/src/styles/index.css` - Military HUD styles (~200 lines added)
 - `packages/ui/tailwind.config.js` - New animations (15+ keyframes)
 

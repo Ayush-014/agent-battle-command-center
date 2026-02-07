@@ -5,6 +5,7 @@
  */
 
 import { Router, type Router as RouterType } from 'express';
+import { z } from 'zod';
 import { PrismaClient } from '@prisma/client';
 import { TrainingDataService } from '../services/trainingDataService.js';
 
@@ -99,19 +100,29 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+const reviewSchema = z.object({
+  notes: z.string().optional(),
+});
+
 /**
  * POST /api/training-data/:id/review
  * Mark a training example for human review
  */
 router.post('/:id/review', async (req, res) => {
   try {
-    const { notes } = req.body;
-    await trainingDataService.markForReview(req.params.id, notes);
+    const data = reviewSchema.parse(req.body);
+    await trainingDataService.markForReview(req.params.id, data.notes);
     res.json({ success: true });
   } catch (error) {
     console.error('Failed to mark for review:', error);
     res.status(500).json({ error: 'Failed to mark for review' });
   }
+});
+
+const updateTrainingDataSchema = z.object({
+  isGoodExample: z.boolean().optional(),
+  humanReviewed: z.boolean().optional(),
+  reviewNotes: z.string().optional(),
 });
 
 /**
@@ -120,14 +131,14 @@ router.post('/:id/review', async (req, res) => {
  */
 router.patch('/:id', async (req, res) => {
   try {
-    const { isGoodExample, humanReviewed, reviewNotes } = req.body;
+    const data = updateTrainingDataSchema.parse(req.body);
 
     const updated = await prisma.trainingDataset.update({
       where: { id: req.params.id },
       data: {
-        ...(isGoodExample !== undefined && { isGoodExample }),
-        ...(humanReviewed !== undefined && { humanReviewed }),
-        ...(reviewNotes !== undefined && { reviewNotes }),
+        ...(data.isGoodExample !== undefined && { isGoodExample: data.isGoodExample }),
+        ...(data.humanReviewed !== undefined && { humanReviewed: data.humanReviewed }),
+        ...(data.reviewNotes !== undefined && { reviewNotes: data.reviewNotes }),
       },
     });
 

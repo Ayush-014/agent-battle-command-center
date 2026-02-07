@@ -306,7 +306,6 @@ interface ExecuteOptions {
   useClaude?: boolean;
   model?: string;
   allowFallback?: boolean;
-  stepByStep?: boolean;
 }
 
 interface QueueState {

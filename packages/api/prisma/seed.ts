@@ -66,27 +66,7 @@ async function main() {
     },
   });
 
-  await prisma.agent.upsert({
-    where: { id: 'coder-02' },
-    update: {},
-    create: {
-      id: 'coder-02',
-      agentTypeId: coderType.id,
-      name: 'Coder-02',
-      status: 'idle',
-      config: {
-        preferredModel: 'ollama/qwen2.5-coder:7b',
-        maxContextTokens: 4000,
-      },
-      stats: {
-        tasksCompleted: 0,
-        tasksFailed: 0,
-        successRate: 0,
-        totalApiCredits: 0,
-        totalTimeMs: 0,
-      },
-    },
-  });
+  // coder-02 removed - single Ollama agent is sufficient with 1 resource slot
 
   await prisma.agent.upsert({
     where: { id: 'qa-01' },

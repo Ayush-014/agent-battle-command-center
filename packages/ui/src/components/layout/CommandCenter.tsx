@@ -7,7 +7,6 @@ import { ToolLog } from '../main-view/ToolLog';
 import { TokenBurnLog } from '../main-view/TokenBurnLog';
 import { AlertPanel } from '../resources/AlertPanel';
 import { ChatPanel } from '../chat/ChatPanel';
-import { MicromanagerView } from '../micromanager/MicromanagerView';
 import { Dashboard } from '../dashboard/Dashboard';
 import { useUIStore } from '../../store/uiState';
 import { ComponentErrorBoundary } from '../ComponentErrorBoundary';
@@ -81,10 +80,6 @@ export function CommandCenter() {
                 </div>
               )}
             </>
-          ) : mode === 'micromanager' ? (
-            <ComponentErrorBoundary componentName="Micromanager">
-              <MicromanagerView />
-            </ComponentErrorBoundary>
           ) : (
             <ComponentErrorBoundary componentName="Dashboard">
               <Dashboard />

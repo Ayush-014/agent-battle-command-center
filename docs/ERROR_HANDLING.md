@@ -53,7 +53,6 @@ Located throughout `CommandCenter.tsx`, wraps individual components:
 - Active Missions
 - Tool Log
 - Token Burn Log
-- Micromanager View
 - Dashboard
 - Alerts Panel
 - Chat Panel

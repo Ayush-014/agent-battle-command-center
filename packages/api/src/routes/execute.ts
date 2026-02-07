@@ -20,7 +20,6 @@ executeRouter.post('/', asyncHandler(async (req, res) => {
     useClaude: z.boolean().default(true),
     model: z.string().optional(),
     allowFallback: z.boolean().default(true),
-    stepByStep: z.boolean().default(false),
   });
 
   const data = schema.parse(req.body);
@@ -55,7 +54,6 @@ executeRouter.post('/', asyncHandler(async (req, res) => {
         useClaude: data.useClaude,
         model: data.model,
         allowFallback: data.allowFallback,
-        stepByStep: data.stepByStep,
       });
 
       if (result.success) {
@@ -79,87 +77,6 @@ executeRouter.post('/', asyncHandler(async (req, res) => {
   executeAsync();
 
   res.json({ started: true, taskId: data.taskId });
-}));
-
-// Execute single step (micromanager mode)
-executeRouter.post('/step', asyncHandler(async (req, res) => {
-  const io = req.app.get('io') as SocketIOServer;
-
-  const schema = z.object({
-    taskId: z.string().uuid(),
-    stepNumber: z.number().min(0),
-  });
-
-  const data = schema.parse(req.body);
-
-  const task = await prisma.task.findUnique({
-    where: { id: data.taskId },
-  });
-
-  if (!task || !task.assignedAgentId) {
-    res.status(404).json({ error: 'Task not found or not assigned' });
-    return;
-  }
-
-  const step = await executor.executeStep(data.taskId, task.assignedAgentId, data.stepNumber);
-
-  if (!step) {
-    res.status(500).json({ error: 'Step execution failed' });
-    return;
-  }
-
-  // Emit step event
-  io.emit('execution_step', {
-    type: 'execution_step',
-    payload: step,
-    timestamp: new Date(),
-  });
-
-  res.json(step);
-}));
-
-// Approve step (micromanager mode)
-executeRouter.post('/approve', asyncHandler(async (req, res) => {
-  const schema = z.object({
-    taskId: z.string().uuid(),
-    stepNumber: z.number().min(0),
-  });
-
-  const data = schema.parse(req.body);
-
-  const success = await executor.approveStep(data.taskId, data.stepNumber);
-
-  if (!success) {
-    res.status(500).json({ error: 'Failed to approve step' });
-    return;
-  }
-
-  res.json({ approved: true });
-}));
-
-// Reject step (micromanager mode)
-executeRouter.post('/reject', asyncHandler(async (req, res) => {
-  const taskQueue = req.app.get('taskQueue') as TaskQueueService;
-
-  const schema = z.object({
-    taskId: z.string().uuid(),
-    stepNumber: z.number().min(0),
-    reason: z.string(),
-  });
-
-  const data = schema.parse(req.body);
-
-  const success = await executor.rejectStep(data.taskId, data.stepNumber, data.reason);
-
-  if (!success) {
-    res.status(500).json({ error: 'Failed to reject step' });
-    return;
-  }
-
-  // Request human input with the rejection reason
-  await taskQueue.requestHumanInput(data.taskId, `Step ${data.stepNumber} rejected: ${data.reason}`);
-
-  res.json({ rejected: true });
 }));
 
 // Abort execution

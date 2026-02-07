@@ -206,6 +206,30 @@ export class AgentManagerService {
     };
   }
 
+  async deleteAgent(id: string): Promise<boolean> {
+    const agent = await this.prisma.agent.findUnique({ where: { id } });
+
+    if (!agent) {
+      return false;
+    }
+
+    // Can't delete if agent is busy
+    if (agent.status === 'busy') {
+      throw new Error('Cannot delete agent while busy. Abort current task first.');
+    }
+
+    await this.prisma.agent.delete({ where: { id } });
+
+    // Emit deletion event
+    this.io.emit('agent_deleted', {
+      type: 'agent_deleted',
+      payload: { id },
+      timestamp: new Date(),
+    });
+
+    return true;
+  }
+
   private emitAgentUpdate(agent: Agent): void {
     this.io.emit('agent_status_changed', {
       type: 'agent_status_changed',

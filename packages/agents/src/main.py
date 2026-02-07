@@ -67,9 +67,6 @@ app.add_middleware(
 )
 
 
-# DEPRECATED: Step-by-step execution state (returns stub data)
-# TODO: Implement real agent introspection for micromanager mode
-execution_state: dict[str, dict] = {}
 
 
 class ExecuteRequest(BaseModel):
@@ -91,29 +88,6 @@ class ExecuteResponse(BaseModel):
     metrics: dict | None = None
 
 
-class StepRequest(BaseModel):
-    task_id: str
-    agent_id: str
-    step_number: int
-
-
-class StepResponse(BaseModel):
-    task_id: str
-    step_number: int
-    action: str
-    description: str
-    status: Literal["pending", "in_progress", "completed", "failed", "awaiting_approval"]
-
-
-class ApproveRequest(BaseModel):
-    task_id: str
-    step_number: int
-
-
-class RejectRequest(BaseModel):
-    task_id: str
-    step_number: int
-    reason: str
 
 
 class AbortRequest(BaseModel):
@@ -418,79 +392,6 @@ async def execute_task(request: ExecuteRequest) -> ExecuteResponse:
                 "iterations": 0,
             },
         )
-
-
-@app.post("/execute/step", response_model=StepResponse)
-async def execute_step(request: StepRequest) -> StepResponse:
-    """DEPRECATED: Returns stub data. Real step-by-step execution not implemented."""
-    task_id = request.task_id
-
-    # Initialize state if needed
-    if task_id not in execution_state:
-        execution_state[task_id] = {
-            "current_step": 0,
-            "steps": [],
-            "status": "in_progress",
-        }
-
-    state = execution_state[task_id]
-
-    # Simulate a step (in real implementation, this would pause crew execution)
-    step = {
-        "step_number": request.step_number,
-        "action": "analyze" if request.step_number == 0 else "modify",
-        "description": f"Step {request.step_number}: Analyzing task requirements..."
-            if request.step_number == 0 else f"Step {request.step_number}: Implementing changes...",
-        "status": "awaiting_approval",
-    }
-
-    state["steps"].append(step)
-    state["current_step"] = request.step_number
-
-    return StepResponse(
-        task_id=task_id,
-        step_number=step["step_number"],
-        action=step["action"],
-        description=step["description"],
-        status=step["status"],
-    )
-
-
-@app.post("/execute/approve")
-async def approve_step(request: ApproveRequest):
-    """Approve a step in micromanager mode."""
-    task_id = request.task_id
-
-    if task_id not in execution_state:
-        raise HTTPException(status_code=404, detail="Task execution not found")
-
-    state = execution_state[task_id]
-
-    if request.step_number >= len(state["steps"]):
-        raise HTTPException(status_code=400, detail="Invalid step number")
-
-    state["steps"][request.step_number]["status"] = "completed"
-
-    return {"approved": True, "step_number": request.step_number}
-
-
-@app.post("/execute/reject")
-async def reject_step(request: RejectRequest):
-    """Reject a step in micromanager mode."""
-    task_id = request.task_id
-
-    if task_id not in execution_state:
-        raise HTTPException(status_code=404, detail="Task execution not found")
-
-    state = execution_state[task_id]
-
-    if request.step_number >= len(state["steps"]):
-        raise HTTPException(status_code=400, detail="Invalid step number")
-
-    state["steps"][request.step_number]["status"] = "failed"
-    state["status"] = "needs_human"
-
-    return {"rejected": True, "step_number": request.step_number, "reason": request.reason}
 
 
 @app.post("/execute/abort")

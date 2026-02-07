@@ -12,7 +12,7 @@
  */
 
 const API_BASE = 'http://localhost:3001/api';
-const AGENTS_BASE = 'http://localhost:8000';
+const API_KEY = process.env.API_KEY || 'ceb3e905f7b1b5e899645c6ec467ca34';
 
 // Simple Ollama task template
 function makeOllamaTask(funcName, code, testCode, fileName) {
@@ -120,8 +120,14 @@ async function sleep(ms) {
 async function resetSystem() {
   console.log('🔄 Resetting system...');
   try {
-    await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST' });
-    await fetch(`${API_BASE}/queue/resources/clear`, { method: 'POST' });
+    await fetch(`${API_BASE}/agents/reset-all`, {
+      method: 'POST',
+      headers: { 'X-API-Key': API_KEY }
+    });
+    await fetch(`${API_BASE}/queue/resources/clear`, {
+      method: 'POST',
+      headers: { 'X-API-Key': API_KEY }
+    });
     console.log('   ✓ Agents and resources reset');
   } catch (e) {
     console.log('   ⚠ Could not reset agents');
@@ -140,7 +146,10 @@ async function resetSystem() {
 async function createTask(task) {
   const response = await fetch(`${API_BASE}/tasks`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY
+    },
     body: JSON.stringify({
       title: `[PARALLEL] ${task.title}`,
       description: task.description,
@@ -156,7 +165,10 @@ async function createTask(task) {
 async function assignTask(taskId, agentId) {
   const response = await fetch(`${API_BASE}/queue/assign`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY
+    },
     body: JSON.stringify({ taskId, agentId })
   });
   return response.json();
@@ -166,15 +178,16 @@ async function executeTask(taskId, agentId, description, expectedOutput, tier) {
   const useClaude = tier !== 'ollama';
   const model = TIER_MODELS[tier];
 
-  return await fetch(`${AGENTS_BASE}/execute`, {
+  // Use API endpoint instead of calling agents service directly
+  return await fetch(`${API_BASE}/execute`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': process.env.API_KEY || 'ceb3e905f7b1b5e899645c6ec467ca34'
+    },
     body: JSON.stringify({
-      task_id: taskId,
-      agent_id: agentId,
-      task_description: description,
-      expected_output: expectedOutput,
-      use_claude: useClaude,
+      taskId: taskId,
+      useClaude: useClaude,
       model: model
     })
   });
@@ -183,7 +196,10 @@ async function executeTask(taskId, agentId, description, expectedOutput, tier) {
 async function completeTask(taskId, result) {
   await fetch(`${API_BASE}/tasks/${taskId}/complete`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY
+    },
     body: JSON.stringify({ success: result.success, result })
   });
 }
@@ -192,13 +208,32 @@ async function waitForAgent(agentId, maxWaitMs = 60000) {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     try {
-      const response = await fetch(`${API_BASE}/agents/${agentId}`);
+      const response = await fetch(`${API_BASE}/agents/${agentId}`, {
+        headers: { 'X-API-Key': API_KEY }
+      });
       const agent = await response.json();
       if (agent.status === 'idle') return true;
     } catch (e) {}
     await sleep(1000);
   }
   return false;
+}
+
+async function waitForTaskCompletion(taskId, maxWaitMs = 120000) {
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
+    try {
+      const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
+        headers: { 'X-API-Key': API_KEY }
+      });
+      const task = await response.json();
+      if (['completed', 'failed', 'aborted'].includes(task.status)) {
+        return task;
+      }
+    } catch (e) {}
+    await sleep(2000);
+  }
+  throw new Error('Task timeout');
 }
 
 async function runValidation(validation) {
@@ -227,7 +262,9 @@ async function runValidation(validation) {
 
 async function getResourceStatus() {
   try {
-    const response = await fetch(`${API_BASE}/queue/resources`);
+    const response = await fetch(`${API_BASE}/queue/resources`, {
+      headers: { 'X-API-Key': API_KEY }
+    });
     return await response.json();
   } catch (e) {
     return null;
@@ -247,22 +284,21 @@ async function runTask(task, taskId, logPrefix) {
     await assignTask(taskId, agentId);
     console.log(`${logPrefix} ${tierInfo.icon} Assigned: ${task.title.substring(0, 30)}...`);
 
-    // Execute
+    // Execute (starts async execution)
     const execResponse = await executeTask(
       taskId, agentId, task.description, task.expectedOutput, task.tier
     );
 
     if (!execResponse.ok) {
-      throw new Error('Execution failed');
+      throw new Error('Execution start failed');
     }
 
-    const execResult = await execResponse.json();
+    // Wait for task to actually complete
+    const completedTask = await waitForTaskCompletion(taskId);
 
-    // Complete
-    await completeTask(taskId, execResult);
-
-    // Wait for agent
-    await waitForAgent(agentId);
+    if (completedTask.status === 'failed' || completedTask.status === 'aborted') {
+      throw new Error(`Task ${completedTask.status}`);
+    }
 
     // Validate
     const elapsed = Math.floor((Date.now() - taskStart) / 1000);
@@ -276,7 +312,10 @@ async function runTask(task, taskId, logPrefix) {
     console.log(`${logPrefix} 💥 ${tierInfo.icon} ${task.title.substring(0, 30)}... ERROR: ${e.message.substring(0, 30)}`);
 
     // Try to reset agent on error
-    await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST' }).catch(() => {});
+    await fetch(`${API_BASE}/agents/reset-all`, {
+      method: 'POST',
+      headers: { 'X-API-Key': API_KEY }
+    }).catch(() => {});
     await sleep(2000);
 
     return { tier: task.tier, passed: false, elapsed };

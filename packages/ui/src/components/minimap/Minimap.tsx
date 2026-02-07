@@ -1,5 +1,6 @@
 import { useUIStore } from '../../store/uiState';
 import { TimelineMinimap } from './TimelineMinimap';
+import { FlowMinimap } from './FlowMinimap';
 
 const STATUS_COLORS = {
   pending: '#6B7280',
@@ -17,6 +18,11 @@ export function Minimap() {
   // Use Timeline minimap if selected in settings
   if (settings.minimapStyle === 'timeline') {
     return <TimelineMinimap />;
+  }
+
+  // Use Flow minimap if selected in settings
+  if (settings.minimapStyle === 'flow') {
+    return <FlowMinimap />;
   }
 
   // Filter out tasks older than 24 hours

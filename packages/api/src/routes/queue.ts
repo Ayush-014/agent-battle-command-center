@@ -51,7 +51,7 @@ queueRouter.get('/', asyncHandler(async (req, res) => {
   });
 }));
 
-// Manually assign task to agent (micromanager mode)
+// Manually assign task to agent
 queueRouter.post('/assign', asyncHandler(async (req, res) => {
   const taskQueue = req.app.get('taskQueue') as TaskQueueService;
 

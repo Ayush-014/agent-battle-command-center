@@ -167,19 +167,16 @@ costMetricsRouter.get('/by-task-type', asyncHandler(async (req, res) => {
   });
 }));
 
+const timelineQuerySchema = z.object({
+  hours: z.coerce.number().min(1).max(168).default(24),
+});
+
 /**
  * GET /api/cost-metrics/timeline?hours=24
  * Get hourly cost breakdown over a time period
  */
 costMetricsRouter.get('/timeline', asyncHandler(async (req, res) => {
-  const hoursParam = req.query.hours as string | undefined;
-  const hours = hoursParam ? parseInt(hoursParam) : 24;
-
-  // Validate hours
-  if (isNaN(hours) || hours < 1 || hours > 168) {
-    res.status(400).json({ error: 'Hours must be between 1 and 168 (1 week)' });
-    return;
-  }
+  const { hours } = timelineQuerySchema.parse(req.query);
 
   // Get logs from the specified time period
   const cutoffTime = new Date(Date.now() - hours * 60 * 60 * 1000);

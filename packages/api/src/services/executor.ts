@@ -1,20 +1,6 @@
 import { config } from '../config.js';
 import type { ExecuteTaskRequest, ExecuteTaskResponse, TaskMetrics } from '../types/index.js';
 
-export interface ExecutionCallbacks {
-  onStep?: (step: ExecutionStepPayload) => void;
-  onProgress?: (progress: number) => void;
-  onLog?: (log: string) => void;
-}
-
-export interface ExecutionStepPayload {
-  taskId: string;
-  stepNumber: number;
-  action: string;
-  description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'awaiting_approval';
-}
-
 export class ExecutorService {
   private baseUrl: string;
 
@@ -23,8 +9,7 @@ export class ExecutorService {
   }
 
   async executeTask(
-    request: ExecuteTaskRequest,
-    callbacks?: ExecutionCallbacks
+    request: ExecuteTaskRequest
   ): Promise<ExecuteTaskResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/execute`, {
@@ -40,7 +25,6 @@ export class ExecutorService {
           use_claude: request.useClaude ?? true,
           model: request.model,
           allow_fallback: request.allowFallback ?? true,
-          step_by_step: request.stepByStep ?? false,
         }),
       });
 
@@ -82,89 +66,6 @@ export class ExecutorService {
         executionId: '',
         error: error instanceof Error ? error.message : 'Unknown error',
       };
-    }
-  }
-
-  async executeStep(
-    taskId: string,
-    agentId: string,
-    stepNumber: number
-  ): Promise<ExecutionStepPayload | null> {
-    try {
-      const response = await fetch(`${this.baseUrl}/execute/step`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          task_id: taskId,
-          agent_id: agentId,
-          step_number: stepNumber,
-        }),
-      });
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const result = await response.json() as {
-        step_number: number;
-        action: string;
-        description: string;
-        status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'awaiting_approval';
-      };
-
-      return {
-        taskId,
-        stepNumber: result.step_number,
-        action: result.action,
-        description: result.description,
-        status: result.status,
-      };
-    } catch (error) {
-      console.error('Step execution error:', error);
-      return null;
-    }
-  }
-
-  async approveStep(taskId: string, stepNumber: number): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/execute/approve`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          task_id: taskId,
-          step_number: stepNumber,
-        }),
-      });
-
-      return response.ok;
-    } catch (error) {
-      console.error('Step approval error:', error);
-      return false;
-    }
-  }
-
-  async rejectStep(taskId: string, stepNumber: number, reason: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/execute/reject`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          task_id: taskId,
-          step_number: stepNumber,
-          reason,
-        }),
-      });
-
-      return response.ok;
-    } catch (error) {
-      console.error('Step rejection error:', error);
-      return false;
     }
   }
 

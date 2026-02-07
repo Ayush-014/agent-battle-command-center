@@ -152,15 +152,6 @@ export function TopBar() {
           </span>
         </button>
         <button
-          className={`mode-toggle-btn ${mode === 'micromanager' ? 'active' : ''}`}
-          onClick={() => setMode('micromanager')}
-        >
-          <span className="flex items-center gap-1">
-            <span className={`w-2 h-2 rounded-full ${mode === 'micromanager' ? 'bg-hud-green' : 'bg-gray-600'}`} />
-            Micromanager
-          </span>
-        </button>
-        <button
           className={`mode-toggle-btn ${mode === 'dashboard' ? 'active' : ''}`}
           onClick={() => setMode('dashboard')}
         >

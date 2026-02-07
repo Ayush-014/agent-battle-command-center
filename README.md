@@ -4,8 +4,10 @@
 
 A Command & Conquer Red Alert-inspired control center for orchestrating AI coding agents with intelligent tiered routing. Watch your AI agents work in real-time with a retro RTS-style interface.
 
+[![MVP Ready](https://img.shields.io/badge/status-MVP%20Ready%20(8.1%2F10)-brightgreen)](./MVP_ASSESSMENT.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
+[![Tests](https://img.shields.io/badge/tests-122%20passing-success)](./packages/api/src/__tests__)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ---
@@ -172,12 +174,14 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 - **Loop detection** - Prevents agents from repeating failed actions
 - **Escalation system** - Ollama fails → Haiku retries with context → Human escalation
 
-### Security
-- ✅ API key authentication on all endpoints
-- ✅ CORS restricted to configured origins
-- ✅ HTTP rate limiting (100 req/min default)
-- ✅ No secrets in docker-compose.yml
+### Security (MVP Hardened - Feb 2026)
+- ✅ API key authentication on all endpoints (except /health)
+- ✅ CORS restricted to configured origins with test coverage
+- ✅ HTTP rate limiting (100 req/min default, configurable)
+- ✅ All secrets externalized to .env (not in docker-compose.yml)
 - ✅ Trivy security scanning in CI/CD
+- ✅ Error boundaries prevent UI crashes
+- ✅ Input sanitization and SQL injection prevention via Prisma
 
 ---
 
@@ -348,14 +352,21 @@ node scripts/test-parallel.js
 ### Unit Tests
 
 ```bash
-# API tests
+# API tests (18 test suites, 122 tests)
 cd packages/api
 npm test
 
-# Agent tests (when available)
+# Agent tests (2 Python test suites, 696 lines)
 cd packages/agents
 pytest
 ```
+
+**Test Coverage (as of Feb 2026):**
+- 18 API test files covering critical services
+- budgetService, resourcePool, stuckTaskRecovery, rateLimiter, agentManager
+- costCalculator, complexityAssessor, taskRouter, taskQueue, fileLock
+- 2 Python test suites (action_history, file_ops)
+- 122 passing tests, 5 known integration test issues being addressed
 
 ### System Health Check
 

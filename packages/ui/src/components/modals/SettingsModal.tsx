@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Volume2, DollarSign, Monitor, Palette, Play } from 'lucide-react';
 import { useUIStore } from '../../store/uiState';
 import { audioManager } from '../../audio/audioManager';
 import { apiPost } from '../../lib/api';
+import { defaultVoicePack } from '../../audio/voicePacks';
 
 type SettingsTab = 'audio' | 'budget' | 'display' | 'theme';
 
@@ -20,6 +21,26 @@ export function SettingsModal() {
   } = useUIStore();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('audio');
+  const [isTesting, setIsTesting] = useState(false);
+  const [budgetInput, setBudgetInput] = useState<string>('');
+
+  // Initialize budget input when modal opens
+  useEffect(() => {
+    if (settingsModalOpen) {
+      setBudgetInput((budget.dailyLimitCents / 100).toFixed(2));
+    }
+  }, [settingsModalOpen, budget.dailyLimitCents]);
+
+  // Apply theme to CSS variables
+  useEffect(() => {
+    const themeColors = {
+      green: '#00ff88',
+      blue: '#00aaff',
+      amber: '#ffaa00',
+    };
+    const accentColor = themeColors[settings.themeAccent as keyof typeof themeColors] || themeColors.green;
+    document.documentElement.style.setProperty('--hud-accent', accentColor);
+  }, [settings.themeAccent]);
 
   if (!settingsModalOpen) return null;
 
@@ -30,10 +51,42 @@ export function SettingsModal() {
     { id: 'theme', label: 'Theme', icon: <Palette className="w-4 h-4" /> },
   ];
 
+  // Get all unique audio files from voice packs
+  const getAllAudioFiles = () => {
+    const audioFiles: { file: string; text: string }[] = [];
+    Object.values(defaultVoicePack).forEach(eventLines => {
+      eventLines.forEach(line => {
+        if (!audioFiles.find(a => a.file === line.audioFile)) {
+          audioFiles.push({ file: line.audioFile, text: line.text });
+        }
+      });
+    });
+    return audioFiles;
+  };
+
   const handleTestSound = () => {
+    if (isTesting) return; // Prevent multiple simultaneous tests
+
     audioManager.setMuted(false);
     audioManager.setVolume(audioSettings.volume);
-    audioManager.playSound('/audio/conscript_reporting.mp3', 'Conscript reporting!', 10);
+
+    const allSounds = getAllAudioFiles();
+    setIsTesting(true);
+
+    // Play sounds in sequence with 1.5s delay between each
+    let currentIndex = 0;
+    const playNext = () => {
+      if (currentIndex < allSounds.length) {
+        const sound = allSounds[currentIndex];
+        audioManager.playSound(sound.file, sound.text, 10);
+        currentIndex++;
+        setTimeout(playNext, 1500);
+      } else {
+        setIsTesting(false);
+      }
+    };
+
+    playNext();
   };
 
   const handleVolumeChange = (value: number) => {
@@ -41,12 +94,19 @@ export function SettingsModal() {
     audioManager.setVolume(value);
   };
 
-  const handleBudgetLimitChange = async (cents: number) => {
+  const handleBudgetLimitChange = async () => {
+    const cents = Math.round(parseFloat(budgetInput) * 100);
+    if (isNaN(cents) || cents < 0) {
+      setBudgetInput((budget.dailyLimitCents / 100).toFixed(2));
+      return;
+    }
+
     try {
       await apiPost('/api/budget/limit', { dailyLimitCents: cents });
       updateBudget({ dailyLimitCents: cents });
     } catch (error) {
       console.error('Failed to update budget limit:', error);
+      setBudgetInput((budget.dailyLimitCents / 100).toFixed(2));
     }
   };
 
@@ -138,11 +198,17 @@ export function SettingsModal() {
               <div>
                 <button
                   onClick={handleTestSound}
-                  className="flex items-center gap-2 px-4 py-2 bg-hud-green/20 text-hud-green border border-hud-green/30 rounded-lg hover:bg-hud-green/30 transition-colors"
+                  disabled={isTesting}
+                  className={`flex items-center gap-2 px-4 py-2 bg-hud-green/20 text-hud-green border border-hud-green/30 rounded-lg transition-colors ${
+                    isTesting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-hud-green/30'
+                  }`}
                 >
-                  <Play className="w-4 h-4" />
-                  Test Sound
+                  <Play className={`w-4 h-4 ${isTesting ? 'animate-pulse' : ''}`} />
+                  {isTesting ? 'Testing All Sounds...' : 'Test All Sounds'}
                 </button>
+                <p className="text-xs text-gray-500 mt-2">
+                  {isTesting ? 'Playing all sounds in sequence...' : 'Cycles through entire sound library'}
+                </p>
               </div>
             </div>
           )}
@@ -160,10 +226,18 @@ export function SettingsModal() {
                     type="number"
                     min="0"
                     step="0.50"
-                    value={(budget.dailyLimitCents / 100).toFixed(2)}
-                    onChange={(e) => handleBudgetLimitChange(Math.round(parseFloat(e.target.value) * 100))}
+                    value={budgetInput}
+                    onChange={(e) => setBudgetInput(e.target.value)}
+                    onBlur={handleBudgetLimitChange}
+                    onKeyDown={(e) => e.key === 'Enter' && handleBudgetLimitChange()}
                     className="w-32 px-4 py-2 bg-command-bg border border-command-border rounded-lg text-xl font-mono focus:outline-none focus:border-hud-green"
                   />
+                  <button
+                    onClick={handleBudgetLimitChange}
+                    className="px-4 py-2 bg-hud-green/20 text-hud-green border border-hud-green/30 rounded-lg hover:bg-hud-green/30 transition-colors text-sm"
+                  >
+                    Save
+                  </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
                   Claude API calls will be blocked when this limit is reached

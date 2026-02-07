@@ -1,4 +1,5 @@
 import { Router, type Router as RouterType } from 'express';
+import { z } from 'zod';
 import { prisma } from '../db/client.js';
 import { asyncHandler } from '../types/index.js';
 import { SuccessRateService } from '../services/successRateService.js';
@@ -114,9 +115,13 @@ metricsRouter.get('/agents/:id', asyncHandler(async (req, res) => {
   });
 }));
 
+const timelineQuerySchema = z.object({
+  hours: z.coerce.number().min(1).max(168).default(24),
+});
+
 // Get timeline data
 metricsRouter.get('/timeline', asyncHandler(async (req, res) => {
-  const hours = parseInt(req.query.hours as string) || 24;
+  const { hours } = timelineQuerySchema.parse(req.query);
   const startTime = new Date(Date.now() - hours * 60 * 60 * 1000);
 
   const executions = await prisma.taskExecution.findMany({
@@ -189,10 +194,14 @@ metricsRouter.get('/distribution', asyncHandler(async (req, res) => {
   });
 }));
 
+const successRateQuerySchema = z.object({
+  period: z.enum(['hourly', 'daily']).default('hourly'),
+  hours: z.coerce.number().min(1).max(168).default(24),
+});
+
 // Get success rate over time
 metricsRouter.get('/success-rate', asyncHandler(async (req, res) => {
-  const period = (req.query.period as 'hourly' | 'daily') || 'hourly';
-  const hours = parseInt(req.query.hours as string) || 24;
+  const { period, hours } = successRateQuerySchema.parse(req.query);
 
   const data = await successRateService.getSuccessRate(period, hours);
 

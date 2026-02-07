@@ -449,8 +449,6 @@ packages/
 │   │   │   ├── AgentComparison.tsx    # Agent performance cards
 │   │   │   ├── CostDashboard.tsx      # Cost tracking & breakdown
 │   │   │   └── SuccessRateChart.tsx   # Success rate timeline
-│   │   └── micromanager/
-│   │       └── MicromanagerView.tsx   # Step-by-step execution view
 │   ├── hooks/
 │   │   └── useSocket.ts       # WebSocket with audio events
 │   └── store/

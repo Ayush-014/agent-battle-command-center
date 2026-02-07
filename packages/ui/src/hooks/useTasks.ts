@@ -136,7 +136,6 @@ export function useTasks() {
       useClaude?: boolean;
       model?: string;
       allowFallback?: boolean;
-      stepByStep?: boolean;
     }
   ) => {
     setLoading(true);

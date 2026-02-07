@@ -202,7 +202,26 @@ agentsRouter.patch('/:id', asyncHandler(async (req, res) => {
   res.json(agent);
 }));
 
-// Pause agent (micromanager control)
+// Delete agent
+agentsRouter.delete('/:id', asyncHandler(async (req, res) => {
+  const io = req.app.get('io') as SocketIOServer;
+  const agentManager = new AgentManagerService(prisma, io);
+
+  try {
+    const deleted = await agentManager.deleteAgent(req.params.id);
+
+    if (!deleted) {
+      res.status(404).json({ error: 'Agent not found' });
+      return;
+    }
+
+    res.json({ success: true, message: 'Agent deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : 'Failed to delete agent' });
+  }
+}));
+
+// Pause agent
 agentsRouter.post('/:id/pause', asyncHandler(async (req, res) => {
   const io = req.app.get('io') as SocketIOServer;
   const agentManager = new AgentManagerService(prisma, io);
