@@ -359,27 +359,27 @@ The system has crossed the MVP threshold. All critical blockers from the previou
 |------|----------|--------|
 | Add API key authentication | P0 | **DONE** |
 | Add error boundaries to UI | P0 | **DONE** |
-| Write 20+ critical unit tests | P0 | **PARTIAL** (12 test files, need ~8 more) |
+| Write 20+ critical unit tests | P0 | **DONE** (27 test files: 23 TS + 4 Python) |
 | Move secrets out of docker-compose.yml | P0 | **DONE** |
 | Restrict CORS to configurable origins | P1 | **DONE** |
 | Write user-facing README with screenshots | P1 | Not started |
-| Fix `.env.example` OLLAMA_MODEL default | P1 | Not started |
+| Fix `.env.example` OLLAMA_MODEL default | P1 | **DONE** |
 | Add HTTP rate limiting | P1 | **DONE** |
 | Make MCP gateway truly optional | P2 | **DONE** |
 | Add database migrations | P2 | **DONE** (partial) |
 | Remove step-by-step/micromanager mode | P1 | **DONE** (2026-02-06) |
-**Completion: 8/11 tasks done, 1 partial, 2 remaining**
+**Completion: 10/11 tasks done, 0 partial, 1 remaining**
 
 ### Next: Milestone 2 (Beta)
 
-| Task | Priority | Effort |
+| Task | Priority | Status |
 |------|----------|--------|
-| Write user-facing README with screenshots | P0 | 1 day |
-| Complete unit test coverage (20+ total) | P0 | 2 days |
-| E2E test suite (Playwright) | P1 | 3 days |
-| UI component tests (Vitest) | P1 | 3 days |
-| CONTRIBUTING.md + SECURITY.md | P1 | 1 day |
-| Purge coder-02 / fix agent routing | P1 | 0.5 day |
+| Write user-facing README with screenshots | P0 | **In Progress** |
+| Complete unit test coverage (20+ total) | P0 | **DONE** (27 tests) |
+| CONTRIBUTING.md + SECURITY.md | P1 | **DONE** |
+| E2E test suite (Playwright) | P1 | Not started |
+| UI component tests (Vitest) | P1 | Not started |
+| Purge coder-02 / fix agent routing | P1 | Not started |
 | Onboarding flow / first-run wizard | P2 | 2 days |
 | Multi-language workspace (JS/TS) | P2 | 3 days |
 | API documentation (OpenAPI/Swagger) | P2 | 1 day |
