@@ -4,10 +4,11 @@
 
 A Command & Conquer Red Alert-inspired control center for orchestrating AI coding agents with intelligent tiered routing. Watch your AI agents work in real-time with a retro RTS-style interface.
 
-[![MVP Ready](https://img.shields.io/badge/status-MVP%20Ready%20(8.1%2F10)-brightgreen)](./MVP_ASSESSMENT.md)
+[![Beta Ready](https://img.shields.io/badge/status-Beta%20Ready%20(8.1%2F10)-brightgreen)](./MVP_ASSESSMENT.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/tests-122%20passing-success)](./packages/api/src/__tests__)
+[![Tests](https://img.shields.io/badge/tests-27%20test%20files-success)](./packages/api/src/__tests__)
+[![Ollama Tested](https://img.shields.io/badge/Ollama%20C1--C8-95%25%20pass-success)](./scripts/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ---
@@ -17,7 +18,7 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 **💰 Cost Optimization (20x cheaper than cloud-only)**
 - FREE local execution via Ollama (qwen2.5-coder:7b) for 88% of tasks
 - Smart tiered routing: only use paid Claude API for complex tasks
-- **Proven:** 100% success rate on C1-C8 tasks, 88% on C1-C9 (includes extreme class-based tasks)
+- **Proven:** 95% success rate on C1-C8 tasks (Feb 2026), 88% on C1-C9 (includes extreme class-based tasks)
 
 **🎯 Academic Complexity Routing**
 - Based on Campbell's Task Complexity Theory
@@ -38,14 +39,38 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 
 ## 📸 Screenshots
 
-> **TODO:** Add screenshots here showing:
-> - Main command center view with task queue
-> - Active missions panel with running agents
-> - Tool log panel showing real-time execution
-> - Dashboard with cost metrics and success rates
-> - Minimap showing agent distribution
+### Main Command Center (Overseer Mode)
+![Command Center Overview](docs/screenshots/command-center-overview.png)
+*The main view showing task queue (bounty board), active missions strip, and real-time tool log with C&C Red Alert aesthetic.*
 
-*Screenshots coming soon - the UI features a retro Command & Conquer aesthetic with teal/amber HUD colors and terminal-style panels.*
+### Task Queue (Bounty Board)
+![Task Queue](docs/screenshots/task-queue.png)
+*Large task cards with complexity indicators, priority colors, and status badges. Click any task to view details and execution logs.*
+
+### Active Missions & Agent Health
+![Active Missions](docs/screenshots/active-missions.png)
+*Real-time agent status strip with health indicators (green=idle, amber=working, red=stuck). Shows current task and progress for each agent.*
+
+### Tool Log (Terminal Feed)
+![Tool Log](docs/screenshots/tool-log.png)
+*Live feed of every tool call with syntax highlighting. Expand entries to see full input/output, timing, and token usage.*
+
+### Dashboard & Analytics
+![Dashboard](docs/screenshots/dashboard.png)
+*Success rates by complexity, cost breakdown by model tier, agent comparison charts, and budget tracking.*
+
+### Cost Tracking
+![Cost Dashboard](docs/screenshots/cost-dashboard.png)
+*Real-time cost monitoring with daily budget limits, model tier breakdown, and token burn rate visualization.*
+
+---
+
+**UI Features:**
+- 🎮 Command & Conquer Red Alert-inspired design
+- 🎨 Teal/amber HUD colors with terminal-style panels
+- 🔊 Voice feedback for agent actions ("Conscript reporting!", "Shake it baby!")
+- ⚡ Real-time WebSocket updates (no polling)
+- 📊 Live metrics and health indicators
 
 ---
 
@@ -361,12 +386,12 @@ cd packages/agents
 pytest
 ```
 
-**Test Coverage (as of Feb 2026):**
-- 18 API test files covering critical services
-- budgetService, resourcePool, stuckTaskRecovery, rateLimiter, agentManager
-- costCalculator, complexityAssessor, taskRouter, taskQueue, fileLock
-- 2 Python test suites (action_history, file_ops)
-- 122 passing tests, 5 known integration test issues being addressed
+**Test Coverage (as of Feb 7, 2026):**
+- **27 total test files:** 23 TypeScript + 4 Python
+- **API tests (16 files):** budgetService, resourcePool, stuckTaskRecovery, rateLimiter, agentManager, costCalculator, complexityAssessor, taskRouter, taskQueue, fileLock, ollamaOptimizer, schedulerService, taskExecutor, taskAssigner
+- **UI component tests (5 files):** ErrorBoundary, AgentCard, TaskCard, AnimatedCounter, StatusBadge
+- **Python tests (4 files):** action_history, file_ops, validators, tools
+- **Integration tests:** CORS, auth middleware, task lifecycle
 
 ### System Health Check
 
@@ -595,10 +620,10 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 | Metric | Result | Test |
 |--------|--------|------|
-| **Ollama C1-C8 Success** | 100% | 20-task stress test |
-| **Ollama C1-C9 Success** | 88% | 40-task ultimate test |
+| **Ollama C1-C8 Success** | 95% (19/20) | 20-task stress test (Feb 7, 2026) |
+| **Ollama C1-C9 Success** | 88% (35/40) | 40-task ultimate test |
 | **Cost per task (avg)** | $0.002 | Mixed complexity batch |
-| **Ollama avg time** | 30-54s | Varies by complexity |
+| **Ollama avg time** | 30-77s | Varies by complexity (C1-C8) |
 | **Haiku avg time** | 27s | With MCP disabled |
 | **Parallel speedup** | 40-60% | vs sequential |
 
