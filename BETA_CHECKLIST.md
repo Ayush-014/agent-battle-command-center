@@ -35,14 +35,13 @@
 
 ### What's Needed:
 
-**6 screenshots to capture** (follow `docs/SCREENSHOT_GUIDE.md`):
+**5 screenshots captured** (follow `docs/SCREENSHOT_GUIDE.md`):
 
-1. [ ] **command-center-overview.png** - Full UI with task queue, missions, tool log
-2. [ ] **task-queue.png** - Bounty board with 6-8 diverse tasks
-3. [ ] **active-missions.png** - Agent health strip with working agents
-4. [ ] **tool-log.png** - Real-time terminal feed with expanded entry
-5. [ ] **dashboard.png** - Analytics, charts, agent comparison
-6. [ ] **cost-dashboard.png** - Budget tracking, model breakdown
+1. [x] **command-center-overview.png** - Full UI with task queue, missions, tool log
+2. [x] **task-queue.png** - Bounty board with 6-8 diverse tasks
+3. [x] **active-missions.png** - Agent health strip with working agents
+4. [x] **tool-log.png** - Real-time terminal feed with expanded entry
+5. [x] **dashboard.png** - Analytics, charts, agent comparison, and cost tracking combined
 
 **Setup before screenshots**:
 ```bash
@@ -205,13 +204,13 @@ See our [Roadmap](README.md#-roadmap) for Beta features coming soon!
 **Current Status**:
 - System tested and validated (95% success C1-C8)
 - Documentation comprehensive
-- Only missing: 6 screenshots for visual appeal
+- ✅ **Screenshots captured and committed** (5 high-quality PNGs)
 
 **Estimated Time to Beta**:
-- Screenshots: 30-60 minutes
+- ✅ ~~Screenshots: 30-60 minutes~~ DONE
 - Final review & version bump: 15-30 minutes
 - GitHub release: 15-30 minutes
-- **Total: ~2 hours**
+- **Remaining: ~1 hour**
 
 **Beta Definition Met**:
 ✅ Core features working
@@ -223,5 +222,5 @@ See our [Roadmap](README.md#-roadmap) for Beta features coming soon!
 
 ---
 
-**Last Updated**: Feb 7, 2026
-**Status**: Ready for screenshot capture → Beta release 🚀
+**Last Updated**: Feb 10, 2026
+**Status**: Screenshots complete → Ready for version bump and release! 🚀
