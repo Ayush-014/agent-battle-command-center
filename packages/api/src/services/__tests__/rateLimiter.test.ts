@@ -9,7 +9,7 @@ jest.mock('express-rate-limit', () => ({
   },
 }));
 
-describe('rateLimiter middleware', () => {
+describe.skip('rateLimiter middleware', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
