@@ -70,24 +70,14 @@ export function useSocket() {
     const existingSocket = getGlobalSocket();
     const connected = isGlobalConnected();
 
-    console.log('[useSocket] connect() called', {
-      existingSocket: !!existingSocket,
-      existingSocketConnected: existingSocket?.connected,
-      globalConnected: connected,
-      socketRefCurrent: !!socketRef.current,
-    });
-
     // Prevent multiple connections (check both local ref and global)
     if (connected || existingSocket?.connected) {
       // Reuse existing socket
       socketRef.current = existingSocket;
       connectedRef.current = connected;
       setIsConnected(connected);
-      console.log('[useSocket] Reusing existing socket connection');
       return;
     }
-
-    console.log('[useSocket] Creating NEW socket connection');
     setGlobalConnected(true);
     connectedRef.current = true;
 
@@ -100,13 +90,11 @@ export function useSocket() {
     });
 
     socket.on('connect', () => {
-      console.log('[useSocket] Socket connected');
       setGlobalConnected(true);
       setIsConnected(true);
     });
 
-    socket.on('disconnect', (reason) => {
-      console.log('[useSocket] Socket disconnected:', reason);
+    socket.on('disconnect', () => {
       setGlobalConnected(false);
       setIsConnected(false);
     });
@@ -118,12 +106,10 @@ export function useSocket() {
 
     // Task events
     socket.on('task_created', (event: { payload: Task }) => {
-      console.log('Task created:', event.payload);
       useUIStore.getState().updateTask(event.payload);
     });
 
     socket.on('task_updated', (event: { payload: Task }) => {
-      console.log('Task updated:', event.payload);
       const newTask = event.payload;
       const prevTask = useUIStore.getState().tasks.find((t) => t.id === newTask.id);
 
@@ -168,19 +154,16 @@ export function useSocket() {
     });
 
     socket.on('task_deleted', (event: { payload: { id: string } }) => {
-      console.log('Task deleted:', event.payload.id);
       useUIStore.getState().removeTask(event.payload.id);
     });
 
     // Agent events
     socket.on('agent_status_changed', (event: { payload: Agent }) => {
-      console.log('Agent status changed:', event.payload);
       useUIStore.getState().updateAgent(event.payload);
     });
 
     // Execution events
     socket.on('execution_step', (event: { payload: ExecutionStep & { isLoop?: boolean; durationMs?: number } }) => {
-      console.log('Execution step:', event.payload);
       const payload = event.payload;
 
       // Update agent health tracking
@@ -219,7 +202,6 @@ export function useSocket() {
 
     // Alert events
     socket.on('alert', (event: { payload: Alert }) => {
-      console.log('Alert:', event.payload);
       useUIStore.getState().addAlert(event.payload);
     });
 
@@ -229,7 +211,6 @@ export function useSocket() {
       byModelTier: { free: number; haiku: number; sonnet: number; opus: number };
       totalTokens: { input: number; output: number; total: number };
     } }) => {
-      console.log('Cost updated:', event.payload);
       useUIStore.getState().updateCostMetrics(event.payload);
     });
 
@@ -244,7 +225,6 @@ export function useSocket() {
       claudeBlocked: boolean;
       costPerTask?: { avgCostCents: number; todayTasks: number };
     } }) => {
-      console.log('Budget updated:', event.payload);
       useUIStore.getState().updateBudget({
         dailySpentCents: event.payload.dailySpentCents,
         dailyLimitCents: event.payload.dailyLimitCents,
@@ -288,13 +268,11 @@ export function useSocket() {
 
     // Code review events (Opus reviewing code)
     socket.on('code_review_started', (event: { payload: { taskId: string; reviewerId?: string } }) => {
-      console.log('Code review started:', event.payload);
       playWithDelay(() => playOpusReview('cto'));
     });
 
     // Task decomposition events (CTO breaking down tasks)
     socket.on('task_decomposition_started', (event: { payload: { taskId: string; agentId?: string } }) => {
-      console.log('Task decomposition started:', event.payload);
       playWithDelay(() => playDecomposition('cto'));
     });
 
@@ -306,7 +284,6 @@ export function useSocket() {
     // Only disconnect if this is the actual global socket
     // In StrictMode, we want to keep the connection alive
     if (socketRef.current && socketRef.current === getGlobalSocket()) {
-      console.log('[useSocket] Disconnecting socket');
       socketRef.current.disconnect();
       socketRef.current = null;
       setGlobalSocket(null);
@@ -326,7 +303,6 @@ export function useSocket() {
     // Sync local state with global on mount
     const existingSocket = getGlobalSocket();
     if (existingSocket && isGlobalConnected()) {
-      console.log('[useSocket] Syncing with existing global socket');
       socketRef.current = existingSocket;
       setIsConnected(true);
     }

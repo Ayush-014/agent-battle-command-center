@@ -394,7 +394,7 @@ def parse_agent_output(raw_output: str, task_id: Optional[str] = None, api_url: 
         action = match.group(1).strip()
         try:
             action_input = json.loads(match.group(2))
-        except:
+        except (json.JSONDecodeError, ValueError, TypeError):
             action_input = {}
         observation = match.group(3).strip()
 

@@ -122,9 +122,6 @@ class AudioManager {
 
       this.currentAudio = audio;
 
-      // Log to console for debugging
-      console.log(`[AudioManager] Playing: ${sound.text} (${sound.audioFile})`);
-
       // Play and wait for completion
       await audio.play();
 
