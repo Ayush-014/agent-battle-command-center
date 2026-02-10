@@ -1,20 +1,10 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { AgentManagerService } from '../agentManager.js';
-import { prisma } from '../../db/client.js';
+import { prismaMock } from '../../__mocks__/prisma.js';
 
-// Mock Prisma
+// Mock the db/client module to use prismaMock
 jest.mock('../../db/client.js', () => ({
-  prisma: {
-    agent: {
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-    },
-    agentType: {
-      findUnique: jest.fn(),
-    },
-  },
+  prisma: prismaMock,
 }));
 
 describe('AgentManagerService', () => {
@@ -25,7 +15,7 @@ describe('AgentManagerService', () => {
     mockIO = {
       emit: jest.fn(),
     };
-    agentManager = new AgentManagerService(prisma, mockIO);
+    agentManager = new AgentManagerService(prismaMock, mockIO);
     jest.clearAllMocks();
   });
 
@@ -46,7 +36,7 @@ describe('AgentManagerService', () => {
         },
       ];
 
-      (prisma.agent.findMany as any).mockResolvedValue(mockAgents as any);
+      (prismaMock.agent.findMany as any).mockResolvedValue(mockAgents as any);
 
       const agents = await agentManager.getAgents();
 
@@ -70,7 +60,7 @@ describe('AgentManagerService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.agent.findUnique as any).mockResolvedValue(mockAgent as any);
+      (prismaMock.agent.findUnique as any).mockResolvedValue(mockAgent as any);
 
       const agent = await agentManager.getAgent('agent-1');
 
@@ -79,7 +69,7 @@ describe('AgentManagerService', () => {
     });
 
     it('should return null for non-existent agent', async () => {
-      (prisma.agent.findUnique as any).mockResolvedValue(null);
+      (prismaMock.agent.findUnique as any).mockResolvedValue(null);
 
       const agent = await agentManager.getAgent('non-existent');
 
@@ -102,7 +92,7 @@ describe('AgentManagerService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.agent.update as any).mockResolvedValue(mockAgent as any);
+      (prismaMock.agent.update as any).mockResolvedValue(mockAgent as any);
 
       const agent = await agentManager.updateAgentConfig('agent-1', {
         preferredModel: 'new-model',
@@ -128,12 +118,12 @@ describe('AgentManagerService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.agent.update as any).mockResolvedValue(mockAgent as any);
+      (prismaMock.agent.update as any).mockResolvedValue(mockAgent as any);
 
       const agent = await agentManager.setAgentOffline('agent-1');
 
       expect(agent?.status).toBe('offline');
-      expect(prisma.agent.update).toHaveBeenCalledWith(
+      expect(prismaMock.agent.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'agent-1' },
           data: { status: 'offline' },
@@ -157,7 +147,7 @@ describe('AgentManagerService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.agent.update as any).mockResolvedValue(mockAgent as any);
+      (prismaMock.agent.update as any).mockResolvedValue(mockAgent as any);
 
       const agent = await agentManager.setAgentOnline('agent-1');
 
@@ -172,8 +162,8 @@ describe('AgentManagerService', () => {
         status: 'idle',
       };
 
-      (prisma.agent.findUnique as any).mockResolvedValue(mockAgent as any);
-      (prisma.agent.delete as any).mockResolvedValue({} as any);
+      (prismaMock.agent.findUnique as any).mockResolvedValue(mockAgent as any);
+      (prismaMock.agent.delete as any).mockResolvedValue({} as any);
 
       const result = await agentManager.deleteAgent('agent-1');
 
@@ -187,7 +177,7 @@ describe('AgentManagerService', () => {
         status: 'busy',
       };
 
-      (prisma.agent.findUnique as any).mockResolvedValue(mockAgent as any);
+      (prismaMock.agent.findUnique as any).mockResolvedValue(mockAgent as any);
 
       await expect(agentManager.deleteAgent('agent-1')).rejects.toThrow(
         'Cannot delete agent while busy'
@@ -195,7 +185,7 @@ describe('AgentManagerService', () => {
     });
 
     it('should return false for non-existent agent', async () => {
-      (prisma.agent.findUnique as any).mockResolvedValue(null);
+      (prismaMock.agent.findUnique as any).mockResolvedValue(null);
 
       const result = await agentManager.deleteAgent('non-existent');
 
@@ -217,7 +207,7 @@ describe('AgentManagerService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.agent.update as any).mockResolvedValue(mockAgent as any);
+      (prismaMock.agent.update as any).mockResolvedValue(mockAgent as any);
 
       const agent = await agentManager.pauseAgent('agent-1');
 
@@ -239,7 +229,7 @@ describe('AgentManagerService', () => {
         updatedAt: new Date(),
       };
 
-      (prisma.agent.update as any).mockResolvedValue(mockAgent as any);
+      (prismaMock.agent.update as any).mockResolvedValue(mockAgent as any);
 
       const agent = await agentManager.resumeAgent('agent-1');
 

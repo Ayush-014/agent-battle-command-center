@@ -83,7 +83,7 @@ describe('ResourcePoolService', () => {
   describe('release', () => {
     it('should release Ollama slot', () => {
       resourcePool.acquire('ollama', 'task-1');
-      resourcePool.release('ollama', 'task-1');
+      resourcePool.release('task-1');
 
       const status = resourcePool.getResourceStatus('ollama');
       expect(status.activeSlots).toBe(0);
@@ -92,7 +92,7 @@ describe('ResourcePoolService', () => {
 
     it('should release Claude slot', () => {
       resourcePool.acquire('claude', 'task-1');
-      resourcePool.release('claude', 'task-1');
+      resourcePool.release('task-1');
 
       const status = resourcePool.getResourceStatus('claude');
       expect(status.activeSlots).toBe(0);
@@ -101,7 +101,7 @@ describe('ResourcePoolService', () => {
 
     it('should allow re-acquire after release', () => {
       resourcePool.acquire('ollama', 'task-1');
-      resourcePool.release('ollama', 'task-1');
+      resourcePool.release('task-1');
       const result = resourcePool.acquire('ollama', 'task-2');
 
       expect(result).toBe(true);
@@ -113,7 +113,7 @@ describe('ResourcePoolService', () => {
 
     it('should handle releasing non-existent task gracefully', () => {
       expect(() => {
-        resourcePool.release('ollama', 'non-existent-task');
+        resourcePool.release('non-existent-task');
       }).not.toThrow();
 
       const status = resourcePool.getResourceStatus('ollama');
@@ -123,7 +123,7 @@ describe('ResourcePoolService', () => {
     it('should release specific task from multiple Claude tasks', () => {
       resourcePool.acquire('claude', 'task-1');
       resourcePool.acquire('claude', 'task-2');
-      resourcePool.release('claude', 'task-1');
+      resourcePool.release('task-1');
 
       const status = resourcePool.getResourceStatus('claude');
       expect(status.activeSlots).toBe(1);

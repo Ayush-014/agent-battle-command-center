@@ -19,17 +19,19 @@ function createMockLog(
   return {
     id: 'test-log-' + Math.random(),
     taskId: 'task-123',
-    taskExecutionId: 'exec-123',
-    stepNumber: 1,
+    agentId: 'agent-123',
+    step: 1,
+    timestamp: new Date(),
+    thought: null,
     action: 'test_action',
-    input: JSON.stringify({}),
+    actionInput: {},
     observation: 'test observation',
     durationMs: 1000,
-    isLoopDetected: false,
+    isLoop: false,
+    errorTrace: null,
     modelUsed,
     inputTokens,
     outputTokens,
-    createdAt: new Date(),
   } as ExecutionLog;
 }
 

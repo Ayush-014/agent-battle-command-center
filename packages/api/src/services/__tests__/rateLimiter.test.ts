@@ -62,7 +62,7 @@ describe('rateLimiter middleware', () => {
   it('should include custom message in response', async () => {
     await import('../rateLimiter.js');
 
-    const config = mockRateLimiter.mock.calls[0][0];
+    const config = mockRateLimiter.mock.calls[0][0] as any;
     expect(config.message).toBeDefined();
     expect(config.message).toContain('rate limit');
   });
@@ -70,7 +70,7 @@ describe('rateLimiter middleware', () => {
   it('should use sliding window by default', async () => {
     await import('../rateLimiter.js');
 
-    const config = mockRateLimiter.mock.calls[0][0];
+    const config = mockRateLimiter.mock.calls[0][0] as any;
     expect(config.standardHeaders).toBe(true);
     expect(config.legacyHeaders).toBe(false);
   });
