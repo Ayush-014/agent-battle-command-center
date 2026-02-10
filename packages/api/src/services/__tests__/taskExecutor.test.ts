@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // This is a minimal test file for taskExecutor
 // Full integration testing is handled by task-lifecycle.test.ts

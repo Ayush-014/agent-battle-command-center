@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from '@jest/globals';
 
 // Mock environment variables
 const originalEnv = process.env;
@@ -7,7 +7,7 @@ describe('CORS Configuration', () => {
   afterEach(() => {
     process.env = originalEnv;
     // Clear module cache to reload config with new env
-    vi.resetModules();
+    jest.resetModules();
   });
 
   it('should parse comma-separated CORS origins', async () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import {
   getHaikuComplexityAssessment,
   getDualComplexityAssessment,
@@ -7,25 +7,25 @@ import {
 import Anthropic from '@anthropic-ai/sdk';
 
 // Mock Anthropic SDK
-vi.mock('@anthropic-ai/sdk');
+jest.mock('@anthropic-ai/sdk');
 
 // Mock rate limiter
-vi.mock('../rateLimiter.js', () => ({
+jest.mock('../rateLimiter.js', () => ({
   rateLimiter: {
-    waitForCapacity: vi.fn().mockResolvedValue(undefined),
-    recordUsage: vi.fn(),
+    waitForCapacity: jest.fn().mockResolvedValue(undefined),
+    recordUsage: jest.fn(),
   },
 }));
 
 describe('Complexity Assessor', () => {
-  let mockCreate: ReturnType<typeof vi.fn>;
+  let mockCreate: ReturnType<typeof jest.fn>;
   const ORIGINAL_ENV = process.env;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     process.env = { ...ORIGINAL_ENV, ANTHROPIC_API_KEY: 'test-key' };
 
-    mockCreate = vi.fn();
+    mockCreate = jest.fn();
     (Anthropic as any).mockImplementation(() => ({
       messages: {
         create: mockCreate,

@@ -1,22 +1,22 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
 import { StuckTaskRecoveryService } from '../stuckTaskRecovery.js';
 import { prisma } from '../../db/client.js';
 
 // Mock Prisma
-vi.mock('../../db/client.js', () => ({
+jest.mock('../../db/client.js', () => ({
   prisma: {
     task: {
-      findMany: vi.fn(),
-      update: vi.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
     },
     agent: {
-      update: vi.fn(),
+      update: jest.fn(),
     },
     taskExecution: {
-      update: vi.fn(),
+      update: jest.fn(),
     },
     fileLock: {
-      deleteMany: vi.fn(),
+      deleteMany: jest.fn(),
     },
   },
 }));
@@ -27,13 +27,13 @@ describe('StuckTaskRecoveryService', () => {
 
   beforeEach(() => {
     mockIO = {
-      emit: vi.fn(),
+      emit: jest.fn(),
     };
 
     recoveryService = new StuckTaskRecoveryService(mockIO);
 
     // Reset all mocks
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -50,7 +50,7 @@ describe('StuckTaskRecoveryService', () => {
         updatedAt: oneHourAgo,
       };
 
-      vi.mocked(prisma.task.findMany).mockResolvedValue([mockStuckTask] as any);
+      jest.mocked(prisma.task.findMany).mockResolvedValue([mockStuckTask] as any);
 
       const stuckTasks = await (recoveryService as any).findStuckTasks();
 
@@ -67,7 +67,7 @@ describe('StuckTaskRecoveryService', () => {
         updatedAt: justNow,
       };
 
-      vi.mocked(prisma.task.findMany).mockResolvedValue([mockRecentTask] as any);
+      jest.mocked(prisma.task.findMany).mockResolvedValue([mockRecentTask] as any);
 
       const stuckTasks = await (recoveryService as any).findStuckTasks();
 
@@ -77,7 +77,7 @@ describe('StuckTaskRecoveryService', () => {
     it('should include both in_progress and assigned tasks', async () => {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-      vi.mocked(prisma.task.findMany).mockResolvedValue([
+      jest.mocked(prisma.task.findMany).mockResolvedValue([
         { id: 'task-1', status: 'in_progress', assignedAgentId: 'agent-1', updatedAt: oneHourAgo },
         { id: 'task-2', status: 'assigned', assignedAgentId: 'agent-2', updatedAt: oneHourAgo },
       ] as any);
@@ -97,10 +97,10 @@ describe('StuckTaskRecoveryService', () => {
         updatedAt: new Date(Date.now() - 60 * 60 * 1000),
       };
 
-      vi.mocked(prisma.task.update).mockResolvedValue({ ...mockTask, status: 'aborted' } as any);
-      vi.mocked(prisma.agent.update).mockResolvedValue({ id: 'agent-1', status: 'idle' } as any);
-      vi.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
+      jest.mocked(prisma.task.update).mockResolvedValue({ ...mockTask, status: 'aborted' } as any);
+      jest.mocked(prisma.agent.update).mockResolvedValue({ id: 'agent-1', status: 'idle' } as any);
+      jest.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
 
       await (recoveryService as any).recoverStuckTask(mockTask);
 
@@ -140,10 +140,10 @@ describe('StuckTaskRecoveryService', () => {
         updatedAt: new Date(Date.now() - 60 * 60 * 1000),
       };
 
-      vi.mocked(prisma.task.update).mockResolvedValue({ ...mockTask, status: 'aborted' } as any);
-      vi.mocked(prisma.agent.update).mockResolvedValue({ id: 'agent-1', status: 'idle' } as any);
-      vi.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
+      jest.mocked(prisma.task.update).mockResolvedValue({ ...mockTask, status: 'aborted' } as any);
+      jest.mocked(prisma.agent.update).mockResolvedValue({ id: 'agent-1', status: 'idle' } as any);
+      jest.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
 
       await (recoveryService as any).recoverStuckTask(mockTask);
 
@@ -170,10 +170,10 @@ describe('StuckTaskRecoveryService', () => {
         stats: { tasksCompleted: 5, tasksFailed: 2, successRate: 0.71 },
       };
 
-      vi.mocked(prisma.agent.update).mockResolvedValue(mockAgent as any);
-      vi.mocked(prisma.task.update).mockResolvedValue({ ...mockTask, status: 'aborted' } as any);
-      vi.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
+      jest.mocked(prisma.agent.update).mockResolvedValue(mockAgent as any);
+      jest.mocked(prisma.task.update).mockResolvedValue({ ...mockTask, status: 'aborted' } as any);
+      jest.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
 
       await (recoveryService as any).recoverStuckTask(mockTask);
 
@@ -193,15 +193,15 @@ describe('StuckTaskRecoveryService', () => {
     it('should recover all stuck tasks', async () => {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-      vi.mocked(prisma.task.findMany).mockResolvedValue([
+      jest.mocked(prisma.task.findMany).mockResolvedValue([
         { id: 'stuck-1', status: 'in_progress', assignedAgentId: 'agent-1', updatedAt: oneHourAgo },
         { id: 'stuck-2', status: 'in_progress', assignedAgentId: 'agent-2', updatedAt: oneHourAgo },
       ] as any);
 
-      vi.mocked(prisma.task.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.agent.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
+      jest.mocked(prisma.task.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.agent.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
 
       const results = await recoveryService.triggerCheck();
 
@@ -211,7 +211,7 @@ describe('StuckTaskRecoveryService', () => {
     });
 
     it('should return empty array when no stuck tasks', async () => {
-      vi.mocked(prisma.task.findMany).mockResolvedValue([]);
+      jest.mocked(prisma.task.findMany).mockResolvedValue([]);
 
       const results = await recoveryService.triggerCheck();
 
@@ -233,14 +233,14 @@ describe('StuckTaskRecoveryService', () => {
     it('should track recent recoveries', async () => {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-      vi.mocked(prisma.task.findMany).mockResolvedValue([
+      jest.mocked(prisma.task.findMany).mockResolvedValue([
         { id: 'stuck-1', status: 'in_progress', assignedAgentId: 'agent-1', updatedAt: oneHourAgo },
       ] as any);
 
-      vi.mocked(prisma.task.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.agent.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
-      vi.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
+      jest.mocked(prisma.task.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.agent.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.taskExecution.update).mockResolvedValue({} as any);
+      jest.mocked(prisma.fileLock.deleteMany).mockResolvedValue({ count: 0 } as any);
 
       await recoveryService.triggerCheck();
 

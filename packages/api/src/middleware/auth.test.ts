@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { Request, Response, NextFunction } from 'express';
 import { requireApiKey, optionalApiKey } from './auth.js';
 
 // Mock config
-vi.mock('../config.js', () => ({
+jest.mock('../config.js', () => ({
   config: {
     auth: {
       apiKey: 'test-api-key-12345',
@@ -23,10 +23,10 @@ describe('Auth Middleware', () => {
       path: '/api/tasks',
     };
     mockResponse = {
-      status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
     };
-    nextFunction = vi.fn();
+    nextFunction = jest.fn();
   });
 
   describe('requireApiKey', () => {

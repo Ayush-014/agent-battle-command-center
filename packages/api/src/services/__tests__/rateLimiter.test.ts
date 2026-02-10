@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 
 // Mock rate limiter module
-const mockRateLimiter = vi.fn();
-vi.mock('express-rate-limit', () => ({
+const mockRateLimiter = jest.fn();
+jest.mock('express-rate-limit', () => ({
   default: (config: any) => {
     mockRateLimiter(config);
     return (req: any, res: any, next: any) => next();
@@ -11,7 +11,7 @@ vi.mock('express-rate-limit', () => ({
 
 describe('rateLimiter middleware', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should create rate limiter with default config', async () => {

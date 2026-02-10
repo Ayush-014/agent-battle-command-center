@@ -1,16 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { CodeReviewService } from '../codeReviewService.js';
 
 // Mock dependencies
-vi.mock('../../db/client.js', () => ({
+jest.mock('../../db/client.js', () => ({
   prisma: {
     codeReview: {
-      create: vi.fn(),
-      findFirst: vi.fn(),
+      create: jest.fn(),
+      findFirst: jest.fn(),
     },
     task: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
     },
   },
 }));
@@ -20,7 +20,7 @@ describe('CodeReviewService', () => {
 
   beforeEach(() => {
     reviewService = CodeReviewService.getInstance();
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('shouldReview', () => {
