@@ -12,7 +12,7 @@ jest.mock('@anthropic-ai/sdk');
 // Mock rate limiter
 jest.mock('../rateLimiter.js', () => ({
   rateLimiter: {
-    waitForCapacity: jest.fn().mockResolvedValue(undefined),
+    waitForCapacity: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
     recordUsage: jest.fn(),
   },
 }));
