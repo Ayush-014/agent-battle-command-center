@@ -49,7 +49,7 @@
 
 | Task | Status | Date | Notes |
 |------|--------|------|-------|
-| Fix CI tests properly (not skip) | DONE | Feb 11 | 15 passing, 2 skipped (with reasons), 0 failures. Was 6 active / 9 skipped. |
+| Fix CI tests properly (not skip) | DONE | Feb 11 | 15 Node + 31 Python passing, 2 Node skipped (ESM mock issues), 0 failures. Fixed ruff linting, ActionHistory bugs, dual-import issue. |
 | Add demo GIF/video to README | TODO | | Static screenshots don't sell the RTS experience |
 | Cross-post to more communities | TODO | | HN, Dev.to, r/selfhosted, r/ollama, Twitter/X |
 | Enable GitHub Discussions | TODO | | Lower barrier than issues for questions |
@@ -141,7 +141,7 @@ These hurt credibility when contributors look at the codebase:
 
 | Item | Priority | Status | Notes |
 |------|----------|--------|-------|
-| CI tests skipped, not fixed | HIGH | TODO | `role "root"` Postgres error in integration tests |
+| CI tests skipped, not fixed | HIGH | DONE | Fixed: 15 Node + 31 Python tests passing. Ruff linting green. 2 skipped (ESM mock). |
 | `api_credits_used: 0.1` hardcoded | MEDIUM | TODO | TD-5 from MVP assessment |
 | Ghost agent coder-02 | MEDIUM | TODO | Gets tasks assigned, always fails |
 | Input validation gaps (Zod) | MEDIUM | TODO | Imported but not applied everywhere |
@@ -173,5 +173,5 @@ These hurt credibility when contributors look at the codebase:
 
 ---
 
-*Last updated: Feb 11, 2026*
+*Last updated: Feb 11, 2026 (evening - CI fully green)*
 *Next check-in: Feb 17, 2026*
