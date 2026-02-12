@@ -175,7 +175,6 @@ services:
     volumes:
       - backup_data:/backups
       - ./workspace:/workspace:ro
-      - ./.env:/env-source/.env:ro
       - ./:/env-restore
       - ${BACKUP_MIRROR_PATH:-./backups}:/backups-mirror
     depends_on:
