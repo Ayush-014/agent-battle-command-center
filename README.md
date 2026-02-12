@@ -78,7 +78,61 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Docker Hub — Recommended)
+
+Pre-built images on Docker Hub. No cloning the full repo, no build step — just pull and run.
+
+### Prerequisites
+
+- **Docker Desktop** (with GPU support for Ollama)
+- **NVIDIA GPU** (recommended: 8GB+ VRAM for local models)
+  - *Or CPU-only mode (comment out the `deploy:` GPU block in the compose file)*
+- **Anthropic API key** (for Claude models — [get one here](https://console.anthropic.com))
+- **8GB+ RAM** (for Docker containers)
+
+### Installation
+
+1. **Download the compose file and env template**
+   ```bash
+   mkdir agent-battle-command-center && cd agent-battle-command-center
+   curl -O https://raw.githubusercontent.com/mrdushidush/agent-battle-command-center/main/docker-compose.hub.yml
+   curl -O https://raw.githubusercontent.com/mrdushidush/agent-battle-command-center/main/.env.example
+   ```
+
+2. **Configure secrets**
+   ```bash
+   cp .env.example .env
+   # Generate 3 secure keys (run this 3 times, use each output below):
+   openssl rand -hex 32
+
+   # Then edit .env and replace CHANGE_ME values:
+   POSTGRES_PASSWORD=<key1>          # Also update the password in DATABASE_URL!
+   API_KEY=<key2>                    # API authentication
+   VITE_API_KEY=<key2>              # Must match API_KEY (same value)
+   JWT_SECRET=<key3>                 # JWT signing
+   ANTHROPIC_API_KEY=sk-ant-api03-...  # From https://console.anthropic.com
+   ```
+
+3. **Start all services** (~30 seconds to pull images)
+   ```bash
+   docker compose -f docker-compose.hub.yml up
+   ```
+
+4. **Open the UI** → http://localhost:5173
+   - First startup downloads the Ollama model (~5 min one-time)
+
+5. **Verify health**
+   ```bash
+   docker ps                                    # All 6 containers running
+   docker exec abcc-ollama ollama list           # Should show qwen2.5-coder:7b
+   curl http://localhost:3001/health             # API healthy
+   ```
+
+---
+
+## 🛠️ Quick Start (Build from Source)
+
+For contributors and developers who want to modify the code.
 
 ### Prerequisites
 
@@ -122,7 +176,7 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 
 5. **Open the UI**
    - Navigate to: http://localhost:5173
-   - The first startup takes ~5 minutes (downloading Ollama model)
+   - The first startup takes ~5 minutes (downloading Ollama model + building images)
 
 6. **Verify health**
    ```bash
@@ -661,7 +715,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - [ ] Onboarding flow / first-run wizard
 - [ ] Agent workspace viewer (live code editing view)
 - [ ] Plugin system for custom agent tools
-- [ ] Docker Hub image publishing
+- [x] Docker Hub image publishing
 
 ### Community Release (v1.0.x) - Target: 2-3 months
 - [ ] Multi-user authentication (OAuth2/OIDC)
