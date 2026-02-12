@@ -99,19 +99,11 @@ Pre-built images on Docker Hub. No cloning the full repo, no build step — just
    curl -O https://raw.githubusercontent.com/mrdushidush/agent-battle-command-center/main/.env.example
    ```
 
-2. **Configure secrets**
+2. **Run setup** (auto-generates all keys, prompts for Anthropic key)
    ```bash
-   cp .env.example .env
-   # Generate 3 secure keys (run this 3 times, use each output below):
-   openssl rand -hex 32
-
-   # Then edit .env and replace CHANGE_ME values:
-   POSTGRES_PASSWORD=<key1>          # Also update the password in DATABASE_URL!
-   API_KEY=<key2>                    # API authentication
-   VITE_API_KEY=<key2>              # Must match API_KEY (same value)
-   JWT_SECRET=<key3>                 # JWT signing
-   ANTHROPIC_API_KEY=sk-ant-api03-...  # From https://console.anthropic.com
+   bash scripts/setup.sh
    ```
+   Or manually: `cp .env.example .env` and edit the `CHANGE_ME` values.
 
 3. **Start all services** (~30 seconds to pull images)
    ```bash
@@ -150,35 +142,22 @@ For contributors and developers who want to modify the code.
    cd agent-battle-command-center
    ```
 
-2. **Create environment file**
+2. **Run setup** (auto-generates all keys, prompts for Anthropic key)
    ```bash
-   cp .env.example .env
+   bash scripts/setup.sh
    ```
+   Or manually: `cp .env.example .env` and edit the `CHANGE_ME` values.
 
-3. **Configure secrets** (edit `.env`)
-   ```bash
-   # Generate 3 secure keys (run this 3 times, use each output below):
-   openssl rand -hex 32
-
-   # Then edit .env and replace CHANGE_ME values:
-   POSTGRES_PASSWORD=<key1>          # Also update the password in DATABASE_URL!
-   API_KEY=<key2>                    # API authentication
-   VITE_API_KEY=<key2>              # Must match API_KEY (same value)
-   JWT_SECRET=<key3>                 # JWT signing
-   ANTHROPIC_API_KEY=sk-ant-api03-...  # From https://console.anthropic.com
-   ```
-
-4. **Start all services**
+3. **Start all services** (first build takes ~5 minutes)
    ```bash
    docker compose up --build
    ```
    > **No NVIDIA GPU?** Comment out the `deploy:` block in `docker-compose.yml` (lines 53-58) to run Ollama in CPU-only mode. It's slower but works.
 
-5. **Open the UI**
-   - Navigate to: http://localhost:5173
-   - The first startup takes ~5 minutes (downloading Ollama model + building images)
+4. **Open the UI** → http://localhost:5173
+   - Ollama model download adds ~5 min on first startup
 
-6. **Verify health**
+5. **Verify health**
    ```bash
    # Check all services are running
    docker ps
