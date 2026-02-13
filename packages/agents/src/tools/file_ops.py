@@ -6,7 +6,7 @@ from src.monitoring import ActionHistory, ActionLoopDetected
 
 
 def _is_test_file(path: str) -> bool:
-    """Check if a file path looks like a test file (Python, JS, or TS)."""
+    """Check if a file path looks like a test file (Python, JS, TS, Go, PHP)."""
     basename = path.rsplit('/', 1)[-1] if '/' in path else path
     # Python: test_*.py
     if basename.startswith('test_') and basename.endswith('.py'):
@@ -15,6 +15,12 @@ def _is_test_file(path: str) -> bool:
     for suffix in ('.test.js', '.test.ts', '.spec.js', '.spec.ts'):
         if basename.endswith(suffix):
             return True
+    # Go: *_test.go
+    if basename.endswith('_test.go'):
+        return True
+    # PHP: *Test.php or test*.php
+    if basename.endswith('Test.php') or (basename.startswith('test') and basename.endswith('.php')):
+        return True
     return False
 
 

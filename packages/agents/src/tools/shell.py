@@ -8,7 +8,7 @@ from src.monitoring import ActionHistory, ActionLoopDetected
 
 ALLOWED_COMMANDS = [
     "ls", "cat", "head", "tail", "grep", "find", "wc",
-    "python", "pip", "npm", "node", "npx", "tsx", "pnpm",
+    "python", "pip", "npm", "node", "npx", "tsx", "pnpm", "php",
     "git", "echo", "pwd", "mkdir", "touch",
     "pytest", "jest", "vitest", "cargo", "go",
 ]
@@ -119,6 +119,75 @@ def _validate_node_code(args: list[str]) -> str | None:
     return None
 
 
+def _validate_go_code(args: list[str]) -> str | None:
+    """Additional validation for go run commands. Reads source file to check for dangerous imports."""
+    if len(args) < 3:
+        return None
+
+    if args[1] != 'run':
+        return None
+
+    filepath = args[2]
+
+    # Read the Go source file and check for dangerous imports
+    import os
+    full_path = os.path.join(settings.WORKSPACE_PATH, filepath) if not os.path.isabs(filepath) else filepath
+    try:
+        with open(full_path, 'r', encoding='utf-8') as f:
+            code = f.read()
+    except FileNotFoundError:
+        return None  # Let go run produce its own error
+
+    dangerous_go_imports = [
+        r'"os/exec"',
+        r'"syscall"',
+        r'"net"',
+        r'"net/http"',
+        r'"net/smtp"',
+        r'"net/rpc"',
+        r'"plugin"',
+    ]
+
+    for pattern in dangerous_go_imports:
+        if re.search(pattern, code):
+            return "Error: Go code contains restricted import. Avoid os/exec, syscall, net, and net/http for security."
+
+    return None
+
+
+def _validate_php_code(args: list[str]) -> str | None:
+    """Additional validation for php -r commands."""
+    if len(args) < 3:
+        return None
+
+    if args[1] != '-r':
+        return None
+
+    code = args[2] if len(args) > 2 else ""
+
+    dangerous_php = [
+        r'\bsystem\s*\(',
+        r'\bexec\s*\(',
+        r'\bshell_exec\s*\(',
+        r'\bpassthru\s*\(',
+        r'\bproc_open\s*\(',
+        r'\bpopen\s*\(',
+        r'\bfopen\s*\(',
+        r'\bfile_get_contents\s*\(',
+        r'\bfile_put_contents\s*\(',
+        r'\beval\s*\(',
+        r'\bcurl_exec\s*\(',
+        r'\bsocket_create\s*\(',
+        r'\bfsockopen\s*\(',
+    ]
+
+    for pattern in dangerous_php:
+        if re.search(pattern, code, re.IGNORECASE):
+            return "Error: PHP code contains restricted function. Avoid system(), exec(), shell_exec(), fopen(), eval(), and network functions for security."
+
+    return None
+
+
 class ShellRunTool(BaseTool):
     name: str = "shell_run"
     description: str = "Run a shell command. Args: command (str): the shell command to execute. Only certain safe commands are allowed. Shell operators (|, &&, ;) are blocked."
@@ -163,6 +232,18 @@ class ShellRunTool(BaseTool):
                 node_check = _validate_node_code(parts)
                 if node_check:
                     return node_check
+
+            # Additional validation for go run
+            if cmd_name == "go":
+                go_check = _validate_go_code(parts)
+                if go_check:
+                    return go_check
+
+            # Additional validation for php -r
+            if cmd_name == "php":
+                php_check = _validate_php_code(parts)
+                if php_check:
+                    return php_check
 
             # SECURITY FIX: Use shell=False with parsed arguments
             # This prevents shell injection by not interpreting shell metacharacters
