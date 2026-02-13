@@ -12,6 +12,8 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 [![Ollama Tested](https://img.shields.io/badge/Ollama%20C1--C8-95%25%20pass-success)](./scripts/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
+**If you find this useful, [give it a star](https://github.com/mrdushidush/agent-battle-command-center/stargazers)** — it helps others discover this project and motivates development.
+
 ### Quick Links
 
 [What Makes This Special](#-what-makes-this-special) · [Screenshots](#-screenshots) · [Quick Start (Docker Hub)](#-quick-start-docker-hub--recommended) · [Quick Start (Source)](#️-quick-start-build-from-source) · [Architecture](#️-architecture) · [Key Features](#-key-features) · [Configuration](#️-configuration) · [Usage](#-usage) · [Testing](#-testing) · [Troubleshooting](#-troubleshooting) · [Documentation](#-documentation) · [Development](#️-development) · [Contributing](#-contributing) · [Performance](#-performance--benchmarks) · [Roadmap](#️-roadmap)
