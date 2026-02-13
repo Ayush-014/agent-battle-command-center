@@ -8,7 +8,7 @@ from src.monitoring import ActionHistory, ActionLoopDetected
 
 ALLOWED_COMMANDS = [
     "ls", "cat", "head", "tail", "grep", "find", "wc",
-    "python", "pip", "npm", "node", "pnpm",
+    "python", "pip", "npm", "node", "npx", "tsx", "pnpm",
     "git", "echo", "pwd", "mkdir", "touch",
     "pytest", "jest", "vitest", "cargo", "go",
 ]
@@ -86,6 +86,39 @@ def _validate_python_code(args: list[str]) -> str | None:
     return None
 
 
+def _validate_node_code(args: list[str]) -> str | None:
+    """Additional validation for node -e / tsx -e commands."""
+    if len(args) < 3:
+        return None
+
+    if args[1] != '-e':
+        return None
+
+    code = args[2] if len(args) > 2 else ""
+
+    dangerous_node = [
+        r"\brequire\s*\(\s*['\"]child_process['\"]",
+        r"\brequire\s*\(\s*['\"]fs['\"]",
+        r"\brequire\s*\(\s*['\"]net['\"]",
+        r"\brequire\s*\(\s*['\"]http['\"]",
+        r"\brequire\s*\(\s*['\"]https['\"]",
+        r"\brequire\s*\(\s*['\"]dgram['\"]",
+        r"\brequire\s*\(\s*['\"]cluster['\"]",
+        r"\bprocess\.exit\b",
+        r"\bprocess\.env\b",
+        r"\bimport\s*\(\s*['\"]child_process['\"]",
+        r"\bimport\s*\(\s*['\"]fs['\"]",
+        r"\bfrom\s+['\"]child_process['\"]",
+        r"\bfrom\s+['\"]fs['\"]",
+    ]
+
+    for pattern in dangerous_node:
+        if re.search(pattern, code, re.IGNORECASE):
+            return "Error: Node.js code contains restricted module. Use the file_read/file_write tools instead of fs, and avoid child_process, net, http, and process.exit."
+
+    return None
+
+
 class ShellRunTool(BaseTool):
     name: str = "shell_run"
     description: str = "Run a shell command. Args: command (str): the shell command to execute. Only certain safe commands are allowed. Shell operators (|, &&, ;) are blocked."
@@ -124,6 +157,12 @@ class ShellRunTool(BaseTool):
                 python_check = _validate_python_code(parts)
                 if python_check:
                     return python_check
+
+            # Additional validation for node -e / tsx -e
+            if cmd_name in ("node", "tsx"):
+                node_check = _validate_node_code(parts)
+                if node_check:
+                    return node_check
 
             # SECURITY FIX: Use shell=False with parsed arguments
             # This prevents shell injection by not interpreting shell metacharacters

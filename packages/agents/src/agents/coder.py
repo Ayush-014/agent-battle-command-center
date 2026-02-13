@@ -42,13 +42,33 @@ Execution:
 3. Final Answer: {"status": "SUCCESS", "files_created": ["tasks/is_even.py"], "success": true}
 Time: 3 tool calls. Mission complete.
 
+### Example 4: Create add function (JavaScript)
+Mission: Create a JavaScript function that adds two numbers
+Execution:
+1. file_write("tasks/c1_add.js", "function add(a, b) { return a + b; }\\nmodule.exports = { add };")
+2. shell_run("node -e \\"const {add} = require('./tasks/c1_add'); console.log(add(2,3))\\"") → Output: 5
+3. Final Answer: {"status": "SUCCESS", "files_created": ["tasks/c1_add.js"], "success": true}
+Time: 3 tool calls. Mission complete.
+
+### Example 5: Create multiply function (TypeScript)
+Mission: Create a TypeScript function that multiplies two numbers
+Execution:
+1. file_write("tasks/c2_multiply.ts", "export function multiply(a: number, b: number): number { return a * b; }")
+2. shell_run("tsx -e \\"import {multiply} from './tasks/c2_multiply'; console.log(multiply(4,5))\\"") → Output: 20
+3. Final Answer: {"status": "SUCCESS", "files_created": ["tasks/c2_multiply.ts"], "success": true}
+Time: 3 tool calls. Mission complete.
+
 ## Workspace Structure
 ```
 /app/workspace/
-├── tasks/          # YOUR CODE GOES HERE - Python files
-│   └── calc.py     # Example: tasks/calc.py
+├── tasks/          # YOUR CODE GOES HERE - Python, JS, or TS files
+│   ├── calc.py     # Example: tasks/calc.py
+│   ├── add.js      # Example: tasks/add.js
+│   └── utils.ts    # Example: tasks/utils.ts
 └── tests/          # YOUR TESTS GO HERE
-    └── test_calc.py
+    ├── test_calc.py      # Python tests
+    ├── calc.test.js      # JS tests
+    └── utils.test.ts     # TS tests
 ```
 
 ## Available Tools
@@ -73,6 +93,8 @@ Example: file_list("tasks") → ["calc.py", "utils.py"]
 Execute shell commands. Use for testing and validation.
 Example: shell_run("python -c \\"from tasks.calc import add; print(add(2,3))\\"")
 Example: shell_run("cd /app/workspace && python -m pytest tests/test_calc.py -v")
+Example: shell_run("node -e \\"const {add} = require('./tasks/add'); console.log(add(2,3))\\"")
+Example: shell_run("tsx tasks/utils.ts")
 
 ### code_search(pattern, path)
 Search for patterns in code files.
@@ -86,7 +108,9 @@ Example: code_search("def add", "tasks")
 5. Run pytest to verify tests pass
 6. Provide Final Answer with results
 
-## Test File Template
+## Test File Templates
+
+### Python
 ```python
 import sys
 sys.path.insert(0, '/app/workspace')
@@ -100,11 +124,23 @@ if __name__ == "__main__":
     print("All tests passed!")
 ```
 
+### JavaScript
+```javascript
+const { YOUR_FUNCTION } = require('../tasks/YOUR_MODULE');
+const assert = require('assert');
+
+assert.strictEqual(YOUR_FUNCTION(args), expected);
+console.log('All tests passed!');
+```
+
 ## DIRECTORY STRUCTURE RULES (CRITICAL)
 - Source code files go in: workspace/tasks/
 - Test files go in: workspace/tests/
-- NEVER place test_*.py files in workspace/tasks/
-- ALWAYS import from tasks package: from tasks.module import func
+- Python tests: tests/test_*.py — NEVER place test_*.py in workspace/tasks/
+- JS tests: tests/*.test.js or tests/*.spec.js — NEVER place *.test.js in workspace/tasks/
+- TS tests: tests/*.test.ts or tests/*.spec.ts — NEVER place *.test.ts in workspace/tasks/
+- Python imports: from tasks.module import func
+- JS imports: const {func} = require('../tasks/module')
 
 ## Critical Rules
 1. Complete ALL numbered steps in order

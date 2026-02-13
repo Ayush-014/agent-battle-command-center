@@ -5,6 +5,19 @@ from src.config import settings
 from src.monitoring import ActionHistory, ActionLoopDetected
 
 
+def _is_test_file(path: str) -> bool:
+    """Check if a file path looks like a test file (Python, JS, or TS)."""
+    basename = path.rsplit('/', 1)[-1] if '/' in path else path
+    # Python: test_*.py
+    if basename.startswith('test_') and basename.endswith('.py'):
+        return True
+    # JS/TS: *.test.js, *.test.ts, *.spec.js, *.spec.ts
+    for suffix in ('.test.js', '.test.ts', '.spec.js', '.spec.ts'):
+        if basename.endswith(suffix):
+            return True
+    return False
+
+
 class FileReadTool(BaseTool):
     name: str = "file_read"
     description: str = "Read the contents of a file. Args: path (str): file path to read"
@@ -41,8 +54,8 @@ class FileWriteTool(BaseTool):
                 return "Error: Both 'path' and 'content' are required"
 
             # Validate directory structure - test files must go in tests/
-            if 'test_' in path and 'tasks/' in path:
-                return "Error: Test files must be in workspace/tests/, not workspace/tasks/. Please use the correct path (e.g., tests/test_module.py instead of tasks/test_module.py)."
+            if 'tasks/' in path and _is_test_file(path):
+                return "Error: Test files must be in workspace/tests/, not workspace/tasks/. Please use the correct path (e.g., tests/test_module.py, tests/module.test.js)."
 
             # Register action and check for loops (truncate content for comparison)
             ActionHistory.register_action("file_write", {
