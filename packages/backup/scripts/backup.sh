@@ -78,10 +78,10 @@ fi
 #######################################
 # 4. Environment File (Encrypted)
 #######################################
-if [ -f "/env-source/.env" ]; then
+if [ -f "/env-restore/.env" ]; then
     if [ -n "${BACKUP_ENCRYPTION_KEY}" ]; then
         log "Encrypting .env file..."
-        if openssl enc -aes-256-cbc -salt -pbkdf2 -in "/env-source/.env" -out "${BACKUP_DIR}/env.enc" -pass "pass:${BACKUP_ENCRYPTION_KEY}"; then
+        if openssl enc -aes-256-cbc -salt -pbkdf2 -in "/env-restore/.env" -out "${BACKUP_DIR}/env.enc" -pass "pass:${BACKUP_ENCRYPTION_KEY}"; then
             SIZES[env]=$(stat -f%z "${BACKUP_DIR}/env.enc" 2>/dev/null || stat -c%s "${BACKUP_DIR}/env.enc")
             log ".env encrypted: ${SIZES[env]} bytes"
         else
@@ -93,7 +93,7 @@ if [ -f "/env-source/.env" ]; then
         SIZES[env]=0
     fi
 else
-    log "NOTICE: No .env file found at /env-source/.env"
+    log "NOTICE: No .env file found at /env-restore/.env"
     SIZES[env]=0
 fi
 

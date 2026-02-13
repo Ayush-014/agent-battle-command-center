@@ -11,7 +11,7 @@ done
 echo "Ollama is ready"
 
 # Pull the model if not already present
-MODEL=${OLLAMA_MODEL:-llama3.1:8b}
+MODEL=${OLLAMA_MODEL:-qwen2.5-coder:7b}
 if ollama list | grep -q "$MODEL"; then
   echo "Model $MODEL already available"
 else

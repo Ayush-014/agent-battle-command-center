@@ -43,6 +43,23 @@ Look for issues labeled:
 5. **Fix bugs** - Check open issues and submit PRs
 6. **Add features** - Discuss in an issue first before implementing
 
+## 🎯 Your First Contribution (5 minutes)
+
+Not sure where to start? Here's a concrete 5-minute walkthrough:
+
+1. **Fork & clone** the repo (see [Development Setup](#development-setup))
+2. **Run** `bash scripts/setup.sh` to get everything running
+3. **Pick a `good first issue`** from [Issues](https://github.com/mrdushidush/agent-battle-command-center/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
+4. **Make your change** on a new branch: `git checkout -b fix/my-fix`
+5. **Test locally**: `docker compose up` and verify in browser at `http://localhost:5173`
+6. **Open a PR** — we'll review within 1-3 days
+
+**Even smaller contributions help:**
+- Fix a typo in docs
+- Add a missing JSDoc comment
+- Improve an error message
+- Add a test for an untested function
+
 ## 💻 Development Setup
 
 ### Prerequisites
@@ -61,10 +78,22 @@ git clone https://github.com/YOUR_USERNAME/agent-battle-command-center.git
 cd agent-battle-command-center
 
 # Add upstream remote
-git remote add upstream https://github.com/ORIGINAL_OWNER/agent-battle-command-center.git
+git remote add upstream https://github.com/mrdushidush/agent-battle-command-center.git
 ```
 
-### Install Dependencies
+### Quick Setup (Recommended)
+
+```bash
+# Run the automated setup script — creates .env, installs deps, pulls Docker images
+bash scripts/setup.sh
+```
+
+### Manual Setup
+
+<details>
+<summary>Click to expand manual steps</summary>
+
+#### Install Dependencies
 
 ```bash
 # Install Node.js dependencies
@@ -75,7 +104,7 @@ cd packages/agents
 pip install -r requirements.txt
 ```
 
-### Configure Environment
+#### Configure Environment
 
 ```bash
 # Copy example environment file
@@ -90,6 +119,8 @@ nano .env  # or your preferred editor
 - `API_KEY` - Generate with `openssl rand -hex 32`
 - `POSTGRES_PASSWORD` - Any secure password
 - `JWT_SECRET` - Generate with `openssl rand -hex 32`
+
+</details>
 
 ### Start Development Environment
 
@@ -114,6 +145,13 @@ pnpm dev
 # Run agents in dev mode (terminal 3)
 cd packages/agents
 uvicorn src.main:app --reload --port 8000
+```
+
+**Option 3: Docker Hub (Quick test, no build)**
+```bash
+# Pull pre-built images and start — no local build required
+docker compose -f docker-compose.hub.yml up
+# UI at http://localhost:5173, API at http://localhost:3001
 ```
 
 ### Verify Setup
@@ -522,8 +560,8 @@ curl -X POST -H "X-API-Key: your_key" http://localhost:3001/api/agents/stuck-rec
 
 ## ❓ Questions?
 
-- **General questions**: [GitHub Discussions](https://github.com/OWNER/agent-battle-command-center/discussions)
-- **Bug reports**: [GitHub Issues](https://github.com/OWNER/agent-battle-command-center/issues)
+- **General questions**: [GitHub Discussions](https://github.com/mrdushidush/agent-battle-command-center/discussions)
+- **Bug reports**: [GitHub Issues](https://github.com/mrdushidush/agent-battle-command-center/issues)
 - **Security issues**: See [SECURITY.md](SECURITY.md)
 
 ## 🙏 Thank You!

@@ -4,12 +4,19 @@
 
 A Command & Conquer Red Alert-inspired control center for orchestrating AI coding agents with intelligent tiered routing. Watch your AI agents work in real-time with a retro RTS-style interface.
 
-[![Beta Ready](https://img.shields.io/badge/status-Beta%20Ready%20(8.1%2F10)-brightgreen)](./MVP_ASSESSMENT.md)
+[![Strong MVP](https://img.shields.io/badge/status-Strong%20MVP%20(8.5%2F10)-brightgreen)](./MVP_ASSESSMENT.md)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-dushidush-blue?logo=docker)](https://hub.docker.com/u/dushidush)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
 [![Tests](https://img.shields.io/badge/tests-27%20test%20files-success)](./packages/api/src/__tests__)
 [![Ollama Tested](https://img.shields.io/badge/Ollama%20C1--C8-95%25%20pass-success)](./scripts/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+**If you find this useful, [give it a star](https://github.com/mrdushidush/agent-battle-command-center/stargazers)** — it helps others discover this project and motivates development.
+
+### Quick Links
+
+[What Makes This Special](#-what-makes-this-special) · [Screenshots](#-screenshots) · [Quick Start (Docker Hub)](#-quick-start-docker-hub--recommended) · [Quick Start (Source)](#️-quick-start-build-from-source) · [Architecture](#️-architecture) · [Key Features](#-key-features) · [Configuration](#️-configuration) · [Usage](#-usage) · [Testing](#-testing) · [Troubleshooting](#-troubleshooting) · [Documentation](#-documentation) · [Development](#️-development) · [Contributing](#-contributing) · [Performance](#-performance--benchmarks) · [Roadmap](#️-roadmap)
 
 ---
 
@@ -38,6 +45,10 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 ---
 
 ## 📸 Screenshots
+
+### Live Demo
+![Command Center in Action](docs/screenshots/CommandCenter1.gif)
+*The full command center running live — agent minimap, task queue, and real-time tool execution log.*
 
 ### Main Command Center (Overseer Mode)
 ![Command Center Overview](docs/screenshots/command-center-overview.png)
@@ -74,7 +85,57 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Docker Hub — Recommended)
+
+Pre-built images on Docker Hub. No cloning the full repo, no build step — just pull and run.
+
+### Prerequisites
+
+- **Docker Desktop** (with GPU support for Ollama)
+- **NVIDIA GPU** (recommended: 8GB+ VRAM for local models)
+  - *Or CPU-only mode (comment out the `deploy:` GPU block in the compose file)*
+- **Anthropic API key** (for Claude models — [get one here](https://console.anthropic.com))
+- **8GB+ RAM** (for Docker containers)
+
+### Installation
+
+1. **Download the files**
+   ```bash
+   mkdir agent-battle-command-center && cd agent-battle-command-center
+   mkdir -p scripts
+   curl -O https://raw.githubusercontent.com/mrdushidush/agent-battle-command-center/main/docker-compose.hub.yml
+   curl -O https://raw.githubusercontent.com/mrdushidush/agent-battle-command-center/main/.env.example
+   curl -o scripts/setup.sh https://raw.githubusercontent.com/mrdushidush/agent-battle-command-center/main/scripts/setup.sh
+   curl -o scripts/ollama-entrypoint.sh https://raw.githubusercontent.com/mrdushidush/agent-battle-command-center/main/scripts/ollama-entrypoint.sh
+   curl -o scripts/nginx-hub.conf https://raw.githubusercontent.com/mrdushidush/agent-battle-command-center/main/scripts/nginx-hub.conf
+   ```
+
+2. **Run setup** (auto-generates all keys, prompts for Anthropic key)
+   ```bash
+   bash scripts/setup.sh
+   ```
+   Or manually: `cp .env.example .env` and edit the `CHANGE_ME` values.
+
+3. **Start all services** (~30 seconds to pull images)
+   ```bash
+   docker compose -f docker-compose.hub.yml up
+   ```
+
+4. **Open the UI** → http://localhost:5173
+   - First startup downloads the Ollama model (~5 min one-time)
+
+5. **Verify health**
+   ```bash
+   docker ps                                    # All 6 containers running
+   docker exec abcc-ollama ollama list           # Should show qwen2.5-coder:7b
+   curl http://localhost:3001/health             # API healthy
+   ```
+
+---
+
+## 🛠️ Quick Start (Build from Source)
+
+For contributors and developers who want to modify the code.
 
 ### Prerequisites
 
@@ -88,40 +149,26 @@ A Command & Conquer Red Alert-inspired control center for orchestrating AI codin
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/agent-battle-command-center.git
+   git clone https://github.com/mrdushidush/agent-battle-command-center.git
    cd agent-battle-command-center
    ```
 
-2. **Create environment file**
+2. **Run setup** (auto-generates all keys, prompts for Anthropic key)
    ```bash
-   cp .env.example .env
+   bash scripts/setup.sh
    ```
+   Or manually: `cp .env.example .env` and edit the `CHANGE_ME` values.
 
-3. **Configure API keys** (edit `.env`)
-   ```bash
-   # Required: Anthropic API key
-   ANTHROPIC_API_KEY=sk-ant-api03-...
-
-   # Required: Secure API key (generate with: openssl rand -hex 32)
-   API_KEY=your_secure_api_key_minimum_32_characters_here
-
-   # Required: Database password
-   POSTGRES_PASSWORD=your_secure_postgres_password_here
-
-   # Required: JWT secret (generate with: openssl rand -hex 32)
-   JWT_SECRET=your_secure_jwt_secret_minimum_32_characters_required
-   ```
-
-4. **Start all services**
+3. **Start all services** (first build takes ~5 minutes)
    ```bash
    docker compose up --build
    ```
+   > **No NVIDIA GPU?** Comment out the `deploy:` block in `docker-compose.yml` (lines 53-58) to run Ollama in CPU-only mode. It's slower but works.
 
-5. **Open the UI**
-   - Navigate to: http://localhost:5173
-   - The first startup takes ~5 minutes (downloading Ollama model)
+4. **Open the UI** → http://localhost:5173
+   - Ollama model download adds ~5 min on first startup
 
-6. **Verify health**
+5. **Verify health**
    ```bash
    # Check all services are running
    docker ps
@@ -658,7 +705,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - [ ] Onboarding flow / first-run wizard
 - [ ] Agent workspace viewer (live code editing view)
 - [ ] Plugin system for custom agent tools
-- [ ] Docker Hub image publishing
+- [x] Docker Hub image publishing
 
 ### Community Release (v1.0.x) - Target: 2-3 months
 - [ ] Multi-user authentication (OAuth2/OIDC)
@@ -687,8 +734,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Support
 
-- **Issues:** [GitHub Issues](https://github.com/yourusername/agent-battle-command-center/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/agent-battle-command-center/discussions)
+- **Issues:** [GitHub Issues](https://github.com/mrdushidush/agent-battle-command-center/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/mrdushidush/agent-battle-command-center/discussions)
 - **Documentation:** [docs/](docs/)
 
 ---

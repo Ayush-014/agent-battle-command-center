@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+package-lock.json
 __pycache__/
 *.pyc
 .venv/
@@ -55,17 +56,34 @@ workspace/
 # Security reports (contain vulnerability details)
 security-reports/
 
-# Scripts temporary files
+# Scripts temporary/internal files
 scripts/results-archive/
 scripts/results-*.json
 scripts/*-report-*.json
 scripts/temp_tasks.json
 scripts/execution-results.json
 scripts/diagnostic-data/
+scripts/json_logs_archive/
 scripts/ollama-stress-results.json
+scripts/DIAGNOSTIC_SUITE_README.md
+scripts/IMPLEMENTATION_SUMMARY.md
+scripts/LOAD_TEST_RESULTS.md
+scripts/README_LOAD_TESTS.md
 
-# Documentation archives (old/obsolete docs moved here)
-# docs/archive/  # Commented out - we want to track archived docs
+# Internal docs (private planning/tracking, not for public repo)
+PROMOTION_CONTENT.md
+POST_LAUNCH_TRACKER.md
+TODO.md
+BETA_CHECKLIST.md
+docs/archive/
+docs/SCREENSHOT_GUIDE.md
+docs/PHASE_MCP_COLLABORATION.md
+docs/UI_FEATURE_SHOWCASE.md
+packages/agents/TEST_TOOLS.md
+packages/api/prisma/migrations/*/CODE_CHANGES.md
+
+# Backups
+backups/
 
 # Windows artifacts
 nul

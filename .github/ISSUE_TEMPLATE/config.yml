@@ -6,3 +6,6 @@ contact_links:
   - name: Contributing Guide
     url: https://github.com/mrdushidush/agent-battle-command-center/blob/main/CONTRIBUTING.md
     about: Read how to contribute to ABCC
+  - name: Ask a Question (Discussions)
+    url: https://github.com/mrdushidush/agent-battle-command-center/discussions
+    about: Got a question? Ask in GitHub Discussions instead of opening an issue

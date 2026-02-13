@@ -41,10 +41,23 @@ The agents service uses **crewai 0.86.0** which internally uses **litellm** for 
 The coder agent uses an "elite autonomous coding unit" persona that dramatically improves task completion:
 - Identity: "CodeX-7" with callsign "Swift"
 - Motto: "One write, one verify, mission complete"
-- Includes 3 concrete mission examples showing ideal 3-step execution
+- Includes 7 concrete mission examples (3 Python, 1 JS, 1 TS, 1 Go, 1 PHP) showing ideal 3-step execution
 - Located in `packages/agents/src/agents/coder.py`
 
 This backstory helps the model stay focused and complete tasks efficiently rather than getting stuck in loops.
+
+**Language Support (Feb 2026):**
+The agents container includes **Python 3.11**, **Node.js 20 LTS** (`typescript`/`tsx`), **Go 1.22**, and **PHP 8.2**:
+- Python tasks: `tasks/*.py`, validated with `python -c "..."`
+- JavaScript tasks: `tasks/*.js` (CommonJS), validated with `node -e "..."`
+- TypeScript tasks: `tasks/*.ts`, validated with `tsx -e "..."`
+- Go tasks: `tasks/*.go` (`package main`), validated with `go run tasks/file.go`
+- PHP tasks: `tasks/*.php` (`<?php`), validated with `php tasks/file.php`
+- Security: `shell.py` blocks dangerous imports/functions per language:
+  - Python: `subprocess`, `os.system`, `socket`, etc.
+  - Node.js: `child_process`, `fs`, `net`, `http`
+  - Go: `os/exec`, `syscall`, `net`, `net/http` (checked via source file reading)
+  - PHP: `system()`, `exec()`, `shell_exec()`, `fopen()`, `eval()` (checked in `-r` mode)
 
 **GPU Utilization (RTX 3060 Ti 8GB):**
 - VRAM usage: ~6GB (75% of 8GB) - optimal for qwen2.5-coder:7b
@@ -652,6 +665,15 @@ node scripts/ollama-stress-test.js
 
 # Run 40-task ULTIMATE Ollama stress test (C1-C9, 88% pass rate, includes extreme classes)
 node scripts/ollama-stress-test-40.js
+
+# Run 20-task JS Ollama stress test (graduated complexity C1-C8, JavaScript)
+node scripts/ollama-stress-test-js.js
+
+# Run 20-task Go Ollama stress test (graduated complexity C1-C8, Go)
+node scripts/ollama-stress-test-go.js
+
+# Run 20-task PHP Ollama stress test (graduated complexity C1-C8, PHP)
+node scripts/ollama-stress-test-php.js
 
 # Run 10-task model comparison test (change MODEL const in script)
 node scripts/ollama-stress-test-14b.js
