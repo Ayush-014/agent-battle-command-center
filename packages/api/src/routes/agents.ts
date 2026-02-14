@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { prisma } from '../db/client.js';
 import { asyncHandler } from '../types/index.js';
 import { AgentManagerService } from '../services/agentManager.js';
-import { ResourcePoolService } from '../services/resourcePool.js';
 import type { TaskQueueService } from '../services/taskQueue.js';
 import type { StuckTaskRecoveryService } from '../services/stuckTaskRecovery.js';
 import type { Server as SocketIOServer } from 'socket.io';
@@ -329,12 +328,11 @@ agentsRouter.get('/:id/stats', asyncHandler(async (req, res) => {
 
   res.json({ stats, executions });
 }));
-// Reset all agents and properly clean up stuck tasks (file locks, resource pool, stats)
+// DEBUG: Reset all agents (clear stuck states)
 agentsRouter.post('/reset-all', asyncHandler(async (req, res) => {
   const io = req.app.get('io') as SocketIOServer;
-  const resourcePool = ResourcePoolService.getInstance();
 
-  // Find all tasks that are stuck (assigned or in_progress)
+  // Find all tasks that are stuck (assigned or in_progress, regardless of error)
   const stuckTasks = await prisma.task.findMany({
     where: {
       OR: [
@@ -342,78 +340,37 @@ agentsRouter.post('/reset-all', asyncHandler(async (req, res) => {
         { status: 'in_progress' },
       ],
     },
-    include: { assignedAgent: true },
   });
 
-  // 1. Release file locks for all stuck tasks
-  for (const task of stuckTasks) {
-    await prisma.fileLock.deleteMany({
-      where: { lockedByTask: task.id },
-    });
-  }
+  // Mark all stuck tasks as failed
+  const failedTasksResult = await prisma.task.updateMany({
+    where: {
+      OR: [
+        { status: 'assigned' },
+        { status: 'in_progress' },
+      ],
+    },
+    data: {
+      status: 'failed',
+      error: 'Task was stuck and reset by user',
+      completedAt: new Date(),
+    },
+  });
 
-  // 2. Clear resource pool (release all Ollama/Claude slots)
-  resourcePool.clear();
+  // Update all agents to idle with no current task
+  const agentsResult = await prisma.agent.updateMany({
+    data: {
+      status: 'idle',
+      currentTaskId: null,
+    },
+  });
 
-  // 3. Mark all stuck tasks as failed with proper field cleanup
-  for (const task of stuckTasks) {
-    await prisma.task.update({
-      where: { id: task.id },
-      data: {
-        status: 'failed',
-        error: 'Task was stuck and reset by user',
-        completedAt: new Date(),
-        assignedAgentId: null,
-        assignedAt: null,
-      },
-    });
-
-    // Update any open execution records
-    await prisma.taskExecution.updateMany({
-      where: { taskId: task.id, status: 'started' },
-      data: {
-        status: 'failed',
-        error: 'Task was stuck and reset by user',
-        completedAt: new Date(),
-      },
-    });
-  }
-
-  // 4. Update all agents to idle and increment failure stats
-  const allAgents = await prisma.agent.findMany({
+  // Emit agent status change events
+  const agents = await prisma.agent.findMany({
     include: { agentType: true },
   });
 
-  // Track which agents had stuck tasks for stat updates
-  const agentsWithStuckTasks = new Set(
-    stuckTasks.map(t => t.assignedAgentId).filter(Boolean)
-  );
-
-  for (const agent of allAgents) {
-    const stats = (agent.stats as Record<string, number>) || {};
-    const hadStuckTask = agentsWithStuckTasks.has(agent.id);
-
-    const updatedStats = hadStuckTask ? {
-      ...stats,
-      tasksFailed: (stats.tasksFailed || 0) + 1,
-    } : stats;
-
-    await prisma.agent.update({
-      where: { id: agent.id },
-      data: {
-        status: 'idle',
-        currentTaskId: null,
-        stats: updatedStats,
-      },
-    });
-  }
-
-  // 5. Emit agent status change events
-  const updatedAgents = await prisma.agent.findMany({
-    include: { agentType: true },
-  });
-
-  updatedAgents.forEach(agent => {
+  agents.forEach(agent => {
     io.emit('agent_status_changed', {
       type: 'agent_status_changed',
       payload: agent,
@@ -421,15 +378,14 @@ agentsRouter.post('/reset-all', asyncHandler(async (req, res) => {
     });
   });
 
-  // 6. Emit task status changes for stuck tasks
+  // Emit task status changes for failed tasks
   stuckTasks.forEach(task => {
+    // Update task object to reflect the changes made by updateMany
     const updatedTask = {
       ...task,
       status: 'failed',
       error: 'Task was stuck and reset by user',
       completedAt: new Date(),
-      assignedAgentId: null,
-      assignedAt: null,
     };
     io.emit('task_updated', {
       type: 'task_updated',
@@ -438,24 +394,10 @@ agentsRouter.post('/reset-all', asyncHandler(async (req, res) => {
     });
   });
 
-  // 7. Emit alert for visibility
-  if (stuckTasks.length > 0) {
-    io.emit('alert', {
-      type: 'system_reset',
-      message: `Reset: ${stuckTasks.length} stuck task(s) cleared, all agents idle`,
-      severity: 'warning',
-      timestamp: new Date(),
-    });
-  }
-
-  console.log(`[Reset] Cleared ${stuckTasks.length} stuck tasks, reset ${updatedAgents.length} agents, released file locks and resource pool`);
-
   res.json({
     success: true,
-    message: `Reset ${updatedAgents.length} agents to idle, cleared ${stuckTasks.length} stuck tasks (file locks released, resource pool cleared)`,
-    agentsReset: updatedAgents.length,
-    tasksFixed: stuckTasks.length,
-    fileLocksReleased: true,
-    resourcePoolCleared: true,
+    message: `Reset ${agentsResult.count} agents to idle, marked ${failedTasksResult.count} stuck tasks as failed`,
+    agentsReset: agentsResult.count,
+    tasksFixed: failedTasksResult.count,
   });
 }));
