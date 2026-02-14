@@ -405,18 +405,31 @@ Every tool call is captured to database with:
 
 **Note:** When tasks are deleted from the UI, their execution logs and training data remain in the database for future model training. Task deletion only removes the task record, not the associated logs.
 
-### Audio System (Military Voice Packs)
+### Audio System (Bark TTS Military Radio Voice Lines)
+
 Voice feedback for agent events via `packages/ui/src/audio/`:
-- **3 original voice packs**: Tactical Ops (US male), Mission Control (US female), Field Command (UK male)
-- **Task assigned** → "Acknowledged", "Standing by for orders", etc.
-- **Task in progress** → "Operation underway", "Executing now"
-- **Milestone** (every 2 iterations) → "Making progress", "Halfway there"
-- **Task completed** → "Mission complete", "Objective secured"
-- **Task failed/stuck** → "Requesting backup", "Need assistance"
-- **Loop detected** → "Going in circles" + pulse animation
+- **96 voice lines** across 3 packs (32 each), generated with **Bark TTS** (MIT, Suno)
+- **Voice packs**: Tactical Ops, Mission Control, Field Command
+- **Speaker**: Bark `v2/en_speaker_0` with `text_temp=0.8`, `waveform_temp=0.8`
+- **Radio post-processing**: Bandpass filter (300-3400Hz) + flat static + opening squelch click + crackle
+- **Duration**: Max 2 seconds per clip (short punchy barks)
+- **Format**: WAV (24kHz, 16-bit) — replaced edge-tts MP3s in v0.4.4
+
+**Events:**
+- **Task assigned** → "Acknowledged!", "Standing by for orders!", etc.
+- **Task in progress** → "Operation underway!", "Executing now!"
+- **Milestone** (every 2 iterations) → "Making progress!", "Halfway there!"
+- **Task completed** → "Mission complete!", "Objective secured!"
+- **Task failed/stuck** → "Requesting backup!", "Need assistance!"
+- **Loop detected** → "Going in circles!" + pulse animation
 
 Audio controls in TopBar (mute toggle, voice pack selector). Files in `packages/ui/public/audio/`.
-Voice lines generated with `edge-tts` via `scripts/generate-voice-packs.py`.
+
+**Regeneration:** `py -3.12 scripts/bark-generate-all.py` (requires Bark + PyTorch CUDA, ~21 min on RTX 3060 Ti)
+- Bark models: `D:\models\bark_v0\` (12.2GB) with junction link from `C:\Users\david\.cache\suno\bark_v0`
+- Must stop Ollama first to free GPU VRAM
+- Python 3.12 required (3.14 has no CUDA PyTorch wheels)
+- torch.load monkey-patch needed for PyTorch 2.6+ compatibility
 
 ## Package Structure
 
@@ -598,6 +611,25 @@ class-based tasks (LRU Cache, RPN Calculator, Stack, TextStats). C1-C8 proven at
 - `scripts/QWEN25_CODER_7B_REPORT.md` - 10-task code review
 - `scripts/QWEN25_CODER_7B_vs_14B_REPORT.md` - 7b vs 14b comparison
 - `scripts/QWEN25_CODER_7B_ULTIMATE_REPORT.md` - 40-task full code review
+
+### Phase 2.5: Bark TTS Voice Overhaul (COMPLETED Feb 14, 2026)
+
+**Problem:** Edge-tts voices sounded "anemic" and "too casual" — not military enough.
+
+**Solution:** Replaced all 96 voice lines with GPU-generated Bark TTS clips:
+1. Tested 3 Bark speakers (0, 3, 6) — speaker 0 selected as best military voice
+2. Tested temperature ranges — 0.8/0.8 optimal (0.9+ made quality worse)
+3. Added radio post-processing: bandpass filter + flat static + opening squelch
+4. Generated all 96 clips in 20.8 minutes on RTX 3060 Ti, zero failures
+5. Bark models moved to D: drive (12.2GB freed from C:) with NTFS junction
+
+**Key findings:**
+- Bark speaker quality is non-deterministic — same text produces different results each run
+- Higher temperatures = worse quality (counterintuitive), 0.8/0.8 is the sweet spot
+- Flat radio static sounds better than dynamic in short 2s clips
+- Opening squelch click sells the "military radio" effect
+
+**Released as v0.4.4**
 
 ### Phase 3: UI/UX Overhaul (WOW Factor)
 1. **Agent Workspace View** - New main panel showing:

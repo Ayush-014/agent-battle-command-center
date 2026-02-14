@@ -32,10 +32,11 @@ An RTS-inspired control center for orchestrating AI coding agents with intellige
 - Dual assessment: rule-based + Haiku AI semantic analysis
 - Automatic escalation: Ollama (1-6) → Haiku (7-8) → Sonnet (9-10)
 
-**🎵 Military Voice Pack Audio**
-- 3 original voice packs: Tactical Ops, Mission Control, Field Command
+**🎵 Bark TTS Military Radio Voice Lines**
+- 96 GPU-generated voice lines with military radio post-processing (static, squelch, crackle)
+- 3 voice packs: Tactical Ops, Mission Control, Field Command (32 lines each)
+- Generated locally with [Bark TTS](https://github.com/suno-ai/bark) (MIT) — $0 cost
 - Voice feedback for every agent action ("Mission complete!", "Engaging target!")
-- Real-time agent status with sound effects
 
 **📊 Full Observability**
 - Every tool call logged with timing, tokens, and cost
@@ -691,13 +692,14 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## 🗺️ Roadmap
 
-### Current (Alpha - v0.1.x)
+### Current (Alpha - v0.4.x)
 - ✅ Tiered task routing (Ollama/Haiku/Sonnet/Opus)
-- ✅ Real-time UI with military voice pack audio
+- ✅ Real-time UI with Bark TTS military radio voice lines (v0.4.4)
 - ✅ API authentication and rate limiting
 - ✅ Parallel execution and file locking
 - ✅ Cost tracking and budget limits
 - ✅ Stuck task auto-recovery
+- ✅ Docker Hub image publishing
 
 ### Beta (v0.2.x) - Target: 4-6 weeks
 - [ ] Multi-language workspace (JavaScript/TypeScript support)
@@ -728,6 +730,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Anthropic** - Claude API powering the intelligent agents
 - **Ollama** - Local LLM runtime enabling free execution
 - **CrewAI** - Agent orchestration framework
+- **[Bark TTS](https://github.com/suno-ai/bark)** - GPU-generated military radio voice lines
 - **Classic RTS games** - Inspiration for the UI/UX
 
 ---
