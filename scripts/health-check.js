@@ -299,14 +299,21 @@ async function checkBackupStatus() {
   }
 
   // Check backup mirror directory - find most recent backup
-  const backupBaseDir = 'C:\\dev\\abcc-backups\\daily';
-  const backupDirs = exec(`dir "${backupBaseDir}" /b /ad /od 2>nul`);
+  const backupBaseDir = process.env.BACKUP_MIRROR_PATH || (process.platform === 'win32' ? 'C:\\dev\\abcc-backups\\daily' : './backups');
+  const listDirsCmd = process.platform === 'win32'
+    ? `dir "${backupBaseDir}" /b /ad /od 2>nul`
+    : `ls -1 "${backupBaseDir}" 2>/dev/null`;
+  const backupDirs = exec(listDirsCmd);
   if (backupDirs) {
     const dirs = backupDirs.split('\n').filter(d => d.trim() && /^\d{8}_\d{6}$/.test(d.trim()));
     if (dirs.length > 0) {
       const latestDir = dirs[dirs.length - 1].trim();
-      const latestPath = `${backupBaseDir}\\${latestDir}`;
-      const files = exec(`dir "${latestPath}" /b 2>nul`);
+      const sep = require('path').sep;
+      const latestPath = `${backupBaseDir}${sep}${latestDir}`;
+      const listFilesCmd = process.platform === 'win32'
+        ? `dir "${latestPath}" /b 2>nul`
+        : `ls -1 "${latestPath}" 2>/dev/null`;
+      const files = exec(listFilesCmd);
       const fileCount = files ? files.split('\n').filter(f => f.trim()).length : 0;
 
       // Check backup age

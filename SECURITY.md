@@ -17,9 +17,8 @@ We take security seriously. If you discover a security vulnerability, please fol
 
 Instead, please report security issues via one of these methods:
 
-1. **Email** (Preferred): Send details to `security@your-domain.com`
-2. **GitHub Security Advisory**: Use the "Report a vulnerability" feature in the Security tab
-3. **Direct Message**: Contact maintainers directly on [Discord/Slack/Twitter]
+1. **GitHub Security Advisory** (Preferred): Use the ["Report a vulnerability"](https://github.com/mrdushidush/agent-battle-command-center/security/advisories/new) feature in the Security tab
+2. **GitHub Issues**: For non-sensitive security improvements, open a [regular issue](https://github.com/mrdushidush/agent-battle-command-center/issues/new)
 
 ### What to Include
 
@@ -169,7 +168,7 @@ If you're deploying Agent Battle Command Center, **follow these practices:**
 
 10. **Regular Backups**
     - Backups run every 30 minutes automatically
-    - Verify backup location: `C:\dev\abcc-backups\daily\`
+    - Verify backup location: `./backups/` (or set `BACKUP_MIRROR_PATH` in `.env`)
     - Test restore process monthly
 
 11. **Monitor Logs**
@@ -273,8 +272,7 @@ Results appear in:
 
 ## Security Contact
 
-- **Email**: security@your-domain.com
-- **PGP Key**: [Link to public key] (optional)
+- **GitHub Security Advisories**: [Report a vulnerability](https://github.com/mrdushidush/agent-battle-command-center/security/advisories/new)
 - **Response Time**: 48 hours for initial acknowledgment
 
 ## Acknowledgments

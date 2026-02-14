@@ -32,9 +32,10 @@ FROM nginx:alpine
 # Copy built assets
 COPY --from=builder /app/packages/ui/dist /usr/share/nginx/html
 
-# Copy nginx config
-COPY packages/ui/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx config as template (API key injected at startup)
+COPY packages/ui/nginx.conf /etc/nginx/templates/default.conf.template
 
 EXPOSE 5173
 
-CMD ["nginx", "-g", "daemon off;"]
+# At startup, replace ABCC_API_KEY_PLACEHOLDER with the real API key, then start nginx
+CMD sh -c "sed \"s/ABCC_API_KEY_PLACEHOLDER/\${VITE_API_KEY:-no_key}/\" /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"

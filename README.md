@@ -561,7 +561,7 @@ docker exec abcc-ollama ollama list
 docker exec abcc-ollama ollama rm <old-model-name>
 
 # Clean backups (keep last 7 days)
-# Backups stored in: C:\dev\abcc-backups\daily\
+# Default backup location: ./backups/ (set BACKUP_MIRROR_PATH in .env)
 ```
 
 ---
@@ -585,7 +585,7 @@ docker exec abcc-ollama ollama rm <old-model-name>
 
 - Node.js 20+
 - Python 3.11+
-- pnpm 8+
+- pnpm 8+ (install with `npm install -g pnpm`)
 - Docker Desktop
 
 ### Local Setup
