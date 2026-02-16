@@ -3,14 +3,14 @@
 /**
  * Landing Page Full 5-Tier Pipeline Test
  *
- * Phase 1: Sonnet decomposes landing page into 11 atomic subtasks (via CTO agent)
+ * Phase 1: Opus decomposes landing page into 11 atomic subtasks (via CTO agent with delays)
  * Phase 2: Haiku validates all subtasks are complete and ready for Ollama
  * Phase 3: Ollama executes all subtasks sequentially
  * Phase 4: Sonnet reviews the result
  * Phase 5: Haiku fixes any issues found by Sonnet
  *
  * Run: node scripts/landing-page-decomposition-test.js
- * Est. cost: ~$0.10-0.20 (Sonnet decomp ~$0.04 + Haiku validation ~$0.01 + Sonnet review ~$0.04 + Haiku fixes ~$0.02)
+ * Est. cost: ~$0.25-0.35 (Opus decomp ~$0.15 + Haiku validation ~$0.01 + Sonnet review ~$0.04 + Haiku fixes ~$0.02)
  */
 
 const API_BASE = 'http://localhost:3001/api';
@@ -21,13 +21,13 @@ const REST_DELAY_MS = 3000;
 const RESET_EVERY_N = 3;
 
 // Model identifiers
-const DECOMP_MODEL = 'claude-sonnet-4-5-20250929';
+const DECOMP_MODEL = 'claude-opus-4-5-20251101';
 const SONNET_MODEL = 'claude-sonnet-4-5-20250929';
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
 // Rate limit safety: 30K input TPM shared across all Claude models
 // Pause between Claude API phases to avoid hitting limits
-const INTER_PHASE_PAUSE_MS = 65000; // 65s > 1 minute window
+const INTER_PHASE_PAUSE_MS = 60000; // 60s between Claude API phases
 
 const LANDING_PAGE_DESCRIPTION = `Decompose this task into EXACTLY 11 atomic subtasks using the create_subtask tool.
 Use the PARENT_TASK_ID provided above as the parent_task_id argument for each create_subtask call.
@@ -303,18 +303,16 @@ async function rateLimitPause(label) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PHASE 1: SONNET DECOMPOSITION (via CTO agent)
+// PHASE 1: OPUS DECOMPOSITION (via CTO agent with 15s delays between subtasks)
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function phase1_decompose() {
   console.log('\n' + '='.repeat(70));
-  console.log('  PHASE 1: SONNET DECOMPOSITION');
+  console.log('  PHASE 1: OPUS DECOMPOSITION');
   console.log('='.repeat(70));
   console.log(`  Model: ${DECOMP_MODEL}`);
   console.log('  Agent: CTO-Sentinel (cto-01)');
-
-  // Rate limit safety: wait before API call to ensure fresh token budget
-  await rateLimitPause('Sonnet decomposition');
+  console.log('  Rate limit strategy: 15s delay between subtask creations');
 
   // Create parent task
   const parentResp = await fetch(`${API_BASE}/tasks`, {
@@ -335,8 +333,8 @@ async function phase1_decompose() {
   await assignToAgent(parentTask.id, 'cto-01');
   console.log('  Assigned to: cto-01');
 
-  // Execute with Sonnet via CTO agent
-  console.log('  Executing Sonnet decomposition...');
+  // Execute with Opus via CTO agent (with SUBTASK_CREATION_DELAY env var)
+  console.log('  Executing Opus decomposition...');
   const decompStart = Date.now();
 
   const execResp = await fetch(`${AGENTS_BASE}/execute`, {
@@ -348,7 +346,10 @@ async function phase1_decompose() {
       task_description: `PARENT_TASK_ID: ${parentTask.id}\n\n${LANDING_PAGE_DESCRIPTION}`,
       expected_output: 'All subtasks created and decomposition marked complete.',
       use_claude: true,
-      model: DECOMP_MODEL
+      model: DECOMP_MODEL,
+      env: {
+        SUBTASK_CREATION_DELAY: '15'  // 15 second delay between subtask creations
+      }
     })
   });
 
@@ -356,10 +357,10 @@ async function phase1_decompose() {
   const execResult = await execResp.json();
 
   if (!execResult.success) {
-    console.log(`   > Sonnet execution FAILED: ${execResult.error?.substring(0, 100)}`);
+    console.log(`   > Opus execution FAILED: ${execResult.error?.substring(0, 100)}`);
     console.log('   > Attempting to continue - checking if subtasks were created...');
   } else {
-    console.log(`   > Sonnet execution completed (${decompTime}s)`);
+    console.log(`   > Opus execution completed (${decompTime}s)`);
   }
 
   // Complete the parent task to release CTO
@@ -383,7 +384,7 @@ async function phase1_decompose() {
   }
 
   if (subtasks.length === 0) {
-    console.error('\n  ERROR: No subtasks created. Sonnet may have failed to call create_subtask.');
+    console.error('\n  ERROR: No subtasks created. Opus may have failed to call create_subtask.');
     console.error('  Check docker logs: docker logs abcc-agents --tail 100');
     process.exit(1);
   }
@@ -665,7 +666,7 @@ async function phase4_review(executionResults) {
   const passed = executionResults.filter(r => r.status === 'PASS').length;
   const failed = executionResults.filter(r => r.status !== 'PASS');
 
-  await rateLimitPause('Sonnet review');
+  // No rate limit pause needed — Phase 3 (Ollama) doesn't use Claude API
 
   // Reset agents
   await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST', headers: { 'X-API-Key': API_KEY } });

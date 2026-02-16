@@ -330,6 +330,14 @@ def create_subtask(
 
         if response.status_code == 201 or response.status_code == 200:
             task = response.json()
+
+            # Rate limit mitigation: delay between subtask creations if env var set
+            import os
+            import time
+            delay_seconds = int(os.environ.get("SUBTASK_CREATION_DELAY", "0"))
+            if delay_seconds > 0:
+                time.sleep(delay_seconds)
+
             return json.dumps({
                 "success": True,
                 "subtask_id": task.get("id"),

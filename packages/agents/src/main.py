@@ -81,6 +81,7 @@ class ExecuteRequest(BaseModel):
     model: str | None = None
     allow_fallback: bool = True
     step_by_step: bool = False
+    env: dict[str, str] | None = None  # Optional environment variables for this execution
 
 
 class ExecuteResponse(BaseModel):
@@ -241,6 +242,12 @@ async def execute_task(request: ExecuteRequest) -> ExecuteResponse:
         os.environ['CURRENT_AGENT_ID'] = request.agent_id
         os.environ['CURRENT_TASK_ID'] = request.task_id
         print(f"📋 Set MCP context: agent={request.agent_id}, task={request.task_id}")
+
+        # Set custom environment variables if provided (e.g., for rate limit delays)
+        if request.env:
+            for key, value in request.env.items():
+                os.environ[key] = str(value)
+            print(f"🔧 Custom env vars: {', '.join(f'{k}={v}' for k, v in request.env.items())}")
 
         agent = get_agent(agent_type, llm, use_mcp=use_mcp_for_agent)
 

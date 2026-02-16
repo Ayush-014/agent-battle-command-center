@@ -1,79 +1,87 @@
 {
-  "timestamp": "2026-02-16T21:19:49.528Z",
+  "timestamp": "2026-02-16T22:37:57.763Z",
   "phases": {
     "decomposition": {
-      "subtasks": 11,
-      "time": 154,
+      "model": "sonnet",
+      "subtasks": 10,
+      "time": 162,
+      "cost": 0
+    },
+    "validation": {
+      "model": "haiku",
+      "issues": 7,
+      "time": 10,
       "cost": 0
     },
     "execution": {
-      "passed": 11,
-      "failed": 0,
-      "total": 11,
+      "model": "ollama",
+      "passed": 8,
+      "failed": 2,
+      "total": 10,
       "results": [
         {
           "index": 1,
-          "title": "Create counter animation JavaScript",
-          "elapsed": 125,
+          "title": "Create particles animation JavaScript file",
+          "elapsed": 110,
           "status": "PASS",
           "error": null,
-          "taskId": "35ff55ba-9c11-4917-a28e-43d126a4bdfd"
+          "taskId": "50b37e44-d971-48aa-88c0-8ab748d24c1c"
         },
         {
           "index": 2,
-          "title": "Create scroll animations JavaScript",
-          "elapsed": 20,
+          "title": "Create counter animation JavaScript file",
+          "elapsed": 370,
           "status": "PASS",
           "error": null,
-          "taskId": "99ce8bd4-db2f-4335-95c6-8ea4eb647358"
+          "taskId": "db7a7d5e-7512-4faa-b38c-5a72dd8698a0"
         },
         {
           "index": 3,
-          "title": "Create navigation JavaScript",
-          "elapsed": 31,
+          "title": "Create scroll animation JavaScript file",
+          "elapsed": 32,
           "status": "PASS",
           "error": null,
-          "taskId": "04334c35-e53e-4199-b614-a05c29a33cc3"
+          "taskId": "46337cc7-8c61-4aa6-b3f4-b38659f6f9d2"
         },
         {
           "index": 4,
-          "title": "Create CSS animations stylesheet",
-          "elapsed": 192,
-          "status": "PASS",
-          "error": null,
-          "taskId": "45bffbc6-c0af-4ea5-bdc9-e624a11b645c"
+          "title": "Create navigation JavaScript file",
+          "elapsed": 308,
+          "status": "ERROR",
+          "error": "fetch failed",
+          "taskId": "5903fe09-b0d9-4627-ba39-e46b222f1e51"
         },
         {
           "index": 5,
-          "title": "Create CSS components stylesheet",
-          "elapsed": 255,
-          "status": "PASS",
-          "error": null,
-          "taskId": "63af9096-1d96-490a-9fb2-8ecebd8e28ae"
+          "title": "Create CSS animations stylesheet",
+          "elapsed": 308,
+          "status": "ERROR",
+          "error": "fetch failed",
+          "taskId": "127cbe7e-58d5-4fb7-9530-d8b4e18f3714"
         },
         {
           "index": 6,
-          "title": "Create CSS layout stylesheet",
-          "elapsed": 40,
+          "title": "Create CSS components stylesheet",
+          "elapsed": 119,
           "status": "PASS",
           "error": null,
-          "taskId": "7809528d-2bd4-4c4d-8fd1-79a445175710"
+          "taskId": "3a2f453f-6ac2-450e-8bad-316c36a80b4d"
         },
         {
           "index": 7,
-          "title": "Create CSS variables stylesheet",
-          "elapsed": 51,
+          "title": "Create CSS layout stylesheet",
+          "elapsed": 66,
           "status": "PASS",
           "error": null,
-          "taskId": "be4cd25a-bde9-44a6-8154-ee36545ad5fc"
+          "taskId": "6ae4477e-24b5-4248-98f4-15b87eb86a39"
         },
         {
           "index": 8,
-          "title": "Create CSS reset stylesheet",
-          "elapsed": 17,
+          "title": "Create CSS variables stylesheet",
+          "elapsed": 19,
           "status": "PASS",
           "error": null,
-          "taskId": "63c12a72-2161-42c4-8520-46b58bdafd65"
+          "taskId": "2e0f14b2-5862-4224-829e-cba5b27dc8a8"
         },
         {
           "index": 9,
@@ -81,37 +89,31 @@
           "elapsed": 26,
           "status": "PASS",
           "error": null,
-          "taskId": "dddb9836-a1cb-420d-b88e-0012604f1db8"
+          "taskId": "4d6a6c8b-cb26-40bc-a0f9-4b6274692167"
         },
         {
           "index": 10,
           "title": "Create directory structure for landing page",
-          "elapsed": 30,
+          "elapsed": 9,
           "status": "PASS",
           "error": null,
-          "taskId": "122aa100-1e62-4b18-9e80-fe9e1ae0727a"
-        },
-        {
-          "index": 11,
-          "title": "Create directory structure for landing page",
-          "elapsed": 23,
-          "status": "PASS",
-          "error": null,
-          "taskId": "d7498e2e-2297-4228-875d-f488780db28a"
+          "taskId": "9ac2552c-6fd5-4b91-bcad-83fc7f6ac61c"
         }
       ]
     },
     "review": {
+      "model": "sonnet",
       "issues": 0,
-      "time": 50,
+      "time": 30,
       "cost": 0
     },
     "fixes": {
+      "model": "haiku",
       "applied": 0,
       "total": 0,
       "results": []
     }
   },
-  "totalDuration": 1117,
+  "totalDuration": 1671,
   "totalCost": 0
 }
