@@ -1,6 +1,6 @@
 # 🎮 Agent Battle Command Center
 
-> **Run 88% of coding tasks for FREE on a $300 GPU, with Claude handling the rest at ~$0.002/task average.**
+> **Run 90% of coding tasks for FREE on a $300 GPU — including LRU caches and RPN calculators — with Claude handling the rest at ~$0.002/task average.**
 
 An RTS-inspired control center for orchestrating AI coding agents with intelligent tiered routing. Watch your AI agents work in real-time with a retro strategy game-style interface.
 
@@ -9,7 +9,7 @@ An RTS-inspired control center for orchestrating AI coding agents with intellige
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
 [![Tests](https://img.shields.io/badge/tests-27%20test%20files-success)](./packages/api/src/__tests__)
-[![Ollama Tested](https://img.shields.io/badge/Ollama%20C1--C8-95%25%20pass-success)](./scripts/)
+[![Ollama Tested](https://img.shields.io/badge/Ollama%20C1--C9-90%25%20pass%20(16K%20ctx)-success)](./scripts/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 **If you find this useful, [give it a star](https://github.com/mrdushidush/agent-battle-command-center/stargazers)** — it helps others discover this project and motivates development.
@@ -23,14 +23,15 @@ An RTS-inspired control center for orchestrating AI coding agents with intellige
 ## ✨ What Makes This Special
 
 **💰 Cost Optimization (20x cheaper than cloud-only)**
-- FREE local execution via Ollama (qwen2.5-coder:7b) for 88% of tasks
-- Smart tiered routing: only use paid Claude API for complex tasks
-- **Proven:** 95% success rate on C1-C8 tasks (Feb 2026), 88% on C1-C9 (includes extreme class-based tasks)
+- FREE local execution via Ollama (qwen2.5-coder:7b + custom 16K context Modelfile) for 90% of tasks
+- Smart tiered routing: only use paid Claude API for multi-class architectural tasks
+- **Proven:** 90% success rate on 40-task C1-C9 suite in just 11 minutes (Feb 2026)
+- Passes LRU Cache, RPN Calculator, Sorted Linked List, Stack — all FREE on local GPU
 
 **🎯 Academic Complexity Routing**
 - Based on Campbell's Task Complexity Theory
 - Dual assessment: rule-based + Haiku AI semantic analysis
-- Automatic escalation: Ollama (1-6) → Haiku (7-8) → Sonnet (9-10)
+- Automatic escalation: Ollama (1-8) → Sonnet (9-10) — Haiku eliminated from routing
 
 **🎵 Bark TTS Military Radio Voice Lines**
 - 96 GPU-generated voice lines with military radio post-processing (static, squelch, crackle)
@@ -128,7 +129,7 @@ Pre-built images on Docker Hub. No cloning the full repo, no build step — just
 5. **Verify health**
    ```bash
    docker ps                                    # All 6 containers running
-   docker exec abcc-ollama ollama list           # Should show qwen2.5-coder:7b
+   docker exec abcc-ollama ollama list           # Should show qwen2.5-coder:32k
    curl http://localhost:3001/health             # API healthy
    ```
 
@@ -176,7 +177,7 @@ For contributors and developers who want to modify the code.
 
    # Check Ollama model is loaded
    docker exec abcc-ollama ollama list
-   # Should show: qwen2.5-coder:7b
+   # Should show: qwen2.5-coder:32k (custom 16K context model)
    ```
 
 ---
@@ -209,8 +210,10 @@ For contributors and developers who want to modify the code.
                                  ┌──────────▼──────────────────┐
                                  │   Ollama (Local LLM)        │
                                  │      localhost:11434        │
-                                 │  • qwen2.5-coder:7b (4.7GB) │
+                                 │  • qwen2.5-coder:32k        │
+                                 │    (7b + 16K ctx Modelfile) │
                                  │  • RTX 3060 Ti 8GB VRAM     │
+                                 │  • 93% GPU / 7% CPU         │
                                  │  • FREE execution           │
                                  └─────────────────────────────┘
 ```
@@ -219,11 +222,12 @@ For contributors and developers who want to modify the code.
 
 ## 🎯 Key Features
 
-### Tiered Task Routing
-- **Complexity 1-6** → Ollama (FREE, ~30s avg) - 100% success rate proven
-- **Complexity 7-8** → Haiku (~$0.003/task) - API integration, error handling
-- **Complexity 9-10** → Sonnet (~$0.01/task) - Architectural design, multiple systems
+### Tiered Task Routing (16K Context Upgrade - Feb 2026)
+- **Complexity 1-8** → Ollama (FREE, ~12s avg with 16K context) - 90-100% success rate
+- **Complexity 9** → Ollama for single-class tasks (80% — LRU Cache, Stack, RPN Calculator)
+- **Complexity 9-10** → Sonnet (~$0.01/task) - Multi-class architectural tasks only
 - **Decomposition** → Opus (~$0.02/task) - Breaking down complex tasks only
+- **Haiku eliminated** from execution routing — Ollama handles C7-C8 at 100%
 
 ### Real-Time Monitoring
 - **Active Missions** - Live agent status with health indicators
@@ -276,8 +280,8 @@ ANTHROPIC_API_KEY=sk-ant-api03-...
 POSTGRES_PASSWORD=your_secure_password
 DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@localhost:5432/abcc?schema=public
 
-# Ollama Model (default: qwen2.5-coder:7b)
-OLLAMA_MODEL=qwen2.5-coder:7b
+# Ollama Model (custom 16K context Modelfile, auto-created on startup)
+OLLAMA_MODEL=qwen2.5-coder:32k
 ```
 
 **Security:**
@@ -407,7 +411,7 @@ curl http://localhost:3001/api/agents/ollama-status \
 node scripts/ollama-stress-test.js
 ```
 
-**40-task ultimate test (C1-C9, 88% pass rate):**
+**40-task ultimate test (C1-C9, 90% pass rate, 11 min with 16K context):**
 ```bash
 node scripts/ollama-stress-test-40.js
 ```
@@ -461,11 +465,15 @@ node scripts/full-system-health-check.js --skip-load-test
 
 **Solution:**
 ```bash
-# Check if model is downloaded
+# Check if model is downloaded (should show qwen2.5-coder:32k)
 docker exec abcc-ollama ollama list
 
-# If missing, pull manually:
+# If missing, the entrypoint auto-creates it. Restart the container:
+docker compose restart ollama
+
+# Or pull base model and create manually:
 docker exec abcc-ollama ollama pull qwen2.5-coder:7b
+# The 32k model (16K context) is auto-created from the base model on startup
 
 # Check logs
 docker logs abcc-ollama --tail 50
@@ -668,12 +676,22 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 | Metric | Result | Test |
 |--------|--------|------|
-| **Ollama C1-C8 Success** | 95% (19/20) | 20-task stress test (Feb 7, 2026) |
-| **Ollama C1-C9 Success** | 88% (35/40) | 40-task ultimate test |
+| **Ollama C1-C9 Success** | **90% (36/40)** | 40-task ultimate test, 16K context |
+| **Ollama C1-C8 Success** | 100% (20/20) | 20-task stress test |
+| **Total runtime (40 tasks)** | **11 minutes** | 4.5x faster than 4K context (was 43 min) |
+| **Ollama avg time** | **12s** | 16K context (was 54s with 4K) |
 | **Cost per task (avg)** | $0.002 | Mixed complexity batch |
-| **Ollama avg time** | 30-77s | Varies by complexity (C1-C8) |
-| **Haiku avg time** | 27s | With MCP disabled |
+| **GPU utilization** | 93% GPU / 7% CPU | 7GB VRAM on RTX 3060 Ti 8GB |
 | **Parallel speedup** | 40-60% | vs sequential |
+
+**16K Context Window Upgrade (Feb 17, 2026):**
+
+| Complexity | Success | Avg Time | What's Tested |
+|------------|---------|----------|---------------|
+| C1-C4 | **100%** | 8-11s | Math, strings, conditionals, loops |
+| C5-C6 | **80-100%** | 10-12s | FizzBuzz, palindrome, caesar cipher, primes |
+| C7-C8 | **100%** | 14-15s | Fibonacci, word freq, matrix, binary search, power set |
+| C9 (Extreme) | **80%** | 19s | LRU Cache, RPN Calculator, Sorted Linked List, Stack |
 
 ### Hardware Requirements
 
@@ -693,15 +711,18 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 ## 🗺️ Roadmap
 
 ### Current (Alpha - v0.4.x)
-- ✅ Tiered task routing (Ollama/Haiku/Sonnet/Opus)
-- ✅ Real-time UI with Bark TTS military radio voice lines (v0.4.4)
+- ✅ Tiered task routing (Ollama/Sonnet/Opus)
+- ✅ **16K context window** for Ollama — 90% C1-C9, 4.5x faster (v0.4.6)
+- ✅ 3D holographic battlefield view with React Three Fiber (v0.4.5)
+- ✅ Bark TTS military radio voice lines — 96 clips, 3 packs (v0.4.4)
 - ✅ API authentication and rate limiting
 - ✅ Parallel execution and file locking
 - ✅ Cost tracking and budget limits
 - ✅ Stuck task auto-recovery
 - ✅ Docker Hub image publishing
+- ✅ Multi-language workspace (Python, JavaScript, TypeScript, Go, PHP)
 
-### Beta (v0.2.x) - Target: 4-6 weeks
+### Beta (v0.5.x) - Target: 4-6 weeks
 - [ ] Multi-language workspace (JavaScript/TypeScript support)
 - [ ] E2E test suite (Playwright)
 - [ ] Onboarding flow / first-run wizard
