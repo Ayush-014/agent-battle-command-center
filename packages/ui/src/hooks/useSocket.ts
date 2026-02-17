@@ -148,6 +148,14 @@ export function useSocket() {
         }
       }
 
+      // Play failure sound on iteration decrease (repair/retry)
+      if (prevTask && newTask.currentIteration < prevTask.currentIteration) {
+        const agentType = newTask.assignedAgentId
+          ? useUIStore.getState().agents.find((a) => a.id === newTask.assignedAgentId)?.type
+          : undefined;
+        playWithDelay(() => playTaskFailed(agentType));
+      }
+
       // Play milestone sound on iteration progress
       if (prevTask && prevTask.currentIteration < newTask.currentIteration) {
         const agentType = newTask.assignedAgentId

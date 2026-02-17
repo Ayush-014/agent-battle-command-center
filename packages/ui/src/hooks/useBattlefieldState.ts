@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useUIStore } from '../store/uiState';
 import {
   getBuildingTier,
@@ -9,6 +9,8 @@ import {
   type BattlefieldSquad,
 } from '../components/battlefield/types';
 
+const REPAIR_DURATION_MS = 1500;
+
 /**
  * Derives 3D battlefield state from Zustand store.
  * Bridges the flat task/agent data to positioned 3D scene objects.
@@ -16,6 +18,11 @@ import {
 export function useBattlefieldState() {
   const tasks = useUIStore((s) => s.tasks);
   const agents = useUIStore((s) => s.agents);
+
+  // Track previous iteration counts to detect decreases (repair)
+  const prevIterationsRef = useRef<Map<string, number>>(new Map());
+  // Track active repair states
+  const repairStateRef = useRef<Map<string, { fromDamage: number; startTime: number }>>(new Map());
 
   const hasActiveTasks = useMemo(
     () => tasks.some((t) => t.status === 'in_progress' || t.status === 'assigned'),
@@ -52,8 +59,18 @@ export function useBattlefieldState() {
   const buildings: BattlefieldBuilding[] = useMemo(() => {
     const existingPositions: [number, number][] = [];
     const allTasks = [...visibleTasks, ...recentlyFinished];
+    const now = Date.now();
+    const prevIter = prevIterationsRef.current;
+    const repairState = repairStateRef.current;
 
-    return allTasks.map((task) => {
+    // Clean up expired repair states
+    for (const [taskId, state] of repairState) {
+      if (now - state.startTime > REPAIR_DURATION_MS) {
+        repairState.delete(taskId);
+      }
+    }
+
+    const result = allTasks.map((task) => {
       const complexity = (task as any).complexity ?? task.priority ?? 5;
       const tier = getBuildingTier(complexity);
       const tierConfig = BUILDING_TIERS[tier];
@@ -68,6 +85,18 @@ export function useBattlefieldState() {
       const currentIter = task.currentIteration || 0;
       const damage = task.status === 'in_progress' ? Math.min(currentIter / maxIter, 1) : 0;
 
+      // Detect iteration decrease → trigger repair
+      const prevIterCount = prevIter.get(task.id) ?? 0;
+      if (currentIter < prevIterCount && task.status === 'in_progress') {
+        const prevDamage = Math.min(prevIterCount / maxIter, 1);
+        repairState.set(task.id, { fromDamage: prevDamage, startTime: now });
+      }
+      prevIter.set(task.id, currentIter);
+
+      // Check if currently repairing
+      const activeRepair = repairState.get(task.id);
+      const repairing = !!activeRepair && (now - activeRepair.startTime < REPAIR_DURATION_MS);
+
       return {
         taskId: task.id,
         task,
@@ -77,8 +106,13 @@ export function useBattlefieldState() {
         damage,
         underSiege: task.status === 'in_progress',
         assignedAgent,
+        repairing,
+        repairFromDamage: activeRepair?.fromDamage ?? 0,
+        repairStartTime: activeRepair?.startTime ?? 0,
       };
     });
+
+    return result;
   }, [visibleTasks, recentlyFinished, agents]);
 
   // Build squad data for agents with assigned tasks

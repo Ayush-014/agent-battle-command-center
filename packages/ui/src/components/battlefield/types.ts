@@ -19,6 +19,12 @@ export interface BattlefieldBuilding {
   underSiege: boolean;
   /** Assigned agent info */
   assignedAgent: Agent | null;
+  /** Whether building is currently repairing (iteration decreased) */
+  repairing: boolean;
+  /** Damage level when repair started (for smooth lerp) */
+  repairFromDamage: number;
+  /** Timestamp when repair started */
+  repairStartTime: number;
 }
 
 /** Squad state for an agent working on a task */
