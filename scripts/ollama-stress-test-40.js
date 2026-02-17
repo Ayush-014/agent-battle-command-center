@@ -3,7 +3,7 @@
 /**
  * Ollama Ultimate Stress Test - 40 Tasks, Complexity 1-9
  *
- * Pushes qwen2.5-coder:7b to its absolute limits.
+ * Pushes qwen2.5-coder:32k to its absolute limits.
  * Includes C9 (extreme) tasks: classes, multi-method, algorithms.
  * Agent reset every 3 tasks for maximum freshness.
  *
@@ -21,6 +21,7 @@
 
 const API_BASE = 'http://localhost:3001/api';
 const AGENTS_BASE = 'http://localhost:8000';
+const API_KEY = process.env.API_KEY || 'ceb3e905f7b1b5e899645c6ec467ca34';
 const TASK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes per task
 const REST_DELAY_MS = 3000; // 3 seconds rest between tasks
 const RESET_EVERY_N_TASKS = 3; // Aggressive reset every 3 tasks
@@ -351,7 +352,7 @@ async function resetSystem() {
   console.log('🔄 Resetting system...');
 
   try {
-    await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST' });
+    await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST', headers: { 'X-API-Key': API_KEY } });
     console.log('   ✓ Agents reset');
   } catch (e) {
     console.log('   ⚠ Could not reset agents');
@@ -381,7 +382,7 @@ DO NOT just output the code - you MUST call file_write(path="tasks/${fileName}.p
 
   const response = await fetch(`${API_BASE}/tasks`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
     body: JSON.stringify({
       title: `[MAX-C${task.complexity}] ${task.name}`,
       description: fullDescription,
@@ -408,7 +409,7 @@ async function executeTask(taskId, description) {
       agent_id: 'coder-01',
       task_description: description,
       use_claude: false,
-      model: null  // uses default qwen2.5-coder:7b
+      model: null  // uses default qwen2.5-coder:32k
     })
   });
 
@@ -419,7 +420,7 @@ async function waitForAgent(maxWaitMs = 60000) {
   const start = Date.now();
   while (Date.now() - start < maxWaitMs) {
     try {
-      const response = await fetch(`${API_BASE}/agents/coder-01`);
+      const response = await fetch(`${API_BASE}/agents/coder-01`, { headers: { 'X-API-Key': API_KEY } });
       const agent = await response.json();
       if (agent.status === 'idle') return true;
     } catch (e) {}
@@ -454,7 +455,7 @@ async function main() {
   console.log('═'.repeat(70));
   console.log('🔥🔥🔥 ULTIMATE OLLAMA STRESS TEST - 40 TASKS (C1-C9) 🔥🔥🔥');
   console.log('═'.repeat(70));
-  console.log('Model: qwen2.5-coder:7b | Champion Run');
+  console.log('Model: qwen2.5-coder:32k | Champion Run');
   console.log(`Tasks: ${TASKS.length} | Complexity: 1-9 | C9 = EXTREME (classes!)`);
   console.log(`Rest: ${REST_DELAY_MS/1000}s between tasks | Reset every ${RESET_EVERY_N_TASKS} tasks`);
   console.log('═'.repeat(70) + '\n');
@@ -466,7 +467,7 @@ async function main() {
     passed: 0,
     failed: 0,
     errors: 0,
-    model: 'qwen2.5-coder:7b',
+    model: 'qwen2.5-coder:32k',
     byComplexity: {},
     details: []
   };
@@ -498,7 +499,7 @@ async function main() {
 
       await fetch(`${API_BASE}/queue/assign`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
         body: JSON.stringify({ taskId: created.id, agentId: 'coder-01' })
       });
 
@@ -514,7 +515,7 @@ async function main() {
 
       await fetch(`${API_BASE}/tasks/${created.id}/complete`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
         body: JSON.stringify({ success: execResult.success, result: execResult })
       });
 
@@ -542,7 +543,7 @@ async function main() {
       console.log(`   💥 ERROR: ${e.message.substring(0, 80)}`);
 
       try {
-        await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST' });
+        await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST', headers: { 'X-API-Key': API_KEY } });
       } catch (resetErr) {}
 
       await sleep(2000);
@@ -566,7 +567,7 @@ async function main() {
     if ((i + 1) % RESET_EVERY_N_TASKS === 0 && i < TASKS.length - 1) {
       console.log(`\n🔄 Resetting agent (clearing context after ${RESET_EVERY_N_TASKS} tasks)...`);
       try {
-        await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST' });
+        await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST', headers: { 'X-API-Key': API_KEY } });
         console.log('   ✓ Agent memory cleared\n');
       } catch (e) {
         console.log('   ⚠ Could not reset agent\n');
@@ -580,7 +581,7 @@ async function main() {
   const successRate = Math.round((results.passed / results.total) * 100);
 
   console.log('\n' + '═'.repeat(70));
-  console.log('📊 ULTIMATE STRESS TEST RESULTS - qwen2.5-coder:7b');
+  console.log('📊 ULTIMATE STRESS TEST RESULTS - qwen2.5-coder:32k');
   console.log('═'.repeat(70));
   console.log(`   Total:    ${results.passed}/${results.total} passed (${successRate}%)`);
   console.log(`   Failed:   ${results.failed} | Errors: ${results.errors}`);
@@ -610,7 +611,7 @@ async function main() {
   if (foundThreshold) {
     console.log(`\n🎯 FAILURE THRESHOLD: C${foundThreshold} (recommend Ollama max = C${foundThreshold - 1})`);
   } else {
-    console.log('\n🎯 qwen2.5-coder:7b HANDLED EVERYTHING INCLUDING C9! CHAMPION! 🏆');
+    console.log('\n🎯 qwen2.5-coder:32k HANDLED EVERYTHING INCLUDING C9! CHAMPION! 🏆');
   }
 
   // Timing breakdown

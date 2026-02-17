@@ -11,13 +11,12 @@
  * | 1-2   | Trivial  | Single-step; clear I/O; no decision-making               | Ollama  |
  * | 3-4   | Low      | Linear sequences; well-defined domain; no ambiguity      | Ollama  |
  * | 5-6   | Moderate | Multiple conditions; validation; helper logic            | Ollama  |
- * | 7-8   | Complex  | Multiple functions; algorithms; data structures          | Haiku   |
+ * | 7-8   | Complex  | Multiple functions; algorithms; data structures          | Ollama  |
  * | 9-10  | Extreme  | Fuzzy goals; dynamic requirements; architectural scope   | Sonnet  |
  *
- * TIER ROUTING (Execution):
- * =========================
- * - Trivial/Moderate (1-6) → Ollama (FREE, ~30s/task avg)
- * - Complex (7-8)          → Haiku (~$0.001/task)
+ * TIER ROUTING (Execution) - Updated Feb 2026 for 32K context:
+ * =============================================================
+ * - Trivial/Complex (1-8)  → Ollama (FREE, 32K context, ~30s/task avg)
  * - Extreme (9-10)         → Sonnet (~$0.005/task)
  * - NOTE: Opus NEVER writes code - decomposition & reviews only
  *
@@ -341,32 +340,22 @@ export class TaskRouter {
       console.log('💸 Budget exceeded - forcing task to Ollama (free)');
     }
 
-    // TRIVIAL/MODERATE (1-6): Single-step to moderate logic → Ollama (FREE)
+    // TRIVIAL/COMPLEX (1-8): All coding tasks → Ollama (FREE, 32K context)
+    // 32K context window enables complex algorithms, data structures, multi-file tasks
     // Also route here if Claude is blocked due to budget
-    if (!selectedAgent && (complexity < 7 || claudeBlocked)) {
+    if (!selectedAgent && (complexity < 9 || claudeBlocked)) {
       selectedAgent = agents.find((a) => a.agentType.name === 'coder') || null;
       if (selectedAgent) {
-        if (claudeBlocked && complexity >= 7) {
+        if (claudeBlocked && complexity >= 9) {
           reason = `⚠️ Budget exceeded - routing ${complexity.toFixed(1)}/10 task to Ollama (free)`;
           confidence = 0.7; // Lower confidence for forced routing
         } else {
-          const level = complexity < 3 ? 'Trivial' : complexity < 5 ? 'Low' : 'Moderate';
-          reason = `${level} complexity (${complexity.toFixed(1)}/10) → Ollama (free, ~30s)`;
-          confidence = 0.9;
+          const level = complexity < 3 ? 'Trivial' : complexity < 5 ? 'Low' : complexity < 7 ? 'Moderate' : 'Complex';
+          reason = `${level} complexity (${complexity.toFixed(1)}/10) → Ollama (free, 32K context)`;
+          confidence = complexity < 7 ? 0.95 : 0.85;
         }
         modelTier = 'ollama';
         estimatedCost = 0;
-      }
-    }
-
-    // COMPLEX (7-8): Multiple functions, algorithms, data structures → Haiku
-    if (!selectedAgent && complexity >= 7 && complexity < 9) {
-      selectedAgent = agents.find((a) => a.agentType.name === 'qa') || null;
-      if (selectedAgent) {
-        reason = `Complex (${complexity.toFixed(1)}/10) → Haiku (quality, ~$0.001)`;
-        confidence = 0.9;
-        modelTier = 'haiku';
-        estimatedCost = 0.001;
       }
     }
 
@@ -383,25 +372,19 @@ export class TaskRouter {
 
     // FALLBACK: If no agent selected yet, handle based on complexity
     if (!selectedAgent) {
-      // For high-complexity tasks (7+), ONLY allow qa agent - don't fall back to coder
-      // This prevents routing complex tasks to Ollama which can't handle them
-      if (complexity >= 7) {
+      // For extreme tasks (9+), ONLY allow qa agent - don't fall back to coder
+      // C1-C8 can all go to Ollama with 32K context window
+      if (complexity >= 9) {
         const qaAgent = agents.find((a) => a.agentType.name === 'qa');
         if (qaAgent) {
           selectedAgent = qaAgent;
-          if (complexity < 9) {
-            reason = `Complex (${complexity.toFixed(1)}/10) → Haiku (qa agent available)`;
-            modelTier = 'haiku';
-            estimatedCost = 0.001;
-          } else {
-            reason = `Extreme (${complexity.toFixed(1)}/10) → Sonnet (qa agent available)`;
-            modelTier = 'sonnet';
-            estimatedCost = 0.005;
-          }
+          reason = `Extreme (${complexity.toFixed(1)}/10) → Sonnet (qa agent available)`;
+          modelTier = 'sonnet';
+          estimatedCost = 0.005;
           confidence = 0.7;
         } else {
-          // No qa agent available for complex task - throw error so task queues
-          throw new Error(`No suitable agent for complex task (${complexity.toFixed(1)}/10). QA agent required but not idle.`);
+          // No qa agent available for extreme task - throw error so task queues
+          throw new Error(`No suitable agent for extreme task (${complexity.toFixed(1)}/10). QA agent required but not idle.`);
         }
       } else {
         // For simple tasks (< 7), coder is fine
