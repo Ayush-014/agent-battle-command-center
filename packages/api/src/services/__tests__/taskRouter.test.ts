@@ -309,25 +309,25 @@ describe('TaskRouter', () => {
       expect(decision.estimatedCost).toBe(0);
     });
 
-    it('should route complex tasks (>= 7) to qa/haiku', async () => {
-      // Create a task with complexity 7-8.9 to trigger haiku routing
+    it('should route complex tasks (7-8) to coder/ollama with 16K context', async () => {
+      // With 16K context upgrade (Feb 2026), C1-C8 all route to Ollama
       // Calculation: base 1 + test type 1.5 + iteration 2 (3) + high keyword 'refactor' (2) = 7.5
       const task = createTask({
         description: 'Refactor the output logic for this function',
         taskType: 'test',
         currentIteration: 2, // Failed twice = +3 complexity (1.5 per iteration)
       });
-      const qaAgent = createMockAgent('qa-1', 'qa');
+      const coderAgent = createMockAgent('coder-1', 'coder');
 
       prismaMock.task.findUnique.mockResolvedValue(task);
-      prismaMock.agent.findMany.mockResolvedValue([qaAgent]);
+      prismaMock.agent.findMany.mockResolvedValue([coderAgent]);
 
       const decision = await router.routeTask('task-1');
 
-      // With the calculation, this should produce complexity ~7.5 (haiku range 7-8.9)
-      expect(decision.agentId).toBe('qa-1');
-      expect(decision.modelTier).toBe('haiku');
-      expect(decision.estimatedCost).toBe(0.001);
+      // C7-C8 now routes to Ollama (free, 16K context) instead of Haiku
+      expect(decision.agentId).toBe('coder-1');
+      expect(decision.modelTier).toBe('ollama');
+      expect(decision.estimatedCost).toBe(0);
     });
 
     it('should respect requiredAgent override', async () => {
