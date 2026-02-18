@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Terminal, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Terminal, CheckCircle, XCircle, Clock, Download } from 'lucide-react';
 import { apiGet } from '../../lib/api';
 
 interface ExecutionLogEntry {
@@ -105,6 +105,22 @@ export function ToolLog() {
     }
   };
 
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tool-log-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      if (a.parentNode) {
+        a.parentNode.removeChild(a);
+      }
+    }, 0);
+  };
+
   return (
     <div className="h-full flex flex-col bg-command-bg border border-command-border rounded-lg overflow-hidden">
       {/* Header */}
@@ -129,6 +145,16 @@ export function ToolLog() {
             />
             Auto-scroll
           </label>
+          <button
+            className="flex items-center gap-2 ml-2 text-gray-400 enabled:hover:text-gray-200 disabled:text-gray-600 disabled:cursor-not-allowed"
+            disabled={logs.length === 0}
+            onClick={handleExport}
+            aria-label="Download logs as JSON"
+          >
+            <Download className="w-4 h-4" />
+            <span className="text-xs">Export</span>
+          </button>
+
         </div>
       </div>
 
