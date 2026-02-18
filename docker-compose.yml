@@ -99,6 +99,7 @@ services:
       API_KEY: ${API_KEY}
       USE_MCP: "false"
       MCP_GATEWAY_URL: http://mcp-gateway:8001
+      LITELLM_REQUEST_TIMEOUT: 300  # 5 minutes for C7-C9 complex tasks
     depends_on:
       ollama:
         condition: service_healthy

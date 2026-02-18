@@ -8,6 +8,7 @@ from src.tools import (
     shell_run,
     code_search,
     find_file,
+    validate_syntax,
     review_code,
     query_logs,
     assign_task,
@@ -55,7 +56,7 @@ def create_base_agent(
 
 # Default tool sets for different agent types (HTTP mode)
 CODER_TOOLS_HTTP = [file_read, file_write, file_edit, file_list, shell_run, code_search, find_file]
-QA_TOOLS_HTTP = [file_read, file_write, file_list, shell_run]
+QA_TOOLS_HTTP = [file_read, file_write, file_list, shell_run, validate_syntax]  # QA gets validation tool
 CTO_TOOLS_HTTP = [
     create_subtask,  # CTO can decompose tasks
     complete_decomposition,  # CTO can mark decomposition complete

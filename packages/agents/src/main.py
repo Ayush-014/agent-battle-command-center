@@ -98,6 +98,15 @@ class AbortRequest(BaseModel):
     task_id: str
 
 
+class ValidateSyntaxRequest(BaseModel):
+    code: str
+    language: str
+
+
+class ValidateSyntaxResponse(BaseModel):
+    result: str  # "OK" or error message
+
+
 def get_llm(use_claude: bool, model: str | None, allow_fallback: bool):
     """Get the appropriate LLM based on configuration.
 
@@ -424,6 +433,17 @@ async def execute_task(request: ExecuteRequest) -> ExecuteResponse:
                 "iterations": 0,
             },
         )
+
+
+@app.post("/validate-syntax", response_model=ValidateSyntaxResponse)
+async def validate_syntax(request: ValidateSyntaxRequest):
+    """Validate code syntax using the validate_syntax tool."""
+    try:
+        from src.tools.code_validation import validate_syntax as validate_tool
+        result = validate_tool._run(request.code, request.language)
+        return ValidateSyntaxResponse(result=result)
+    except Exception as e:
+        return ValidateSyntaxResponse(result=f"Validation error: {str(e)}")
 
 
 @app.post("/execute/abort")

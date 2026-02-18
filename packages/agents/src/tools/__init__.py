@@ -1,6 +1,7 @@
 from .file_ops import file_read, file_write, file_edit, file_list
 from .shell import shell_run
 from .search import code_search, find_file
+from .code_validation import validate_syntax
 from .cto_tools import (
     review_code,
     query_logs,
@@ -20,6 +21,7 @@ __all__ = [
     "shell_run",
     "code_search",
     "find_file",
+    "validate_syntax",
     "review_code",
     "query_logs",
     "assign_task",

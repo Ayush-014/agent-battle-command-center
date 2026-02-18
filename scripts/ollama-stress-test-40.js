@@ -401,7 +401,8 @@ DO NOT just output the code - you MUST call file_write(path="tasks/${fileName}.p
 }
 
 function getOllamaModel(complexity) {
-  if (complexity >= 9) return 'qwen2.5-coder:32k';
+  // C1-C6: 8K with validation (fast, no spill)
+  // C7-C9: 16K without validation (complex, 5min timeout)
   if (complexity >= 7) return 'qwen2.5-coder:16k';
   return 'qwen2.5-coder:8k';
 }

@@ -57,7 +57,7 @@
       "complexity": 1,
       "status": "passed",
       "error": null,
-      "duration": 80
+      "duration": 20
     },
     {
       "task": "negate",
@@ -78,7 +78,7 @@
       "complexity": 2,
       "status": "failed",
       "error": null,
-      "duration": 7
+      "duration": 8
     },
     {
       "task": "is_even",
@@ -225,21 +225,21 @@
       "complexity": 6,
       "status": "passed",
       "error": null,
-      "duration": 12
+      "duration": 13
     },
     {
       "task": "fibonacci",
       "complexity": 7,
       "status": "passed",
       "error": null,
-      "duration": 16
+      "duration": 17
     },
     {
       "task": "word_frequency",
       "complexity": 7,
       "status": "passed",
       "error": null,
-      "duration": 12
+      "duration": 13
     },
     {
       "task": "matrix_transpose",
@@ -267,7 +267,7 @@
       "complexity": 8,
       "status": "passed",
       "error": null,
-      "duration": 16
+      "duration": 17
     },
     {
       "task": "binary_search",
@@ -295,46 +295,46 @@
       "complexity": 8,
       "status": "passed",
       "error": null,
-      "duration": 20
+      "duration": 19
     },
     {
       "task": "stack_class",
       "complexity": 9,
       "status": "passed",
       "error": null,
-      "duration": 40
+      "duration": 15
     },
     {
       "task": "lru_cache",
       "complexity": 9,
       "status": "passed",
       "error": null,
-      "duration": 57
+      "duration": 21
     },
     {
       "task": "rpn_calculator",
       "complexity": 9,
       "status": "passed",
       "error": null,
-      "duration": 37
+      "duration": 15
     },
     {
       "task": "text_stats",
       "complexity": 9,
       "status": "failed",
       "error": null,
-      "duration": 32
+      "duration": 15
     },
     {
       "task": "sorted_linked_list",
       "complexity": 9,
       "status": "passed",
       "error": null,
-      "duration": 51
+      "duration": 29
     }
   ],
-  "totalDuration": 817,
+  "totalDuration": 640,
   "successRate": 90,
   "recommendedThreshold": 9,
-  "timestamp": "2026-02-17T22:51:57.916Z"
+  "timestamp": "2026-02-18T22:26:10.103Z"
 }

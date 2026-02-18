@@ -440,6 +440,75 @@ export class TaskExecutor {
   }
 
   /**
+   * Trigger syntax validation after task completion.
+   * If validation fails, create a fix task for QA agent.
+   */
+  private async triggerSyntaxValidation(taskId: string, task: any): Promise<void> {
+    try {
+      // Extract filename from task description or result
+      const fileMatch = task.description?.match(/tasks\/([a-z0-9_]+\.(py|js|ts|go|php))/i);
+      if (!fileMatch) {
+        console.log(`[SyntaxValidation] No file found in task ${taskId}, skipping validation`);
+        return;
+      }
+
+      const filename = fileMatch[1];
+      const extension = fileMatch[2];
+      const languageMap: Record<string, string> = {
+        'py': 'python',
+        'js': 'javascript',
+        'ts': 'typescript',
+        'go': 'go',
+        'php': 'php'
+      };
+      const language = languageMap[extension];
+
+      // Read the file content
+      const filePath = path.join('/app/workspace/tasks', filename);
+      let code: string;
+      try {
+        code = await fs.readFile(filePath, 'utf-8');
+      } catch (error) {
+        console.log(`[SyntaxValidation] File not found: ${filePath}, skipping`);
+        return;
+      }
+
+      // Call validate_syntax via agents API
+      const response = await fetch(`${process.env.AGENTS_URL || 'http://agents:8000'}/validate-syntax`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, language })
+      });
+
+      const result = await response.json() as { result: string };
+
+      if (result.result !== 'OK') {
+        console.log(`[SyntaxValidation] Task ${taskId} has syntax errors, creating fix task`);
+
+        // Create fix task for QA agent (Haiku)
+        await this.prisma.task.create({
+          data: {
+            title: `Fix syntax errors in ${filename}`,
+            description: `Fix syntax errors in tasks/${filename}.\n\nValidation error:\n${result.result}\n\nUse validate_syntax tool to check your fixes.`,
+            status: 'pending',
+            priority: 10, // High priority
+            complexity: 3, // Simple fix task
+            complexitySource: 'auto',
+            assignedAgentId: 'qa-01', // Haiku agent with validate_syntax tool
+            taskType: 'code',
+          }
+        });
+
+        console.log(`[SyntaxValidation] Created fix task for ${filename}`);
+      } else {
+        console.log(`[SyntaxValidation] Task ${taskId} passed syntax validation`);
+      }
+    } catch (error) {
+      console.error('[SyntaxValidation] Error during syntax validation:', error);
+    }
+  }
+
+  /**
    * Detect test failures in agent output JSON.
    * Returns true if tests were run and failed.
    * Returns false if no tests ran or all tests passed.
