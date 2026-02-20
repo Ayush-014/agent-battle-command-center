@@ -1,0 +1,267 @@
+{
+  "timestamp": "2026-02-17T21:15:53.491Z",
+  "hardware": "RTX 3060 Ti 8GB",
+  "model": "qwen2.5-coder:7b",
+  "tasks": 5,
+  "taskBreakdown": "3x C8 + 2x C9",
+  "benchmarks": [
+    {
+      "numCtx": 2048,
+      "ctxLabel": "2K",
+      "passed": 1,
+      "total": 5,
+      "passRate": 20,
+      "avgTime": 24,
+      "totalDuration": 89,
+      "avgVram": 6248,
+      "avgGpuUtil": 12,
+      "results": [
+        {
+          "task": "binary_search",
+          "complexity": 8,
+          "status": "failed",
+          "duration": 11
+        },
+        {
+          "task": "balanced_parens",
+          "complexity": 8,
+          "status": "failed",
+          "duration": 13
+        },
+        {
+          "task": "run_length_encode",
+          "complexity": 8,
+          "status": "failed",
+          "duration": 13
+        },
+        {
+          "task": "stack_class",
+          "complexity": 9,
+          "status": "failed",
+          "duration": 13
+        },
+        {
+          "task": "lru_cache",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 24
+        }
+      ]
+    },
+    {
+      "numCtx": 4096,
+      "ctxLabel": "4K",
+      "passed": 5,
+      "total": 5,
+      "passRate": 100,
+      "avgTime": 12,
+      "totalDuration": 76,
+      "avgVram": 6351,
+      "avgGpuUtil": 3,
+      "results": [
+        {
+          "task": "binary_search",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 9
+        },
+        {
+          "task": "balanced_parens",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 11
+        },
+        {
+          "task": "run_length_encode",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 11
+        },
+        {
+          "task": "stack_class",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 11
+        },
+        {
+          "task": "lru_cache",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 20
+        }
+      ]
+    },
+    {
+      "numCtx": 8192,
+      "ctxLabel": "8K",
+      "passed": 5,
+      "total": 5,
+      "passRate": 100,
+      "avgTime": 12,
+      "totalDuration": 76,
+      "avgVram": 6586,
+      "avgGpuUtil": 5,
+      "results": [
+        {
+          "task": "binary_search",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 9
+        },
+        {
+          "task": "balanced_parens",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 11
+        },
+        {
+          "task": "run_length_encode",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 10
+        },
+        {
+          "task": "stack_class",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 11
+        },
+        {
+          "task": "lru_cache",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 20
+        }
+      ]
+    },
+    {
+      "numCtx": 16384,
+      "ctxLabel": "16K",
+      "passed": 5,
+      "total": 5,
+      "passRate": 100,
+      "avgTime": 17,
+      "totalDuration": 101,
+      "avgVram": 7068,
+      "avgGpuUtil": 10,
+      "results": [
+        {
+          "task": "binary_search",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 15
+        },
+        {
+          "task": "balanced_parens",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 15
+        },
+        {
+          "task": "run_length_encode",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 15
+        },
+        {
+          "task": "stack_class",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 15
+        },
+        {
+          "task": "lru_cache",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 27
+        }
+      ]
+    },
+    {
+      "numCtx": 24576,
+      "ctxLabel": "24K",
+      "passed": 5,
+      "total": 5,
+      "passRate": 100,
+      "avgTime": 28,
+      "totalDuration": 157,
+      "avgVram": 6666,
+      "avgGpuUtil": 3,
+      "results": [
+        {
+          "task": "binary_search",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 24
+        },
+        {
+          "task": "balanced_parens",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 24
+        },
+        {
+          "task": "run_length_encode",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 23
+        },
+        {
+          "task": "stack_class",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 26
+        },
+        {
+          "task": "lru_cache",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 45
+        }
+      ]
+    },
+    {
+      "numCtx": 32768,
+      "ctxLabel": "32K",
+      "passed": 5,
+      "total": 5,
+      "passRate": 100,
+      "avgTime": 43,
+      "totalDuration": 228,
+      "avgVram": 5938,
+      "avgGpuUtil": 8,
+      "results": [
+        {
+          "task": "binary_search",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 35
+        },
+        {
+          "task": "balanced_parens",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 39
+        },
+        {
+          "task": "run_length_encode",
+          "complexity": 8,
+          "status": "passed",
+          "duration": 36
+        },
+        {
+          "task": "stack_class",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 38
+        },
+        {
+          "task": "lru_cache",
+          "complexity": 9,
+          "status": "passed",
+          "duration": 65
+        }
+      ]
+    }
+  ]
+}

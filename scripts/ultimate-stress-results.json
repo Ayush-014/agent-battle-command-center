@@ -1,0 +1,386 @@
+{
+  "timestamp": "2026-02-17T20:30:26.542Z",
+  "grade": "B",
+  "overallRate": 86,
+  "totalTasks": 43,
+  "totalPassed": 37,
+  "totalDuration": 1423,
+  "totalCost": 0,
+  "phase1": {
+    "model": "qwen2.5-coder:32k",
+    "passed": 36,
+    "total": 40,
+    "successRate": 90,
+    "duration": 685,
+    "cost": 0,
+    "byComplexity": {
+      "1": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0
+      },
+      "2": {
+        "total": 3,
+        "passed": 2,
+        "failed": 1
+      },
+      "3": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0
+      },
+      "4": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      },
+      "5": {
+        "total": 5,
+        "passed": 3,
+        "failed": 2
+      },
+      "6": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      },
+      "7": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      },
+      "8": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0
+      },
+      "9": {
+        "total": 5,
+        "passed": 4,
+        "failed": 1
+      }
+    },
+    "details": [
+      {
+        "task": "double",
+        "complexity": 1,
+        "status": "passed",
+        "error": null,
+        "duration": 28
+      },
+      {
+        "task": "negate",
+        "complexity": 1,
+        "status": "passed",
+        "error": null,
+        "duration": 9
+      },
+      {
+        "task": "square",
+        "complexity": 1,
+        "status": "passed",
+        "error": null,
+        "duration": 9
+      },
+      {
+        "task": "greet",
+        "complexity": 2,
+        "status": "failed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "is_even",
+        "complexity": 2,
+        "status": "passed",
+        "error": null,
+        "duration": 14
+      },
+      {
+        "task": "to_upper",
+        "complexity": 2,
+        "status": "passed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "absolute",
+        "complexity": 3,
+        "status": "passed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "max_of_two",
+        "complexity": 3,
+        "status": "passed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "min_of_three",
+        "complexity": 3,
+        "status": "passed",
+        "error": null,
+        "duration": 11
+      },
+      {
+        "task": "is_leap_year",
+        "complexity": 3,
+        "status": "passed",
+        "error": null,
+        "duration": 17
+      },
+      {
+        "task": "clamp",
+        "complexity": 4,
+        "status": "passed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "count_vowels",
+        "complexity": 4,
+        "status": "passed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "reverse_string",
+        "complexity": 4,
+        "status": "passed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "factorial",
+        "complexity": 4,
+        "status": "passed",
+        "error": null,
+        "duration": 11
+      },
+      {
+        "task": "title_case",
+        "complexity": 4,
+        "status": "passed",
+        "error": null,
+        "duration": 15
+      },
+      {
+        "task": "fizzbuzz_single",
+        "complexity": 5,
+        "status": "passed",
+        "error": null,
+        "duration": 13
+      },
+      {
+        "task": "is_palindrome",
+        "complexity": 5,
+        "status": "passed",
+        "error": null,
+        "duration": 11
+      },
+      {
+        "task": "safe_divide",
+        "complexity": 5,
+        "status": "passed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "flatten_list",
+        "complexity": 5,
+        "status": "failed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "truncate",
+        "complexity": 5,
+        "status": "failed",
+        "error": null,
+        "duration": 16
+      },
+      {
+        "task": "sum_of_digits",
+        "complexity": 6,
+        "status": "passed",
+        "error": null,
+        "duration": 10
+      },
+      {
+        "task": "find_second_largest",
+        "complexity": 6,
+        "status": "passed",
+        "error": null,
+        "duration": 11
+      },
+      {
+        "task": "is_prime",
+        "complexity": 6,
+        "status": "passed",
+        "error": null,
+        "duration": 11
+      },
+      {
+        "task": "caesar_cipher",
+        "complexity": 6,
+        "status": "passed",
+        "error": null,
+        "duration": 14
+      },
+      {
+        "task": "unique_sorted",
+        "complexity": 6,
+        "status": "passed",
+        "error": null,
+        "duration": 15
+      },
+      {
+        "task": "fibonacci",
+        "complexity": 7,
+        "status": "passed",
+        "error": null,
+        "duration": 14
+      },
+      {
+        "task": "word_frequency",
+        "complexity": 7,
+        "status": "passed",
+        "error": null,
+        "duration": 12
+      },
+      {
+        "task": "matrix_transpose",
+        "complexity": 7,
+        "status": "passed",
+        "error": null,
+        "duration": 9
+      },
+      {
+        "task": "group_by",
+        "complexity": 7,
+        "status": "passed",
+        "error": null,
+        "duration": 12
+      },
+      {
+        "task": "roman_to_int",
+        "complexity": 7,
+        "status": "passed",
+        "error": null,
+        "duration": 22
+      },
+      {
+        "task": "merge_sorted",
+        "complexity": 8,
+        "status": "passed",
+        "error": null,
+        "duration": 16
+      },
+      {
+        "task": "binary_search",
+        "complexity": 8,
+        "status": "passed",
+        "error": null,
+        "duration": 13
+      },
+      {
+        "task": "run_length_encode",
+        "complexity": 8,
+        "status": "passed",
+        "error": null,
+        "duration": 14
+      },
+      {
+        "task": "power_set",
+        "complexity": 8,
+        "status": "passed",
+        "error": null,
+        "duration": 13
+      },
+      {
+        "task": "balanced_parens",
+        "complexity": 8,
+        "status": "passed",
+        "error": null,
+        "duration": 19
+      },
+      {
+        "task": "stack_class",
+        "complexity": 9,
+        "status": "passed",
+        "error": null,
+        "duration": 14
+      },
+      {
+        "task": "lru_cache",
+        "complexity": 9,
+        "status": "passed",
+        "error": null,
+        "duration": 21
+      },
+      {
+        "task": "rpn_calculator",
+        "complexity": 9,
+        "status": "passed",
+        "error": null,
+        "duration": 15
+      },
+      {
+        "task": "text_stats",
+        "complexity": 9,
+        "status": "failed",
+        "error": null,
+        "duration": 13
+      },
+      {
+        "task": "sorted_linked_list",
+        "complexity": 9,
+        "status": "passed",
+        "error": null,
+        "duration": 23
+      }
+    ]
+  },
+  "phase2": {
+    "decompModel": "claude-opus-4-5-20251101",
+    "execModel": "qwen2.5-coder:32k",
+    "passed": 1,
+    "total": 3,
+    "duration": 735,
+    "cost": 0,
+    "results": [
+      {
+        "name": "Calculator Package",
+        "subtasksCreated": 3,
+        "subtasksPassed": 0,
+        "decompTime": 104,
+        "decompCost": 0,
+        "execTime": 88,
+        "validationPassed": false,
+        "error": null
+      },
+      {
+        "name": "Todo Manager",
+        "subtasksCreated": 3,
+        "subtasksPassed": 0,
+        "decompTime": 90,
+        "decompCost": 0,
+        "execTime": 109,
+        "validationPassed": true,
+        "error": null
+      },
+      {
+        "name": "Mini Test Framework",
+        "subtasksCreated": 3,
+        "subtasksPassed": 0,
+        "decompTime": 88,
+        "decompCost": 0,
+        "execTime": 124,
+        "validationPassed": false,
+        "error": null
+      }
+    ]
+  }
+}
