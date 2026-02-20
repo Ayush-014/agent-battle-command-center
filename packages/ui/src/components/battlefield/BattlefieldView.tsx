@@ -13,12 +13,11 @@ const BattlefieldCanvas = lazy(() => import('./BattlefieldCanvas'));
  * - Lazy-loads Three.js bundle only when battlefield first activates
  */
 export function BattlefieldView() {
-  const [webglFailed, setWebglFailed] = useState(false);
   const [everActivated, setEverActivated] = useState(false);
   const { hasActiveTasks } = useBattlefieldState();
 
   // Show 3D when there are active tasks
-  const show3D = hasActiveTasks && !webglFailed;
+  const show3D = hasActiveTasks;
 
   // Track if we've ever activated (to start lazy loading)
   const wasActive = useRef(false);
@@ -28,10 +27,6 @@ export function BattlefieldView() {
       setEverActivated(true);
     }
   }, [show3D]);
-
-  if (webglFailed) {
-    return <TaskQueue />;
-  }
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -63,7 +58,6 @@ export function BattlefieldView() {
           >
             <BattlefieldCanvas
               show3D={show3D}
-              onWebGLError={() => setWebglFailed(true)}
             />
           </Suspense>
         </div>

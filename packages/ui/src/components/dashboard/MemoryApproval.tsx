@@ -113,7 +113,7 @@ export function MemoryApproval() {
             >
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <span className="inline-block px-2 py-1 text-xs rounded bg-command-accent text-white">
+                  <span className="inline-block px-2 py-1 text-xs rounded-sm bg-command-accent text-white">
                     {memory.taskType}
                   </span>
                   {memory.proposedByAgent && (
@@ -153,7 +153,7 @@ export function MemoryApproval() {
                   {memory.keywords.map((kw, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 text-xs rounded bg-command-surface text-command-text-secondary"
+                      className="px-2 py-0.5 text-xs rounded-sm bg-command-surface text-command-text-secondary"
                     >
                       {kw}
                     </span>
@@ -165,14 +165,14 @@ export function MemoryApproval() {
                 <button
                   onClick={() => handleApprove(memory.id)}
                   disabled={actionLoading === memory.id}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm rounded transition-colors"
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm rounded-sm transition-colors"
                 >
                   {actionLoading === memory.id ? 'Processing...' : 'Approve'}
                 </button>
                 <button
                   onClick={() => handleReject(memory.id)}
                   disabled={actionLoading === memory.id}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm rounded transition-colors"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm rounded-sm transition-colors"
                 >
                   Reject
                 </button>
@@ -191,7 +191,7 @@ export function MemoryApproval() {
             {stats.byTaskType.map(t => (
               <div
                 key={t.taskType}
-                className="px-3 py-2 rounded bg-command-bg text-center"
+                className="px-3 py-2 rounded-sm bg-command-bg text-center"
               >
                 <div className="text-lg font-bold text-command-text">{t.count}</div>
                 <div className="text-xs text-command-text-secondary">{t.taskType}</div>

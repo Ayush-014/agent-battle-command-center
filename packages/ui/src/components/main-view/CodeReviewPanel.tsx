@@ -119,7 +119,7 @@ export function CodeReviewPanel({ taskId }: CodeReviewPanelProps) {
 
       {/* Summary */}
       {review.summary && (
-        <div className="bg-command-bg border border-command-border rounded p-3">
+        <div className="bg-command-bg border border-command-border rounded-sm p-3">
           <div className="text-sm text-command-text-secondary mb-1">Summary</div>
           <div className="text-command-text">{review.summary}</div>
         </div>
@@ -128,13 +128,13 @@ export function CodeReviewPanel({ taskId }: CodeReviewPanelProps) {
       {/* Complexity Comparison */}
       {review.opusComplexity && (
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-command-bg border border-command-border rounded p-3">
+          <div className="bg-command-bg border border-command-border rounded-sm p-3">
             <div className="text-sm text-command-text-secondary">Initial Complexity</div>
             <div className="text-xl font-semibold text-command-text">
               {review.initialComplexity.toFixed(1)}
             </div>
           </div>
-          <div className="bg-command-bg border border-command-border rounded p-3">
+          <div className="bg-command-bg border border-command-border rounded-sm p-3">
             <div className="text-sm text-command-text-secondary">Opus Assessment</div>
             <div className="text-xl font-semibold text-command-accent">
               {review.opusComplexity.toFixed(1)}
@@ -159,7 +159,7 @@ export function CodeReviewPanel({ taskId }: CodeReviewPanelProps) {
 
       {/* Fix Attempts */}
       {review.fixAttempts > 0 && (
-        <div className="bg-command-bg border border-command-border rounded p-3">
+        <div className="bg-command-bg border border-command-border rounded-sm p-3">
           <div className="text-sm text-command-text-secondary">
             Fix attempts: {review.fixAttempts}
             {review.fixedByModel && ` (by ${review.fixedByModel})`}
@@ -189,7 +189,7 @@ function StatusBadge({ status }: { status: string }) {
   const color = colors[status as keyof typeof colors] || colors.pending;
 
   return (
-    <span className={`px-2 py-0.5 rounded border text-xs font-semibold uppercase ${color}`}>
+    <span className={`px-2 py-0.5 rounded-sm border text-xs font-semibold uppercase ${color}`}>
       {status.replace('_', ' ')}
     </span>
   );
@@ -211,7 +211,7 @@ function FindingCard({ finding }: { finding: CodeReviewFinding }) {
   };
 
   return (
-    <div className={`border rounded p-3 ${severityColors[finding.severity]}`}>
+    <div className={`border rounded-sm p-3 ${severityColors[finding.severity]}`}>
       <div className="flex items-start gap-2">
         <span className="text-lg">{severityIcons[finding.severity]}</span>
         <div className="flex-1">
@@ -232,7 +232,7 @@ function FindingCard({ finding }: { finding: CodeReviewFinding }) {
           )}
 
           {finding.suggestion && (
-            <div className="mt-2 text-sm bg-command-surface rounded p-2 border border-command-border">
+            <div className="mt-2 text-sm bg-command-surface rounded-sm p-2 border border-command-border">
               <div className="text-command-text-secondary text-xs mb-1">💡 Suggestion:</div>
               <div className="text-command-text">{finding.suggestion}</div>
             </div>

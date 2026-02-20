@@ -1,6 +1,351 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --color-command-bg: #0a0e14;
+  --color-command-panel: #141a22;
+  --color-command-border: #1e2836;
+  --color-command-accent: #2d3b4f;
+
+  --color-hud-green: #00ff88;
+  --color-hud-blue: #00aaff;
+  --color-hud-amber: #ffaa00;
+  --color-hud-red: #ff4444;
+  --color-hud-purple: #aa55ff;
+
+  --color-agent-coder: #3b82f6;
+  --color-agent-qa: #10b981;
+
+  --color-status-pending: #6b7280;
+  --color-status-assigned: #8b5cf6;
+  --color-status-active: #3b82f6;
+  --color-status-stuck: #f59e0b;
+  --color-status-completed: #10b981;
+  --color-status-failed: #ef4444;
+
+  --font-mono: JetBrains Mono, Fira Code, monospace;
+  --font-display: Orbitron, sans-serif;
+
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-scan: scan 2s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+  --animate-radar-sweep: radar-rotate 4s linear infinite;
+  --animate-slide-in: slide-in 0.3s ease-out;
+  --animate-slide-up: slide-up 0.3s ease-out;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-scale-pulse: scale-pulse 0.4s ease-out;
+  --animate-shake: shake 0.5s ease-in-out;
+  --animate-border-flash-green: border-flash-green 0.5s ease-out;
+  --animate-border-flash-red: border-flash-red 0.5s ease-out;
+  --animate-warning-blink: warning-blink 1s linear infinite;
+  --animate-glow-pulse-blue: glow-pulse-blue 2s ease-in-out infinite;
+  --animate-glow-pulse-amber: glow-pulse-amber 1.5s ease-in-out infinite;
+
+  @keyframes scan {
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 5px currentColor;
+    }
+    100% {
+      box-shadow:
+        0 0 20px currentColor,
+        0 0 30px currentColor;
+    }
+  }
+  @keyframes radar-rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes slide-in {
+    0% {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes scale-pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: translateX(-2px);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+      transform: translateX(2px);
+    }
+  }
+  @keyframes border-flash-green {
+    0% {
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+    50% {
+      border-color: rgba(16, 185, 129, 1);
+    }
+    100% {
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+  }
+  @keyframes border-flash-red {
+    0% {
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    50% {
+      border-color: rgba(239, 68, 68, 1);
+    }
+    100% {
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+  }
+  @keyframes warning-blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  @keyframes glow-pulse-blue {
+    0%,
+    100% {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow:
+        0 0 15px rgba(59, 130, 246, 0.6),
+        0 0 25px rgba(59, 130, 246, 0.3);
+    }
+  }
+  @keyframes glow-pulse-amber {
+    0%,
+    100% {
+      box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
+    }
+    50% {
+      box-shadow:
+        0 0 15px rgba(245, 158, 11, 0.6),
+        0 0 25px rgba(245, 158, 11, 0.3);
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility panel {
+  @apply bg-command-panel border border-command-border rounded-lg;
+}
+@utility panel-header {
+  @apply px-4 py-2 border-b border-command-border font-display text-sm uppercase tracking-wider text-gray-400;
+}
+@utility panel-content {
+  @apply p-4;
+}
+@utility hud-border {
+  /* HUD elements */
+  @apply border border-hud-green/30;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.1);
+}
+@utility hud-text {
+  @apply text-hud-green font-display tracking-wider;
+}
+@utility status-dot {
+  /* Status indicators */
+  @apply w-2 h-2 rounded-full;
+}
+@utility status-dot-idle {
+  @apply bg-status-completed animate-pulse-slow;
+}
+@utility status-dot-busy {
+  @apply bg-status-active animate-scan;
+}
+@utility status-dot-stuck {
+  @apply bg-status-stuck animate-pulse;
+}
+@utility status-dot-offline {
+  @apply bg-status-pending;
+}
+@utility resource-bar {
+  /* Resource bars */
+  @apply h-4 bg-command-accent rounded-sm overflow-hidden;
+}
+@utility resource-bar-fill {
+  @apply h-full transition-all duration-500 ease-out;
+}
+@utility task-card {
+  /* Task cards - Compact for fitting more */
+  @apply panel p-2 hover:border-hud-blue/50 transition-colors cursor-pointer;
+
+  &.active {
+    @apply border-hud-blue/70;
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.2);
+  }
+
+  &.pending {
+    @apply border-status-pending/30;
+  }
+
+  &.in-progress {
+    @apply border-status-active/50;
+  }
+
+  &.stuck {
+    @apply border-status-stuck/50;
+  }
+
+  &.completed {
+    @apply border-status-completed/50;
+  }
+}
+@utility active {
+  &.task-card {
+    @apply border-hud-blue/70;
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.2);
+  }
+
+  &.mode-toggle-btn {
+    @apply bg-hud-green/20 text-hud-green;
+  }
+}
+@utility pending {
+  &.task-card {
+    @apply border-status-pending/30;
+  }
+}
+@utility in-progress {
+  &.task-card {
+    @apply border-status-active/50;
+  }
+}
+@utility stuck {
+  &.task-card {
+    @apply border-status-stuck/50;
+  }
+}
+@utility completed {
+  &.task-card {
+    @apply border-status-completed/50;
+  }
+}
+@utility agent-card {
+  /* Agent cards */
+  @apply panel p-3 transition-all duration-300;
+
+  &.coder {
+    @apply border-agent-coder/30 hover:border-agent-coder/60;
+  }
+
+  &.qa {
+    @apply border-agent-qa/30 hover:border-agent-qa/60;
+  }
+}
+@utility coder {
+  &.agent-card {
+    @apply border-agent-coder/30 hover:border-agent-coder/60;
+  }
+}
+@utility qa {
+  &.agent-card {
+    @apply border-agent-qa/30 hover:border-agent-qa/60;
+  }
+}
+@utility btn {
+  /* Buttons */
+  @apply px-4 py-2 rounded-sm font-display text-sm uppercase tracking-wider transition-all duration-200;
+}
+@utility btn-primary {
+  @apply btn bg-hud-blue/20 text-hud-blue border border-hud-blue/50 hover:bg-hud-blue/30;
+}
+@utility btn-success {
+  @apply btn bg-hud-green/20 text-hud-green border border-hud-green/50 hover:bg-hud-green/30;
+}
+@utility btn-warning {
+  @apply btn bg-hud-amber/20 text-hud-amber border border-hud-amber/50 hover:bg-hud-amber/30;
+}
+@utility btn-danger {
+  @apply btn bg-hud-red/20 text-hud-red border border-hud-red/50 hover:bg-hud-red/30;
+}
+@utility mode-toggle {
+  /* Mode toggle */
+  @apply flex rounded-lg overflow-hidden border border-command-border;
+}
+@utility mode-toggle-btn {
+  @apply px-4 py-2 font-display text-xs uppercase tracking-wider transition-all duration-200;
+
+  &.active {
+    @apply bg-hud-green/20 text-hud-green;
+  }
+
+  &:not(.active) {
+    @apply text-gray-500 hover:text-gray-300;
+  }
+}
 
 /* Base styles */
 :root {
@@ -10,177 +355,47 @@
   --hud-red: #ff4444;
 }
 
-body {
-  @apply bg-command-bg text-gray-100 font-mono;
-  overflow: hidden;
-}
-
-/* Screen reader only utility */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-/* Focus visible styles for keyboard navigation */
-*:focus-visible {
-  outline: 2px solid var(--hud-blue);
-  outline-offset: 2px;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-command-bg;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-command-accent rounded;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-command-border;
-}
-
-/* Panel styling */
-@layer components {
-  .panel {
-    @apply bg-command-panel border border-command-border rounded-lg;
+@layer base {
+  body {
+    @apply bg-command-bg text-gray-100 font-mono;
+    overflow: hidden;
   }
 
-  .panel-header {
-    @apply px-4 py-2 border-b border-command-border font-display text-sm uppercase tracking-wider text-gray-400;
+  /* Screen reader only utility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 
-  .panel-content {
-    @apply p-4;
+  /* Focus visible styles for keyboard navigation */
+  *:focus-visible {
+    outline: 2px solid var(--hud-blue);
+    outline-offset: 2px;
   }
 
-  /* HUD elements */
-  .hud-border {
-    @apply border border-hud-green/30;
-    box-shadow: 0 0 10px rgba(0, 255, 136, 0.1);
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
 
-  .hud-text {
-    @apply text-hud-green font-display tracking-wider;
+  ::-webkit-scrollbar-track {
+    @apply bg-command-bg;
   }
 
-  /* Status indicators */
-  .status-dot {
-    @apply w-2 h-2 rounded-full;
+  ::-webkit-scrollbar-thumb {
+    @apply bg-command-accent rounded-sm;
   }
 
-  .status-dot-idle {
-    @apply bg-status-completed animate-pulse-slow;
-  }
-
-  .status-dot-busy {
-    @apply bg-status-active animate-scan;
-  }
-
-  .status-dot-stuck {
-    @apply bg-status-stuck animate-pulse;
-  }
-
-  .status-dot-offline {
-    @apply bg-status-pending;
-  }
-
-  /* Resource bars */
-  .resource-bar {
-    @apply h-4 bg-command-accent rounded overflow-hidden;
-  }
-
-  .resource-bar-fill {
-    @apply h-full transition-all duration-500 ease-out;
-  }
-
-  /* Task cards - Compact for fitting more */
-  .task-card {
-    @apply panel p-2 hover:border-hud-blue/50 transition-colors cursor-pointer;
-  }
-
-  .task-card.active {
-    @apply border-hud-blue/70;
-    box-shadow: 0 0 15px rgba(0, 170, 255, 0.2);
-  }
-
-  .task-card.pending {
-    @apply border-status-pending/30;
-  }
-
-  .task-card.in-progress {
-    @apply border-status-active/50;
-  }
-
-  .task-card.stuck {
-    @apply border-status-stuck/50;
-  }
-
-  .task-card.completed {
-    @apply border-status-completed/50;
-  }
-
-  /* Agent cards */
-  .agent-card {
-    @apply panel p-3 transition-all duration-300;
-  }
-
-  .agent-card.coder {
-    @apply border-agent-coder/30 hover:border-agent-coder/60;
-  }
-
-  .agent-card.qa {
-    @apply border-agent-qa/30 hover:border-agent-qa/60;
-  }
-
-  /* Buttons */
-  .btn {
-    @apply px-4 py-2 rounded font-display text-sm uppercase tracking-wider transition-all duration-200;
-  }
-
-  .btn-primary {
-    @apply btn bg-hud-blue/20 text-hud-blue border border-hud-blue/50 hover:bg-hud-blue/30;
-  }
-
-  .btn-success {
-    @apply btn bg-hud-green/20 text-hud-green border border-hud-green/50 hover:bg-hud-green/30;
-  }
-
-  .btn-warning {
-    @apply btn bg-hud-amber/20 text-hud-amber border border-hud-amber/50 hover:bg-hud-amber/30;
-  }
-
-  .btn-danger {
-    @apply btn bg-hud-red/20 text-hud-red border border-hud-red/50 hover:bg-hud-red/30;
-  }
-
-  /* Mode toggle */
-  .mode-toggle {
-    @apply flex rounded-lg overflow-hidden border border-command-border;
-  }
-
-  .mode-toggle-btn {
-    @apply px-4 py-2 font-display text-xs uppercase tracking-wider transition-all duration-200;
-  }
-
-  .mode-toggle-btn.active {
-    @apply bg-hud-green/20 text-hud-green;
-  }
-
-  .mode-toggle-btn:not(.active) {
-    @apply text-gray-500 hover:text-gray-300;
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-command-border;
   }
 }
 

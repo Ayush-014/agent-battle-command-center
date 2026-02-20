@@ -45,12 +45,12 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
         placeholder={placeholder || 'Type a message...'}
         disabled={disabled}
         rows={1}
-        className="flex-1 bg-command-bg border border-command-border rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 resize-none focus:outline-none focus:border-hud-green/50 disabled:opacity-50"
+        className="flex-1 bg-command-bg border border-command-border rounded-lg px-3 py-2 text-sm text-gray-200 placeholder-gray-500 resize-none focus:outline-hidden focus:border-hud-green/50 disabled:opacity-50"
       />
       <button
         onClick={handleSend}
         disabled={disabled || !message.trim()}
-        className="flex-shrink-0 p-2 bg-hud-green/20 hover:bg-hud-green/30 border border-hud-green/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="shrink-0 p-2 bg-hud-green/20 hover:bg-hud-green/30 border border-hud-green/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Send className="w-5 h-5 text-hud-green" />
       </button>

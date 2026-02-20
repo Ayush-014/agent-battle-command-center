@@ -53,7 +53,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
         </div>
         <button
           onClick={() => selectTask(null)}
-          className="p-1 hover:bg-command-accent rounded transition-colors"
+          className="p-1 hover:bg-command-accent rounded-sm transition-colors"
         >
           <X className="w-4 h-4 text-gray-400" />
         </button>
@@ -77,19 +77,19 @@ export function TaskDetail({ task }: TaskDetailProps) {
 
         {/* Info Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-command-bg rounded p-3">
+          <div className="bg-command-bg rounded-sm p-3">
             <div className="text-xs text-gray-500">Type</div>
             <div className="text-sm capitalize">{task.taskType}</div>
           </div>
-          <div className="bg-command-bg rounded p-3">
+          <div className="bg-command-bg rounded-sm p-3">
             <div className="text-xs text-gray-500">Priority</div>
             <div className="text-sm">P{task.priority}</div>
           </div>
-          <div className="bg-command-bg rounded p-3">
+          <div className="bg-command-bg rounded-sm p-3">
             <div className="text-xs text-gray-500">Required Agent</div>
             <div className="text-sm capitalize">{task.requiredAgent || 'Any'}</div>
           </div>
-          <div className="bg-command-bg rounded p-3">
+          <div className="bg-command-bg rounded-sm p-3">
             <div className="text-xs text-gray-500">Iterations</div>
             <div className="text-sm">{task.currentIteration}/{task.maxIterations}</div>
           </div>
@@ -99,7 +99,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
         {assignedAgent && (
           <div className="mb-4">
             <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Assigned To</div>
-            <div className="bg-command-bg rounded p-3 flex items-center gap-3">
+            <div className="bg-command-bg rounded-sm p-3 flex items-center gap-3">
               <div className={`w-8 h-8 rounded flex items-center justify-center ${
                 assignedAgent.type === 'coder' ? 'bg-agent-coder/20' : 'bg-agent-qa/20'
               }`}>
@@ -141,7 +141,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
             <textarea
               value={humanInput}
               onChange={(e) => setHumanInput(e.target.value)}
-              className="w-full bg-command-bg border border-command-border rounded px-3 py-2 text-sm focus:outline-none focus:border-hud-blue h-24 resize-none mb-2"
+              className="w-full bg-command-bg border border-command-border rounded-sm px-3 py-2 text-sm focus:outline-hidden focus:border-hud-blue h-24 resize-none mb-2"
               placeholder="Enter your input or instructions..."
             />
             <div className="flex gap-2">
@@ -174,7 +174,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
         {task.error && (
           <div className="mb-4">
             <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Error</div>
-            <div className="bg-hud-red/10 border border-hud-red/30 rounded p-3 text-sm text-hud-red">
+            <div className="bg-hud-red/10 border border-hud-red/30 rounded-sm p-3 text-sm text-hud-red">
               {task.error}
             </div>
           </div>
@@ -184,7 +184,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
         {task.result && (
           <div className="mb-4">
             <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Result</div>
-            <div className="bg-hud-green/10 border border-hud-green/30 rounded p-3 text-sm">
+            <div className="bg-hud-green/10 border border-hud-green/30 rounded-sm p-3 text-sm">
               <pre className="whitespace-pre-wrap text-xs max-h-32 overflow-y-auto">
                 {JSON.stringify(task.result, null, 2)}
               </pre>
@@ -201,7 +201,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
             </div>
 
             {reviewLoading ? (
-              <div className="bg-command-bg rounded p-3 text-sm text-gray-400 animate-pulse">
+              <div className="bg-command-bg rounded-sm p-3 text-sm text-gray-400 animate-pulse">
                 Loading review data...
               </div>
             ) : codeReview ? (
@@ -234,7 +234,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
 
                 {/* Summary */}
                 {codeReview.summary && (
-                  <div className="bg-command-bg rounded p-2 text-xs text-gray-300">
+                  <div className="bg-command-bg rounded-sm p-2 text-xs text-gray-300">
                     {codeReview.summary}
                   </div>
                 )}
@@ -277,12 +277,12 @@ export function TaskDetail({ task }: TaskDetailProps) {
 
                 {/* Complexity Comparison */}
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-command-bg rounded p-2 text-center">
+                  <div className="bg-command-bg rounded-sm p-2 text-center">
                     <div className="text-[10px] text-gray-500">Initial Complexity</div>
                     <div className="text-sm font-medium">{codeReview.initialComplexity.toFixed(1)}</div>
                   </div>
                   {codeReview.opusComplexity !== undefined && (
-                    <div className="bg-command-bg rounded p-2 text-center">
+                    <div className="bg-command-bg rounded-sm p-2 text-center">
                       <div className="text-[10px] text-gray-500">Opus Assessment</div>
                       <div className="text-sm font-medium">{codeReview.opusComplexity.toFixed(1)}</div>
                     </div>
@@ -319,7 +319,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
                 )}
               </div>
             ) : (
-              <div className="bg-command-bg rounded p-3 text-xs text-gray-500 flex items-center gap-2">
+              <div className="bg-command-bg rounded-sm p-3 text-xs text-gray-500 flex items-center gap-2">
                 <AlertTriangle className="w-3 h-3" />
                 No code review yet
               </div>

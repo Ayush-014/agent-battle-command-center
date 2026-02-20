@@ -42,7 +42,7 @@ export function EditTaskModal({ task, onClose }: EditTaskModalProps) {
           <h2 className="font-display text-sm uppercase tracking-wider">Edit Task</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-command-accent rounded transition-colors"
+            className="p-1 hover:bg-command-accent rounded-sm transition-colors"
           >
             <X className="w-4 h-4 text-gray-400" />
           </button>
@@ -57,7 +57,7 @@ export function EditTaskModal({ task, onClose }: EditTaskModalProps) {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-command-bg border border-command-border rounded px-3 py-2 text-sm focus:outline-none focus:border-hud-blue"
+              className="w-full bg-command-bg border border-command-border rounded-sm px-3 py-2 text-sm focus:outline-hidden focus:border-hud-blue"
               placeholder="Task title..."
               required
             />
@@ -69,7 +69,7 @@ export function EditTaskModal({ task, onClose }: EditTaskModalProps) {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-command-bg border border-command-border rounded px-3 py-2 text-sm focus:outline-none focus:border-hud-blue h-24 resize-none"
+              className="w-full bg-command-bg border border-command-border rounded-sm px-3 py-2 text-sm focus:outline-hidden focus:border-hud-blue h-24 resize-none"
               placeholder="Task description..."
             />
           </div>
@@ -81,7 +81,7 @@ export function EditTaskModal({ task, onClose }: EditTaskModalProps) {
               <select
                 value={taskType}
                 disabled
-                className="w-full bg-command-accent border border-command-border rounded px-3 py-2 text-sm text-gray-500 cursor-not-allowed"
+                className="w-full bg-command-accent border border-command-border rounded-sm px-3 py-2 text-sm text-gray-500 cursor-not-allowed"
               >
                 <option value="code">Code</option>
                 <option value="test">Test</option>
@@ -96,7 +96,7 @@ export function EditTaskModal({ task, onClose }: EditTaskModalProps) {
               <select
                 value={requiredAgent}
                 disabled
-                className="w-full bg-command-accent border border-command-border rounded px-3 py-2 text-sm text-gray-500 cursor-not-allowed"
+                className="w-full bg-command-accent border border-command-border rounded-sm px-3 py-2 text-sm text-gray-500 cursor-not-allowed"
               >
                 <option value="">Any</option>
                 <option value="coder">Coder</option>
@@ -126,7 +126,7 @@ export function EditTaskModal({ task, onClose }: EditTaskModalProps) {
 
           {/* Error */}
           {error && (
-            <div className="text-sm text-hud-red bg-hud-red/10 border border-hud-red/30 rounded p-2">
+            <div className="text-sm text-hud-red bg-hud-red/10 border border-hud-red/30 rounded-sm p-2">
               {error}
             </div>
           )}

@@ -52,7 +52,7 @@ export function ResourceBar({ label, icon, value, max, color, format = 'number' 
 
   return (
     <div className="flex items-center gap-2 min-w-[140px]">
-      <div className={clsx('flex-shrink-0', textColorClasses[actualColor])}>
+      <div className={clsx('shrink-0', textColorClasses[actualColor])}>
         {icon}
       </div>
       <div className="flex-1">

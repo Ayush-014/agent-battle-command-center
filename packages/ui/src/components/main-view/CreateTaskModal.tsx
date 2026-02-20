@@ -41,7 +41,7 @@ export function CreateTaskModal({ onClose }: CreateTaskModalProps) {
           <h2 className="font-display text-sm uppercase tracking-wider">Create Task</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-command-accent rounded transition-colors"
+            className="p-1 hover:bg-command-accent rounded-sm transition-colors"
           >
             <X className="w-4 h-4 text-gray-400" />
           </button>
@@ -56,7 +56,7 @@ export function CreateTaskModal({ onClose }: CreateTaskModalProps) {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-command-bg border border-command-border rounded px-3 py-2 text-sm focus:outline-none focus:border-hud-blue"
+              className="w-full bg-command-bg border border-command-border rounded-sm px-3 py-2 text-sm focus:outline-hidden focus:border-hud-blue"
               placeholder="Task title..."
               required
             />
@@ -68,7 +68,7 @@ export function CreateTaskModal({ onClose }: CreateTaskModalProps) {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-command-bg border border-command-border rounded px-3 py-2 text-sm focus:outline-none focus:border-hud-blue h-24 resize-none"
+              className="w-full bg-command-bg border border-command-border rounded-sm px-3 py-2 text-sm focus:outline-hidden focus:border-hud-blue h-24 resize-none"
               placeholder="Task description..."
             />
           </div>
@@ -80,7 +80,7 @@ export function CreateTaskModal({ onClose }: CreateTaskModalProps) {
               <select
                 value={taskType}
                 onChange={(e) => setTaskType(e.target.value as TaskType)}
-                className="w-full bg-command-bg border border-command-border rounded px-3 py-2 text-sm focus:outline-none focus:border-hud-blue"
+                className="w-full bg-command-bg border border-command-border rounded-sm px-3 py-2 text-sm focus:outline-hidden focus:border-hud-blue"
               >
                 <option value="code">Code</option>
                 <option value="test">Test</option>
@@ -95,7 +95,7 @@ export function CreateTaskModal({ onClose }: CreateTaskModalProps) {
               <select
                 value={requiredAgent}
                 onChange={(e) => setRequiredAgent(e.target.value as AgentType | '')}
-                className="w-full bg-command-bg border border-command-border rounded px-3 py-2 text-sm focus:outline-none focus:border-hud-blue"
+                className="w-full bg-command-bg border border-command-border rounded-sm px-3 py-2 text-sm focus:outline-hidden focus:border-hud-blue"
               >
                 <option value="">Any</option>
                 <option value="coder">Coder</option>
@@ -125,7 +125,7 @@ export function CreateTaskModal({ onClose }: CreateTaskModalProps) {
 
           {/* Error */}
           {error && (
-            <div className="text-sm text-hud-red bg-hud-red/10 border border-hud-red/30 rounded p-2">
+            <div className="text-sm text-hud-red bg-hud-red/10 border border-hud-red/30 rounded-sm p-2">
               {error}
             </div>
           )}

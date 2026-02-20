@@ -286,7 +286,7 @@ export function TaskBuilding({ building }: TaskBuildingProps) {
       {geometries.map((geo, i) => (
         <mesh key={i} geometry={geo}>
           <meshBasicMaterial
-            ref={(mat) => {
+            ref={(mat: THREE.MeshBasicMaterial | null) => {
               if (mat) materialsRef.current[i] = mat;
             }}
             color={HOLO_COLORS.primary}

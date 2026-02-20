@@ -6,7 +6,7 @@ import { vi } from 'vitest';
  * Custom render function that wraps components with necessary providers
  */
 export function renderWithProviders(
-  ui: ReactElement,
+  ui: ReactElement<any>,
   options?: Omit<RenderOptions, 'wrapper'>
 ) {
   return render(ui, { ...options });

@@ -18,8 +18,8 @@ export function Skeleton({
       className={clsx(
         'animate-pulse bg-gray-700/50',
         variant === 'circular' && 'rounded-full',
-        variant === 'text' && 'rounded',
-        variant === 'rectangular' && 'rounded',
+        variant === 'text' && 'rounded-sm',
+        variant === 'rectangular' && 'rounded-sm',
         className
       )}
       style={{ width, height }}
@@ -33,7 +33,7 @@ export function TaskCardSkeleton() {
       {/* Header */}
       <div className="flex items-start justify-between gap-1 mb-1">
         <div className="flex items-center gap-1.5">
-          <Skeleton className="w-6 h-6 rounded" />
+          <Skeleton className="w-6 h-6 rounded-sm" />
           <div className="flex flex-col gap-1">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-2 w-12" />
@@ -47,7 +47,7 @@ export function TaskCardSkeleton() {
 
       {/* Footer */}
       <div className="flex items-center justify-between">
-        <Skeleton className="h-5 w-12 rounded" />
+        <Skeleton className="h-5 w-12 rounded-sm" />
         <Skeleton className="h-2 w-8" />
       </div>
     </div>

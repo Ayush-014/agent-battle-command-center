@@ -140,11 +140,11 @@ export function CostDashboard() {
             {pieData.map((slice) => (
               <div
                 key={slice.label}
-                className="flex items-center justify-between p-3 bg-command-bg rounded border border-command-border"
+                className="flex items-center justify-between p-3 bg-command-bg rounded-sm border border-command-border"
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-4 h-4 rounded"
+                    className="w-4 h-4 rounded-sm"
                     style={{ backgroundColor: slice.color }}
                   />
                   <span className="text-command-text">{slice.label}</span>

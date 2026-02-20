@@ -87,7 +87,7 @@ export function SuccessRateChart({ period = 'hourly', hours = 24 }: SuccessRateC
           <select
             value={selectedHours}
             onChange={(e) => setSelectedHours(parseInt(e.target.value))}
-            className="px-3 py-1 bg-command-surface border border-command-border rounded text-command-text text-sm"
+            className="px-3 py-1 bg-command-surface border border-command-border rounded-sm text-command-text text-sm"
           >
             <option value={6}>6 hours</option>
             <option value={12}>12 hours</option>
@@ -105,15 +105,15 @@ export function SuccessRateChart({ period = 'hourly', hours = 24 }: SuccessRateC
 
       {/* Stats */}
       <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
-        <div className="bg-command-surface border border-command-border rounded p-3">
+        <div className="bg-command-surface border border-command-border rounded-sm p-3">
           <div className="text-command-text-secondary">Completed</div>
           <div className="text-lg font-semibold text-green-400">{data.overall.completed}</div>
         </div>
-        <div className="bg-command-surface border border-command-border rounded p-3">
+        <div className="bg-command-surface border border-command-border rounded-sm p-3">
           <div className="text-command-text-secondary">Failed</div>
           <div className="text-lg font-semibold text-red-400">{data.overall.failed}</div>
         </div>
-        <div className="bg-command-surface border border-command-border rounded p-3">
+        <div className="bg-command-surface border border-command-border rounded-sm p-3">
           <div className="text-command-text-secondary">Total</div>
           <div className="text-lg font-semibold text-command-text">{data.overall.total}</div>
         </div>

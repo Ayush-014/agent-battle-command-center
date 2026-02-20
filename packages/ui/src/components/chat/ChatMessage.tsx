@@ -15,7 +15,7 @@ export function ChatMessage({ role, content, isStreaming, timestamp }: ChatMessa
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       {/* Avatar */}
       <div
-        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+        className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
           isUser ? 'bg-hud-blue/20' : 'bg-hud-green/20'
         }`}
       >
@@ -34,7 +34,7 @@ export function ChatMessage({ role, content, isStreaming, timestamp }: ChatMessa
             : 'bg-command-accent border border-command-border'
         }`}
       >
-        <div className="text-sm text-gray-200 whitespace-pre-wrap break-words">
+        <div className="text-sm text-gray-200 whitespace-pre-wrap wrap-break-word">
           {content}
           {isStreaming && (
             <span className="inline-block w-2 h-4 ml-1 bg-hud-green animate-pulse" />

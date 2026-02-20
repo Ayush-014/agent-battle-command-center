@@ -19,7 +19,7 @@ export function Sidebar() {
       <div className="h-full flex flex-col items-center py-4 gap-4">
         <button
           onClick={toggleSidebar}
-          className="p-2 hover:bg-command-accent rounded transition-colors"
+          className="p-2 hover:bg-command-accent rounded-sm transition-colors"
         >
           <ChevronRight className="w-4 h-4 text-gray-400" />
         </button>
@@ -68,7 +68,7 @@ export function Sidebar() {
         </span>
         <button
           onClick={toggleSidebar}
-          className="p-1 hover:bg-command-accent rounded transition-colors"
+          className="p-1 hover:bg-command-accent rounded-sm transition-colors"
         >
           <ChevronLeft className="w-4 h-4 text-gray-400" />
         </button>

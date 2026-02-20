@@ -163,7 +163,7 @@ function ExplosionParticles({
       birthTime.current = clock.elapsedTime;
     }
 
-    const age = clock.elapsedTime - birthTime.current;
+    const age = clock.elapsedTime - birthTime.current!;
     const maxAge = success ? 1.5 : 2;
 
     for (let i = 0; i < COUNT; i++) {

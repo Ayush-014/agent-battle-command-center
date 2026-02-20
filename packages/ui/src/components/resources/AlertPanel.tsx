@@ -25,14 +25,14 @@ function AlertItem({ alert, onAcknowledge }: { alert: Alert; onAcknowledge: () =
       }`}
     >
       <div className="flex items-start gap-2">
-        <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+        <Icon className="w-4 h-4 shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <span className="font-medium text-sm truncate">{alert.title}</span>
             {!alert.acknowledged && (
               <button
                 onClick={onAcknowledge}
-                className="flex-shrink-0 p-1 hover:bg-white/10 rounded transition-colors"
+                className="shrink-0 p-1 hover:bg-white/10 rounded-sm transition-colors"
               >
                 <CheckCircle className="w-3 h-3" />
               </button>
@@ -74,7 +74,7 @@ export function AlertPanel() {
           )}
           <button
             onClick={toggleAlertsPanel}
-            className="p-1 hover:bg-command-accent rounded transition-colors"
+            className="p-1 hover:bg-command-accent rounded-sm transition-colors"
           >
             <X className="w-4 h-4 text-gray-400" />
           </button>

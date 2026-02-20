@@ -33,7 +33,7 @@ export function ShortcutsHelp({ shortcuts }: ShortcutsHelpProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs">
       <div className="bg-command-panel border border-command-border rounded-lg shadow-xl max-w-md w-full mx-4">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-command-border">
@@ -45,7 +45,7 @@ export function ShortcutsHelp({ shortcuts }: ShortcutsHelpProps) {
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-1 hover:bg-command-accent rounded transition-colors"
+            className="p-1 hover:bg-command-accent rounded-sm transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -57,10 +57,10 @@ export function ShortcutsHelp({ shortcuts }: ShortcutsHelpProps) {
           {shortcuts.map((shortcut, index) => (
             <div
               key={index}
-              className="flex items-center justify-between py-2 px-3 rounded bg-command-accent/50"
+              className="flex items-center justify-between py-2 px-3 rounded-sm bg-command-accent/50"
             >
               <span className="text-gray-300">{shortcut.description}</span>
-              <kbd className="px-2 py-1 bg-command-panel border border-command-border rounded text-hud-green font-mono text-sm">
+              <kbd className="px-2 py-1 bg-command-panel border border-command-border rounded-sm text-hud-green font-mono text-sm">
                 {shortcut.key}
               </kbd>
             </div>
@@ -69,7 +69,7 @@ export function ShortcutsHelp({ shortcuts }: ShortcutsHelpProps) {
 
         {/* Footer */}
         <div className="p-4 border-t border-command-border text-center text-sm text-gray-500">
-          Press <kbd className="px-1 py-0.5 bg-command-accent rounded text-hud-green">Esc</kbd> to close
+          Press <kbd className="px-1 py-0.5 bg-command-accent rounded-sm text-hud-green">Esc</kbd> to close
         </div>
       </div>
     </div>

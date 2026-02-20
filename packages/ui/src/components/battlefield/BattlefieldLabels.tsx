@@ -24,7 +24,7 @@ export function BuildingLabel({ building }: BuildingLabelProps) {
         <div className="flex flex-col items-center gap-0.5 whitespace-nowrap">
           {/* Complexity badge */}
           <span
-            className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold"
+            className="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-bold"
             style={{
               backgroundColor: `${getBadgeColor(complexity)}22`,
               color: getBadgeColor(complexity),

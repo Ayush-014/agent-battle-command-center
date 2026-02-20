@@ -102,7 +102,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
 
               {/* Error Details */}
-              <div className="bg-black/50 rounded p-4 space-y-2">
+              <div className="bg-black/50 rounded-sm p-4 space-y-2">
                 <div>
                   <p className="text-hud-amber text-xs uppercase font-mono mb-1">
                     Error Type
@@ -135,13 +135,13 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={this.handleReset}
-                  className="flex-1 bg-hud-cyan/20 hover:bg-hud-cyan/30 border border-hud-cyan text-hud-cyan px-4 py-2 rounded font-bold transition-colors"
+                  className="flex-1 bg-hud-cyan/20 hover:bg-hud-cyan/30 border border-hud-cyan text-hud-cyan px-4 py-2 rounded-sm font-bold transition-colors"
                 >
                   Try Again
                 </button>
                 <button
                   onClick={this.handleReload}
-                  className="flex-1 bg-hud-amber/20 hover:bg-hud-amber/30 border border-hud-amber text-hud-amber px-4 py-2 rounded font-bold transition-colors"
+                  className="flex-1 bg-hud-amber/20 hover:bg-hud-amber/30 border border-hud-amber text-hud-amber px-4 py-2 rounded-sm font-bold transition-colors"
                 >
                   Reload Page
                 </button>

@@ -56,7 +56,7 @@ export class ComponentErrorBoundary extends Component<Props, State> {
       const componentName = this.props.componentName || 'This component';
 
       return (
-        <div className="w-full h-full flex items-center justify-center p-4 bg-hud-red/5 border border-hud-red/30 rounded">
+        <div className="w-full h-full flex items-center justify-center p-4 bg-hud-red/5 border border-hud-red/30 rounded-sm">
           <div className="text-center space-y-3 max-w-md">
             {/* Icon */}
             <div className="flex justify-center">
@@ -90,7 +90,7 @@ export class ComponentErrorBoundary extends Component<Props, State> {
             {/* Action */}
             <button
               onClick={this.handleReset}
-              className="bg-hud-cyan/20 hover:bg-hud-cyan/30 border border-hud-cyan text-hud-cyan text-xs px-3 py-1.5 rounded transition-colors font-mono"
+              className="bg-hud-cyan/20 hover:bg-hud-cyan/30 border border-hud-cyan text-hud-cyan text-xs px-3 py-1.5 rounded-sm transition-colors font-mono"
             >
               Retry
             </button>
@@ -101,7 +101,7 @@ export class ComponentErrorBoundary extends Component<Props, State> {
                 <summary className="text-hud-text-dim text-xs cursor-pointer hover:text-hud-text font-mono">
                   Details
                 </summary>
-                <pre className="text-hud-text-dim text-[10px] mt-1 overflow-x-auto max-h-32 p-2 bg-black/50 rounded">
+                <pre className="text-hud-text-dim text-[10px] mt-1 overflow-x-auto max-h-32 p-2 bg-black/50 rounded-sm">
                   {this.state.error.stack}
                 </pre>
               </details>

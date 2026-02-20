@@ -124,14 +124,14 @@ export function ChatPanel({ agents, onClose }: ChatPanelProps) {
         <div className="flex items-center gap-1">
           <button
             onClick={handleNewConversation}
-            className="p-1 hover:bg-command-accent rounded transition-colors"
+            className="p-1 hover:bg-command-accent rounded-sm transition-colors"
             title="New conversation"
           >
             <Plus className="w-4 h-4 text-gray-400" />
           </button>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-command-accent rounded transition-colors"
+            className="p-1 hover:bg-command-accent rounded-sm transition-colors"
           >
             <X className="w-4 h-4 text-gray-400" />
           </button>
@@ -218,7 +218,7 @@ export function ChatPanel({ agents, onClose }: ChatPanelProps) {
               </div>
               <button
                 onClick={(e) => handleDeleteConversation(conv.id, e)}
-                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-hud-red/20 rounded transition-all"
+                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-hud-red/20 rounded-sm transition-all"
               >
                 <Trash2 className="w-3 h-3 text-hud-red" />
               </button>

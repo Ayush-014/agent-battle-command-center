@@ -191,7 +191,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
       >
         <div className="flex items-center gap-1.5 mb-1">
           <TaskIcon className={clsx(
-            'w-3 h-3 flex-shrink-0',
+            'w-3 h-3 shrink-0',
             task.requiredAgent === 'coder' ? 'text-agent-coder' :
             task.requiredAgent === 'qa' ? 'text-agent-qa' : 'text-gray-400'
           )} aria-hidden="true" />
@@ -199,7 +199,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
           <button
             type="button"
             onClick={handleCopyId}
-            className="p-0.5 hover:bg-command-accent rounded flex-shrink-0 text-gray-400 hover:text-hud-amber"
+            className="p-0.5 hover:bg-command-accent rounded-sm shrink-0 text-gray-400 hover:text-hud-amber"
             aria-label={copied ? 'Copied' : 'Copy task ID'}
             title={task.id}
           >
@@ -208,7 +208,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
         </div>
         <div className="flex items-center justify-between mt-auto">
           <span className={clsx(
-            'text-[9px] px-1 py-0.5 rounded',
+            'text-[9px] px-1 py-0.5 rounded-sm',
             priorityColors[priorityLevel]
           )} aria-label={`Priority ${task.priority}`}>
             P{task.priority}
@@ -218,7 +218,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
               <button
                 onClick={handleExecute}
                 disabled={executing}
-                className="p-0.5 bg-hud-green/20 hover:bg-hud-green/30 text-hud-green rounded disabled:opacity-50"
+                className="p-0.5 bg-hud-green/20 hover:bg-hud-green/30 text-hud-green rounded-sm disabled:opacity-50"
                 aria-label="Execute task"
               >
                 <Play className="w-2.5 h-2.5" aria-hidden="true" />
@@ -274,7 +274,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
       <div className="flex items-start justify-between gap-1 mb-1">
         <div className="flex items-center gap-1.5">
           <div className={clsx(
-            'w-6 h-6 rounded flex items-center justify-center',
+            'w-6 h-6 rounded-sm flex items-center justify-center',
             task.requiredAgent === 'coder' ? 'bg-agent-coder/20' :
             task.requiredAgent === 'qa' ? 'bg-agent-qa/20' : 'bg-gray-500/20'
           )} aria-hidden="true">
@@ -294,7 +294,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
               <button
                 type="button"
                 onClick={handleCopyId}
-                className="p-0.5 hover:bg-command-accent rounded transition-colors text-gray-400 hover:text-hud-amber"
+                className="p-0.5 hover:bg-command-accent rounded-sm transition-colors text-gray-400 hover:text-hud-amber"
                 aria-label={copied ? 'Copied' : 'Copy task ID'}
                 title={copied ? 'Copied' : 'Copy task ID'}
               >
@@ -311,7 +311,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
           {task.status === 'pending' && (
             <button
               onClick={handleEdit}
-              className="p-1 hover:bg-command-accent rounded transition-colors"
+              className="p-1 hover:bg-command-accent rounded-sm transition-colors"
               aria-label="Edit task"
             >
               <Edit className="w-3 h-3 text-gray-400" aria-hidden="true" />
@@ -321,7 +321,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="p-1 hover:bg-hud-red/20 rounded transition-colors disabled:opacity-50"
+              className="p-1 hover:bg-hud-red/20 rounded-sm transition-colors disabled:opacity-50"
               aria-label="Delete task"
             >
               <Trash2 className="w-3 h-3 text-hud-red" aria-hidden="true" />
@@ -350,7 +350,7 @@ export function TaskCard({ task, compact = false, onClick }: TaskCardProps) {
             <button
               onClick={handleExecute}
               disabled={executing}
-              className="flex items-center gap-0.5 px-1.5 py-0.5 bg-hud-green/20 hover:bg-hud-green/30 text-hud-green rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[10px]"
+              className="flex items-center gap-0.5 px-1.5 py-0.5 bg-hud-green/20 hover:bg-hud-green/30 text-hud-green rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-[10px]"
               aria-label="Execute task"
             >
               <Play className="w-2.5 h-2.5" aria-hidden="true" />

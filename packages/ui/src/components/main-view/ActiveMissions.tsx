@@ -55,7 +55,7 @@ function CompactMission({ agent, task }: CompactMissionProps) {
       <div className="flex items-center gap-2">
         {/* Agent indicator */}
         <div 
-          className={`w-2 h-2 rounded-full flex-shrink-0 ${
+          className={`w-2 h-2 rounded-full shrink-0 ${
             agent.type === 'coder' ? 'bg-agent-coder' :
             agent.type === 'qa' ? 'bg-agent-qa' : 'bg-agent-cto'
           }`}
@@ -66,7 +66,7 @@ function CompactMission({ agent, task }: CompactMissionProps) {
         {/* Agent name */}
         <span className="text-[10px] text-gray-500 w-16 truncate">{agent.name}</span>
 
-        <ArrowRight className="w-3 h-3 text-gray-600 flex-shrink-0" aria-hidden="true" />
+        <ArrowRight className="w-3 h-3 text-gray-600 shrink-0" aria-hidden="true" />
 
         {/* Task title */}
         <span className="text-xs truncate flex-1 min-w-0">{task.title}</span>
@@ -74,12 +74,12 @@ function CompactMission({ agent, task }: CompactMissionProps) {
         {/* Status */}
         {isStuck || loopDetected ? (
           <>
-            <AlertTriangle className="w-3 h-3 text-hud-amber flex-shrink-0" aria-hidden="true" />
+            <AlertTriangle className="w-3 h-3 text-hud-amber shrink-0" aria-hidden="true" />
             <span className="sr-only">Needs attention</span>
           </>
         ) : (
           <>
-            <Loader className="w-3 h-3 text-hud-blue flex-shrink-0 animate-spin" style={{ animationDuration: '2s' }} aria-hidden="true" />
+            <Loader className="w-3 h-3 text-hud-blue shrink-0 animate-spin" style={{ animationDuration: '2s' }} aria-hidden="true" />
             <span className="sr-only">In progress</span>
           </>
         )}
@@ -177,7 +177,7 @@ export function ActiveMissions() {
         ) : (
           <div className="flex gap-2 h-full items-center">
             {missions.map(({ agent, task }) => (
-              <div key={task.id} className="flex-shrink-0" role="listitem">
+              <div key={task.id} className="shrink-0" role="listitem">
                 <CompactMission agent={agent} task={task} />
               </div>
             ))}

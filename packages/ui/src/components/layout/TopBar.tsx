@@ -98,7 +98,7 @@ export function TopBar() {
     <header className="h-14 bg-command-panel border-b border-command-border flex items-center px-4 gap-6">
       {/* Logo/Title */}
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded bg-hud-green/20 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-sm bg-hud-green/20 flex items-center justify-center">
           <Zap className="w-5 h-5 text-hud-green" />
         </div>
         <span className="font-display text-lg tracking-wider text-hud-green hidden lg:block">
@@ -194,7 +194,7 @@ export function TopBar() {
         {/* Voice Pack Selector */}
         <div className="relative" ref={voicePackDropdownRef}>
           <button
-            className="flex items-center gap-1 px-2 py-1.5 hover:bg-command-accent rounded transition-colors text-sm text-gray-300"
+            className="flex items-center gap-1 px-2 py-1.5 hover:bg-command-accent rounded-sm transition-colors text-sm text-gray-300"
             onClick={() => setVoicePackOpen(!voicePackOpen)}
             aria-label={`Voice pack: ${getAvailableVoicePacks().find(p => p.id === audioSettings.selectedPack)?.name || 'Voice'}`}
             aria-expanded={voicePackOpen}
@@ -285,7 +285,7 @@ export function TopBar() {
 
         {/* Alerts Button */}
         <button
-          className="relative p-2 hover:bg-command-accent rounded transition-colors"
+          className="relative p-2 hover:bg-command-accent rounded-sm transition-colors"
           onClick={toggleAlertsPanel}
           aria-label={`Alerts${unacknowledgedAlerts > 0 ? `, ${unacknowledgedAlerts} unacknowledged` : ''}`}
         >
@@ -325,7 +325,7 @@ export function TopBar() {
         Keyboard shortcuts
         <button
           onClick={() => window.dispatchEvent(new CustomEvent('show-shortcuts-help'))}
-          className="p-2 hover:bg-command-accent rounded transition-colors"
+          className="p-2 hover:bg-command-accent rounded-sm transition-colors"
           aria-label="Keyboard shortcuts"
         >
           <HelpCircle className="w-5 h-5 text-gray-400" aria-hidden="true" />

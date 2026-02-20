@@ -200,7 +200,7 @@ export function TokenBurnLog() {
             Token Burn Rate
           </h3>
           {useMockData && (
-            <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">DEMO</span>
+            <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded-sm">DEMO</span>
           )}
         </div>
 
@@ -225,7 +225,7 @@ export function TokenBurnLog() {
           {entries.length === 0 && !useMockData && (
             <button
               onClick={() => setUseMockData(true)}
-              className="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded hover:bg-amber-500/30 transition-colors"
+              className="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-sm hover:bg-amber-500/30 transition-colors"
             >
               Demo
             </button>
@@ -236,7 +236,7 @@ export function TokenBurnLog() {
               type="checkbox"
               checked={autoScroll}
               onChange={(e) => setAutoScroll(e.target.checked)}
-              className="rounded"
+              className="rounded-sm"
             />
             Auto
           </label>
@@ -280,24 +280,24 @@ export function TokenBurnLog() {
             return (
               <div
                 key={entry.id}
-                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-command-panel/50"
+                className="flex items-center gap-2 px-2 py-1 rounded-sm hover:bg-command-panel/50"
               >
                 {/* Timestamp */}
-                <span className="text-gray-500 w-20 flex-shrink-0">
+                <span className="text-gray-500 w-20 shrink-0">
                   [{formatTime(entry.timestamp)}]
                 </span>
 
                 {/* Model tier badge */}
-                <span className={`w-16 text-center px-1.5 py-0.5 rounded text-[10px] font-bold ${color} bg-gray-800/50 flex-shrink-0`}>
+                <span className={`w-16 text-center px-1.5 py-0.5 rounded-sm text-[10px] font-bold ${color} bg-gray-800/50 shrink-0`}>
                   {tier}
                 </span>
 
                 {/* Token counts */}
-                <span className="text-blue-400 w-16 text-right flex-shrink-0">
+                <span className="text-blue-400 w-16 text-right shrink-0">
                   +{formatNumber(entry.inputTokens)}
                 </span>
                 <span className="text-gray-600">/</span>
-                <span className="text-amber-400 w-16 flex-shrink-0">
+                <span className="text-amber-400 w-16 shrink-0">
                   {formatNumber(entry.outputTokens)}
                 </span>
 
@@ -308,7 +308,7 @@ export function TokenBurnLog() {
 
                 {/* Cost */}
                 {cost > 0 && (
-                  <span className="text-hud-green w-16 text-right flex-shrink-0">
+                  <span className="text-hud-green w-16 text-right shrink-0">
                     ${cost.toFixed(4)}
                   </span>
                 )}

@@ -17,7 +17,6 @@ const GpuThrottleContext = createContext<GpuThrottleState>({ throttled: false })
 
 interface BattlefieldCanvasProps {
   show3D: boolean;
-  onWebGLError: () => void;
 }
 
 interface ActiveExplosion {
@@ -31,7 +30,7 @@ interface ActiveExplosion {
  * The actual R3F Canvas with all 3D scene content.
  * This is the heavy chunk that gets code-split via lazy loading.
  */
-export default function BattlefieldCanvas({ show3D, onWebGLError }: BattlefieldCanvasProps) {
+export default function BattlefieldCanvas({ show3D }: BattlefieldCanvasProps) {
   const {
     hasOllamaInProgress,
     buildings,
@@ -93,8 +92,6 @@ export default function BattlefieldCanvas({ show3D, onWebGLError }: BattlefieldC
             gl.setClearColor('#0a0f0a', 1);
             gl.toneMapping = 0; // NoToneMapping for raw wireframe colors
           }}
-          onError={onWebGLError}
-          style={{ background: '#0a0f0a' }}
         >
           <Suspense fallback={null}>
             <ThrottledRenderer />
@@ -152,7 +149,7 @@ export default function BattlefieldCanvas({ show3D, onWebGLError }: BattlefieldC
       {show3D && (
         <div className="absolute top-2 left-2 pointer-events-none">
           <div
-            className="px-2 py-1 rounded border text-[10px] font-mono uppercase tracking-wider"
+            className="px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-wider"
             style={{
               borderColor: '#00ff8844',
               backgroundColor: '#00ff8811',

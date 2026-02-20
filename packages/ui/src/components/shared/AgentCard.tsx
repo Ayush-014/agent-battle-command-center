@@ -94,13 +94,13 @@ export function AgentCard({ agent, compact = false, showControls = false }: Agen
 
       {/* Current Task */}
       {currentTask && (
-        <div className="bg-command-bg rounded p-2 mb-3">
+        <div className="bg-command-bg rounded-sm p-2 mb-3">
           <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">
             Current Task
           </div>
           <div className="text-xs truncate">{currentTask.title}</div>
           {currentTask.status === 'in_progress' && (
-            <div className="mt-2 h-1 bg-command-accent rounded overflow-hidden">
+            <div className="mt-2 h-1 bg-command-accent rounded-sm overflow-hidden">
               <div
                 className="h-full bg-hud-blue animate-pulse"
                 style={{ width: '50%' }}
@@ -112,11 +112,11 @@ export function AgentCard({ agent, compact = false, showControls = false }: Agen
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-        <div className="bg-command-bg rounded p-2">
+        <div className="bg-command-bg rounded-sm p-2">
           <div className="text-gray-500">Completed</div>
           <div className="text-hud-green font-mono">{agent.stats.tasksCompleted}</div>
         </div>
-        <div className="bg-command-bg rounded p-2">
+        <div className="bg-command-bg rounded-sm p-2">
           <div className="text-gray-500">Success</div>
           <div className="text-hud-blue font-mono">
             {(agent.stats.successRate * 100).toFixed(0)}%

@@ -86,11 +86,11 @@ export function ToolLog() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success':
-        return <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0" />;
+        return <CheckCircle className="w-3 h-3 text-green-400 shrink-0" />;
       case 'error':
-        return <XCircle className="w-3 h-3 text-red-400 flex-shrink-0" />;
+        return <XCircle className="w-3 h-3 text-red-400 shrink-0" />;
       default:
-        return <Clock className="w-3 h-3 text-yellow-400 flex-shrink-0 animate-spin" />;
+        return <Clock className="w-3 h-3 text-yellow-400 shrink-0 animate-spin" />;
     }
   };
 
@@ -141,7 +141,7 @@ export function ToolLog() {
               type="checkbox"
               checked={autoScroll}
               onChange={(e) => setAutoScroll(e.target.checked)}
-              className="rounded"
+              className="rounded-sm"
             />
             Auto-scroll
           </label>
@@ -178,12 +178,12 @@ export function ToolLog() {
               }`}
             >
               {/* Timestamp */}
-              <span className="text-gray-500 w-20 flex-shrink-0">
+              <span className="text-gray-500 w-20 shrink-0">
                 [{formatTime(log.timestamp)}]
               </span>
 
               {/* Agent ID */}
-              <span className="text-gray-400 w-24 truncate flex-shrink-0">
+              <span className="text-gray-400 w-24 truncate shrink-0">
                 {log.agentId.substring(0, 12)}
               </span>
 
@@ -197,7 +197,7 @@ export function ToolLog() {
 
               {/* Duration */}
               {log.durationMs !== undefined && (
-                <span className="text-gray-500 w-16 text-right flex-shrink-0">
+                <span className="text-gray-500 w-16 text-right shrink-0">
                   {log.durationMs}ms
                 </span>
               )}

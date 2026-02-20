@@ -114,14 +114,14 @@ export function SettingsModal() {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-xs"
         onClick={toggleSettingsModal}
       />
 
       {/* Modal */}
       <div className="relative bg-command-panel border border-command-border rounded-lg w-[600px] max-h-[80vh] overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-command-border bg-gradient-to-r from-hud-green/5 to-transparent">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-command-border bg-linear-to-r from-hud-green/5 to-transparent">
           <h2 className="font-display text-lg tracking-wider text-hud-green">SETTINGS</h2>
           <button
             onClick={toggleSettingsModal}
@@ -230,7 +230,7 @@ export function SettingsModal() {
                     onChange={(e) => setBudgetInput(e.target.value)}
                     onBlur={handleBudgetLimitChange}
                     onKeyDown={(e) => e.key === 'Enter' && handleBudgetLimitChange()}
-                    className="w-32 px-4 py-2 bg-command-bg border border-command-border rounded-lg text-xl font-mono focus:outline-none focus:border-hud-green"
+                    className="w-32 px-4 py-2 bg-command-bg border border-command-border rounded-lg text-xl font-mono focus:outline-hidden focus:border-hud-green"
                   />
                   <button
                     onClick={handleBudgetLimitChange}
@@ -250,7 +250,7 @@ export function SettingsModal() {
                   Warning at: {Math.round((budget.dailyLimitCents * 0.8) / 100)}% (80% of limit)
                 </label>
                 <div className="h-3 bg-command-accent rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-hud-green via-hud-amber to-hud-red" style={{ width: '100%' }} />
+                  <div className="h-full bg-linear-to-r from-hud-green via-hud-amber to-hud-red" style={{ width: '100%' }} />
                 </div>
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>$0</span>
