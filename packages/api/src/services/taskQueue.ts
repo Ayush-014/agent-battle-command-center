@@ -3,6 +3,7 @@ import type { Server as SocketIOServer } from 'socket.io';
 import type { Task, Agent, AgentType } from '../types/index.js';
 import { ResourcePoolService } from './resourcePool.js';
 import type { CodeReviewService } from './codeReviewService.js';
+import type { AsyncValidationService } from './asyncValidationService.js';
 import {
   getOllamaOptimizer,
   getOllamaTaskCounts,
@@ -21,10 +22,11 @@ export class TaskQueueService {
   constructor(
     private prisma: PrismaClient,
     private io: SocketIOServer,
-    codeReviewService?: CodeReviewService
+    codeReviewService?: CodeReviewService,
+    asyncValidationService?: AsyncValidationService
   ) {
     this.taskAssigner = new TaskAssigner(prisma, io);
-    this.taskExecutor = new TaskExecutor(prisma, io, codeReviewService);
+    this.taskExecutor = new TaskExecutor(prisma, io, codeReviewService, asyncValidationService);
   }
 
   // ============================================

@@ -17,6 +17,7 @@ import { codeReviewsRouter } from './routes/code-reviews.js';
 import { costMetricsRouter } from './routes/cost-metrics.js';
 import { memoriesRouter } from './routes/memories.js';
 import { budgetRouter } from './routes/budget.js';
+import { validationRouter } from './routes/validation.js';
 import { setupWebSocket } from './websocket/handler.js';
 import { budgetService } from './services/budgetService.js';
 import { TaskQueueService } from './services/taskQueue.js';
@@ -26,6 +27,7 @@ import { ResourcePoolService } from './services/resourcePool.js';
 import { CodeReviewService } from './services/codeReviewService.js';
 import { SchedulerService } from './services/schedulerService.js';
 import { StuckTaskRecoveryService } from './services/stuckTaskRecovery.js';
+import { AsyncValidationService } from './services/asyncValidationService.js';
 import { mcpBridge } from './services/mcpBridge.js';
 import { requireApiKey } from './middleware/auth.js';
 import { standardRateLimiter } from './middleware/rateLimiter.js';
@@ -71,7 +73,17 @@ const autoReviewEnabled = process.env.AUTO_CODE_REVIEW !== 'false';
 codeReviewService.setEnabled(autoReviewEnabled);
 console.log(`Code review service: ${codeReviewService.isEnabled() ? 'enabled' : 'disabled'}`);
 
-const taskQueue = new TaskQueueService(prisma, io, codeReviewService);
+// Initialize async validation service (replaces sync auto-retry when enabled)
+const asyncValidation = process.env.ASYNC_VALIDATION_ENABLED !== 'false'
+  ? new AsyncValidationService(prisma, io)
+  : null;
+if (asyncValidation) {
+  console.log('Async validation service: enabled');
+} else {
+  console.log('Async validation service: disabled (using sync auto-retry)');
+}
+
+const taskQueue = new TaskQueueService(prisma, io, codeReviewService, asyncValidation || undefined);
 const humanEscalation = new HumanEscalationService(prisma, io, taskQueue);
 const chatService = new ChatService(io);
 
@@ -88,6 +100,9 @@ app.set('resourcePool', resourcePool);
 app.set('codeReviewService', codeReviewService);
 app.set('scheduler', scheduler);
 app.set('stuckTaskRecovery', stuckTaskRecovery);
+if (asyncValidation) {
+  app.set('asyncValidation', asyncValidation);
+}
 
 // Routes
 app.use('/api/tasks', tasksRouter);
@@ -103,6 +118,7 @@ app.use('/api/code-reviews', codeReviewsRouter);
 app.use('/api/cost-metrics', costMetricsRouter);
 app.use('/api/memories', memoriesRouter);
 app.use('/api/budget', budgetRouter);
+app.use('/api/validation', validationRouter);
 
 // Health check
 app.get('/health', (req, res) => {

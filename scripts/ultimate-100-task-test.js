@@ -2688,7 +2688,39 @@ function seedBuggyFiles() {
 // TASK CREATION & EXECUTION
 // =============================================================================
 
+/**
+ * Build a validationCommand suitable for the server-side /run-validation endpoint.
+ * The endpoint runs inside the agents container, so no `docker exec` needed.
+ */
+function buildValidationCommand(task) {
+  if (!task.validation) return null;
+  const lang = task.validationLang || 'py';
+  if (lang === 'tsx') {
+    const fileName = task.fileName || `${task.name}.ts`;
+    return `tsx tasks/${task.dir}/${fileName}`;
+  }
+  if (lang === 'go') {
+    const fileName = task.fileName || `${task.name}.go`;
+    return `go run tasks/${task.dir}/${fileName}`;
+  }
+  // For python/node, return raw code — the server wraps with python3 -c / node -e
+  return task.validation;
+}
+
+/**
+ * Detect validation language for the server endpoint
+ */
+function getValidationLang(task) {
+  const lang = task.validationLang || 'py';
+  if (lang === 'py') return 'python';
+  if (lang === 'node') return 'javascript';
+  if (lang === 'tsx') return 'typescript';
+  if (lang === 'go') return 'go';
+  return 'python';
+}
+
 async function createTask(task) {
+  const validationCommand = buildValidationCommand(task);
   const response = await fetch(`${API_BASE}/tasks`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
@@ -2699,8 +2731,8 @@ async function createTask(task) {
       taskType: 'code',
       priority: task.complexity,
       maxIterations: MAX_ITERATIONS,
-      // NOTE: Don't pass validationCommand — stress test handles its own validation/retry
-      // Passing it triggers server-side auto-retry pipeline which doubles execution time
+      // Pass validationCommand for server-side async validation pipeline
+      validationCommand: validationCommand || undefined,
     })
   });
 
@@ -2741,30 +2773,26 @@ async function waitForAgent(maxWaitMs = 60000) {
 }
 
 // =============================================================================
-// VALIDATION RUNNERS
+// CLIENT-SIDE VALIDATION (fallback when server async validation unavailable)
 // =============================================================================
 
-function runValidation(task) {
+function runValidationLocal(task) {
   try {
     let cmd;
     const lang = task.validationLang || 'py';
 
     if (lang === 'tsx') {
-      // Self-testing TypeScript file
       const fileName = task.fileName || `${task.name}.ts`;
       const filePath = `tasks/${task.dir}/${fileName}`;
       cmd = `docker exec -w /app/workspace abcc-agents tsx ${filePath}`;
     } else if (lang === 'go') {
-      // Self-testing Go file
       const fileName = task.fileName || `${task.name}.go`;
       const filePath = `tasks/${task.dir}/${fileName}`;
       cmd = `docker exec -w /app/workspace abcc-agents go run ${filePath}`;
     } else if (lang === 'node') {
-      // Node.js validation (base64 to avoid Windows cmd.exe shell escaping issues)
       const b64 = Buffer.from(task.validation).toString('base64');
       cmd = `docker exec -w /app/workspace abcc-agents node -e "eval(Buffer.from('${b64}','base64').toString())"`;
     } else {
-      // Python validation (base64 encoded)
       const b64 = Buffer.from(task.validation).toString('base64');
       cmd = `docker exec -w /app/workspace abcc-agents python3 -c "import base64; exec(base64.b64decode('${b64}').decode())"`;
     }
@@ -2777,41 +2805,75 @@ function runValidation(task) {
 }
 
 // =============================================================================
-// IN-SCRIPT RETRY
+// SERVER-SIDE ASYNC VALIDATION (polls /api/validation/results)
 // =============================================================================
 
-async function retryTask(task, taskNum, totalTasks) {
-  const color = getComplexityColor(task.complexity);
-  console.log(`   \u{1f504} Retrying ${task.name}...`);
-
-  try {
-    const created = await createTask(task);
-    await fetch(`${API_BASE}/queue/assign`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
-      body: JSON.stringify({ taskId: created.id, agentId: 'coder-01' })
-    });
-
-    const execResponse = await executeTask(created.id, task.description, task.complexity);
-    if (!execResponse.ok) throw new Error('Retry execution failed');
-
-    const execJson = await execResponse.json();
-    await fetch(`${API_BASE}/tasks/${created.id}/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
-      body: JSON.stringify({ success: Boolean(execJson.success) })
-    });
-
-    const passed = runValidation(task);
-    await waitForAgent();
-    return passed;
-  } catch (e) {
-    console.log(`   \u{1f4a5} Retry error: ${e.message.substring(0, 60)}`);
+/**
+ * Poll the server for a validation result. Background validation typically
+ * completes in 1-3s after task completion.
+ */
+async function pollValidationResult(taskId, maxWaitMs = 10000) {
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
     try {
-      await fetch(`${API_BASE}/agents/reset-all`, { method: 'POST', headers: { 'X-API-Key': API_KEY } });
-    } catch (re) {}
-    await sleep(2000);
+      const resp = await fetch(`${API_BASE}/validation/results?taskId=${taskId}`, {
+        headers: { 'X-API-Key': API_KEY }
+      });
+      if (resp.ok) {
+        const result = await resp.json();
+        if (result && result.validatedAt) {
+          return result; // { taskId, passed, error, validatedAt }
+        }
+      }
+    } catch (e) {}
+    await sleep(500);
+  }
+  return null; // Timed out waiting
+}
+
+/**
+ * Check if the server has async validation enabled
+ */
+async function checkAsyncValidationAvailable() {
+  try {
+    const resp = await fetch(`${API_BASE}/validation/status`, {
+      headers: { 'X-API-Key': API_KEY }
+    });
+    return resp.ok;
+  } catch (e) {
     return false;
+  }
+}
+
+/**
+ * Process the server-side retry queue. Returns { retried, saved, stillFailing, details }
+ */
+async function processRetryQueue() {
+  try {
+    const resp = await fetch(`${API_BASE}/validation/retry`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY }
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  } catch (e) {
+    console.log(`   Retry queue error: ${e.message}`);
+    return null;
+  }
+}
+
+/**
+ * Get current validation status from server
+ */
+async function getValidationStatus() {
+  try {
+    const resp = await fetch(`${API_BASE}/validation/status`, {
+      headers: { 'X-API-Key': API_KEY }
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  } catch (e) {
+    return null;
   }
 }
 
@@ -2963,6 +3025,9 @@ async function runTaskSequence(tasks, results, sectionNum) {
       const created = await createTask(task);
       console.log(`   Created: ${created.id.substring(0, 8)}...`);
 
+      // Track taskId for this task (used for server-side validation lookup)
+      task._taskId = created.id;
+
       await fetch(`${API_BASE}/queue/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
@@ -2986,17 +3051,30 @@ async function runTaskSequence(tasks, results, sectionNum) {
         body: JSON.stringify({ success: execSuccess })
       });
 
-      console.log('   Validating...');
-      let passed = runValidation(task);
-
-      // In-script retry
-      if (!passed && !NO_RETRY) {
-        console.log(`   \u274c First attempt failed, retrying...`);
-        await sleep(REST_DELAY_MS);
-        passed = await retryTask(task, globalNum, tasks.length);
-        if (passed) results.retriesSaved++;
+      // Validation: use server-side async validation if available, else fall back to local
+      let passed = false;
+      if (results._asyncValidation && task.validation) {
+        console.log('   Validating (server-side)...');
+        const valResult = await pollValidationResult(created.id, 10000);
+        if (valResult) {
+          passed = valResult.passed;
+          if (!passed) {
+            console.log(`   Server validation error: ${(valResult.error || '').substring(0, 80)}`);
+          }
+        } else {
+          // Server validation timed out, fall back to local
+          console.log('   Server validation timed out, trying local...');
+          passed = runValidationLocal(task);
+        }
+      } else if (task.validation) {
+        console.log('   Validating (local)...');
+        passed = runValidationLocal(task);
+      } else {
+        // No validation defined — consider passed if execution succeeded
+        passed = execSuccess;
       }
 
+      // No in-script retry — retries are deferred to the server-side retry queue
       if (passed) {
         status = 'passed';
         results.passed++;
@@ -3033,7 +3111,8 @@ async function runTaskSequence(tasks, results, sectionNum) {
     results.details.push({
       task: task.name, section: sectionNum, category: task.category,
       complexity: task.complexity, status, error,
-      duration: Math.floor((Date.now() - taskStart) / 1000)
+      duration: Math.floor((Date.now() - taskStart) / 1000),
+      taskId: task._taskId || null
     });
 
     // Rest delay
@@ -3068,7 +3147,7 @@ function printReport(results, totalDuration) {
   console.log('\u2550'.repeat(70));
   console.log(`   Total:      ${results.passed}/${results.totalRun} passed (${successRate}%)`);
   console.log(`   Failed:     ${results.failed} | Errors: ${results.errors}`);
-  console.log(`   Retries:    ${results.retriesSaved} saved by in-script retry`);
+  console.log(`   Retries:    ${results.retriesSaved} saved by ${results._asyncValidation ? 'server-side' : 'in-script'} retry`);
   if (results.ctoGenerated > 0) {
     console.log(`   CTO Tasks:  ${results.ctoGenerated} generated by decomposition`);
   }
@@ -3163,10 +3242,26 @@ async function main() {
   }
 
   console.log(`Sections: ${sectionsToRun.join(', ')} | Tasks: ~${totalExpected} | Skip CTO: ${SKIP_CTO}`);
-  console.log(`Rest: ${REST_DELAY_MS / 1000}s | Reset every ${RESET_EVERY_N_TASKS} tasks | Retry: ${!NO_RETRY}`);
+  console.log(`Rest: ${REST_DELAY_MS / 1000}s | Reset every ${RESET_EVERY_N_TASKS} tasks | Retry: ${!NO_RETRY} (deferred)`);
   if (DRY_RUN) console.log('\u{1f4cb} DRY RUN MODE - no tasks will be executed');
   if (MAX_TASKS_LIMIT) console.log(`\u{1f522} Limited to first ${MAX_TASKS_LIMIT} tasks`);
   console.log('\u2550'.repeat(70) + '\n');
+
+  // Check for server-side async validation
+  let asyncValidationAvailable = false;
+  if (!DRY_RUN) {
+    asyncValidationAvailable = await checkAsyncValidationAvailable();
+    if (asyncValidationAvailable) {
+      console.log('\u2705 Server-side async validation: ENABLED');
+      // Clear previous validation state
+      await fetch(`${API_BASE}/validation/clear`, {
+        method: 'POST',
+        headers: { 'X-API-Key': API_KEY }
+      }).catch(() => {});
+    } else {
+      console.log('\u26a0 Server-side async validation: unavailable (using local validation)');
+    }
+  }
 
   if (!DRY_RUN) {
     await resetSystem();
@@ -3176,7 +3271,8 @@ async function main() {
     totalRun: 0, passed: 0, failed: 0, errors: 0,
     retriesSaved: 0, ctoGenerated: 0,
     byComplexity: {}, byCategory: {}, bySection: {},
-    details: []
+    details: [],
+    _asyncValidation: asyncValidationAvailable  // internal flag for runTaskSequence
   };
 
   const startTime = Date.now();
@@ -3229,6 +3325,72 @@ async function main() {
     // (buggy files already seeded at start of Section 4)
   }
 
+  // === RETRY PHASE: process server-side retry queue ===
+  if (asyncValidationAvailable && !DRY_RUN && !NO_RETRY) {
+    console.log('\n' + '\u2550'.repeat(70));
+    console.log('\u{1f504} RETRY PHASE — Processing server-side retry queue');
+    console.log('\u2550'.repeat(70));
+
+    // Wait for any pending validations to finish
+    let waitCount = 0;
+    while (waitCount < 30) {
+      const valStatus = await getValidationStatus();
+      if (!valStatus || valStatus.pending === 0) break;
+      console.log(`   Waiting for ${valStatus.pending} pending validations...`);
+      await sleep(1000);
+      waitCount++;
+    }
+
+    const valStatus = await getValidationStatus();
+    if (valStatus) {
+      console.log(`   Validation summary: ${valStatus.passed} passed, ${valStatus.failed} failed, ${valStatus.retryQueueSize} in retry queue`);
+    }
+
+    if (valStatus && valStatus.retryQueueSize > 0) {
+      console.log(`   Processing ${valStatus.retryQueueSize} failed validations...`);
+      const retryResults = await processRetryQueue();
+
+      if (retryResults) {
+        console.log(`\n   Retry results: ${retryResults.saved} saved / ${retryResults.retried} retried`);
+
+        // Update results with retries saved
+        for (const detail of retryResults.details) {
+          if (detail.savedAt) {
+            // Find the failed task in results and flip it to passed
+            const match = results.details.find(d => d.taskId === detail.taskId && d.status === 'failed');
+            if (match) {
+              match.status = 'passed';
+              match.retryPhase = detail.savedAt;
+              results.passed++;
+              results.failed--;
+              results.retriesSaved++;
+
+              // Update complexity/category/section buckets
+              if (results.byComplexity[match.complexity]) {
+                results.byComplexity[match.complexity].passed++;
+                results.byComplexity[match.complexity].failed--;
+              }
+              if (results.byCategory[match.category]) {
+                results.byCategory[match.category].passed++;
+                results.byCategory[match.category].failed--;
+              }
+              if (results.bySection[match.section]) {
+                results.bySection[match.section].passed++;
+                results.bySection[match.section].failed--;
+              }
+
+              console.log(`   \u2705 ${match.task} saved by ${detail.savedAt}`);
+            }
+          } else {
+            console.log(`   \u274c ${detail.taskId.substring(0, 8)} still failing: ${(detail.finalError || '').substring(0, 60)}`);
+          }
+        }
+      }
+    } else {
+      console.log('   No failed validations to retry.');
+    }
+  }
+
   const totalDuration = Math.floor((Date.now() - startTime) / 1000);
 
   printReport(results, totalDuration);
@@ -3248,7 +3410,8 @@ async function main() {
       skipCto: SKIP_CTO,
       noRetry: NO_RETRY,
       sectionFilter: SECTION_FILTER,
-      maxTasksLimit: MAX_TASKS_LIMIT
+      maxTasksLimit: MAX_TASKS_LIMIT,
+      asyncValidation: asyncValidationAvailable
     }
   }, null, 2));
   console.log(`\n\u{1f4be} Results saved to ${resultsFile}`);

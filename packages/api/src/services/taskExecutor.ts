@@ -25,6 +25,7 @@ import { TaskAssigner } from './taskAssigner.js';
 import { TaskRouter } from './taskRouter.js';
 import { ExecutorService } from './executor.js';
 import { AutoRetryService } from './autoRetryService.js';
+import type { AsyncValidationService } from './asyncValidationService.js';
 
 export class TaskExecutor {
   private trainingDataService: TrainingDataService;
@@ -32,18 +33,22 @@ export class TaskExecutor {
   private ollamaOptimizer: OllamaOptimizer;
   private taskAssigner: TaskAssigner;
   private autoRetryService: AutoRetryService | null = null;
+  private asyncValidationService: AsyncValidationService | null = null;
 
   constructor(
     private prisma: PrismaClient,
     private io: SocketIOServer,
-    codeReviewService?: CodeReviewService
+    codeReviewService?: CodeReviewService,
+    asyncValidationService?: AsyncValidationService
   ) {
     this.trainingDataService = new TrainingDataService(prisma);
     this.codeReviewService = codeReviewService || null;
     this.ollamaOptimizer = getOllamaOptimizer(io);
     this.taskAssigner = new TaskAssigner(prisma, io);
+    this.asyncValidationService = asyncValidationService || null;
 
-    if (process.env.AUTO_RETRY_ENABLED !== 'false') {
+    // Only enable sync auto-retry if async validation is NOT active
+    if (process.env.AUTO_RETRY_ENABLED !== 'false' && !asyncValidationService) {
       this.autoRetryService = new AutoRetryService(prisma, io);
     }
   }
@@ -107,7 +112,7 @@ export class TaskExecutor {
       }
     }
 
-    // === AUTO-RETRY: Validate output & retry with error context if needed ===
+    // === SYNC AUTO-RETRY (legacy path, only when asyncValidationService is NOT active) ===
     if (this.autoRetryService) {
       const retryResult = await this.autoRetryService.validateAndRetry(taskId, result);
       if (!retryResult.validated) {
@@ -123,7 +128,7 @@ export class TaskExecutor {
       }
     }
 
-    // Release file locks
+    // Release file locks (moved before async validation so agent is freed immediately)
     await this.taskAssigner.releaseFileLocks(taskId);
 
     // Release resource pool slot
@@ -190,6 +195,12 @@ export class TaskExecutor {
     mcpBridge.publishTaskCompleted(taskId, result).catch((error) => {
       console.error('Failed to publish task completion to MCP:', error);
     });
+
+    // === ASYNC VALIDATION (fire-and-forget, non-blocking) ===
+    // Runs after agent is fully released; results collected via /api/validation endpoints
+    if (this.asyncValidationService) {
+      this.asyncValidationService.validateInBackground(taskId);
+    }
   }
 
   /**
