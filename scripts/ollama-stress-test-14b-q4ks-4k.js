@@ -445,7 +445,9 @@ async function waitForAgent(maxWaitMs = 60000) {
 async function runValidation(validation) {
   try {
     const { execSync } = require('child_process');
-    const result = execSync(`docker exec abcc-agents sh -c "cd /app/workspace && python -c \\"${validation}\\""`, {
+    // Base64-encode to avoid shell escaping issues with <, ', /, etc.
+    const b64 = Buffer.from(validation).toString('base64');
+    const result = execSync(`docker exec -w /app/workspace abcc-agents python3 -c "import base64; exec(base64.b64decode('${b64}').decode())"`, {
       encoding: 'utf8',
       timeout: 15000
     });
