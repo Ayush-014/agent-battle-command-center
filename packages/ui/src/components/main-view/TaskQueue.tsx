@@ -1,5 +1,5 @@
 import { Plus, CheckCircle, Clock, Archive } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { TaskCard } from '../shared/TaskCard';
 import { TaskQueueSkeleton } from '../shared/Skeleton';
 import { useUIStore } from '../../store/uiState';
@@ -15,6 +15,25 @@ function isToday(date: Date | string | null | undefined): boolean {
 
 export function TaskQueue() {
   const { tasks, isLoading } = useUIStore();
+  const priorityCount = React.useMemo(() => {
+  const counts = {
+    high: 0,
+    medium: 0,
+    low: 0,
+  };
+
+  tasks.forEach((task) => {
+    if (!task.priority) return;
+
+    const p = task.priority.toLowerCase();
+
+    if (p === "high") counts.high++;
+    else if (p === "medium") counts.medium++;
+    else if (p === "low") counts.low++;
+  });
+
+  return counts;
+}, [tasks]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [filter, setFilter] = useState<'all' | 'coder' | 'qa'>('all');
   const [showCompleted, setShowCompleted] = useState(false);
@@ -43,6 +62,8 @@ export function TaskQueue() {
           <h2 className="font-display text-sm uppercase tracking-wider text-gray-400" id="task-queue-heading">
             Task Queue
           </h2>
+  </div>
+)}
           <span className="text-xs text-gray-500" aria-live="polite">
             {showCompleted
               ? showArchive
@@ -51,7 +72,26 @@ export function TaskQueue() {
               : `${pendingTasks.length} pending`}
           </span>
         </div>
+{tasks.length > 0 && (
+      <div className="flex flex-wrap gap-2 mt-2">
+    
+    {priorityCount.high > 0 && (
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+        High {priorityCount.high}
+      </span>
+    )}
 
+    {priorityCount.medium > 0 && (
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700">
+        Medium {priorityCount.medium}
+      </span>
+    )}
+
+    {priorityCount.low > 0 && (
+      <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+        Low {priorityCount.low}
+      </span>
+    )}
         <div className="flex items-center gap-2" role="toolbar" aria-label="Task queue controls">
           {/* Pending/Completed Toggle */}
           <button
